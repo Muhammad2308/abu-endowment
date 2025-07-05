@@ -18,7 +18,19 @@ class SessionController extends Controller
     {
         try {
             Log::info('Session creation request received', [
-                'data' => $request->all()
+                'data' => $request->all(),
+                'headers' => $request->headers->all(),
+                'content_type' => $request->header('Content-Type')
+            ]);
+
+            // Log each field individually to debug
+            Log::info('Individual fields check', [
+                'has_donorData' => $request->has('donorData'),
+                'has_deviceInfo' => $request->has('deviceInfo'),
+                'has_verificationData' => $request->has('verificationData'),
+                'donorData_type' => gettype($request->input('donorData')),
+                'deviceInfo_type' => gettype($request->input('deviceInfo')),
+                'verificationData_type' => gettype($request->input('verificationData'))
             ]);
 
             $request->validate([
@@ -78,7 +90,8 @@ class SessionController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Session creation validation failed', [
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
             ]);
             
             return response()->json([
