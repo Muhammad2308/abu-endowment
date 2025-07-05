@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Donor; // Make sure you have a Donation model
+use App\Http\Resources\DonorResource;
 use Illuminate\Support\Facades\Validator;
 
 class DonorController extends Controller
@@ -39,46 +40,46 @@ class DonorController extends Controller
 
     public function searchByRegNumber($reg_number)
     {
-        $donor = \App\Models\Donor::where('reg_number', $reg_number)->first();
-        if ($donor) {
-            $donor->full_name = trim("{$donor->surname} {$donor->name} {$donor->other_name}");
-            if ($donor->department_id) {
-                $department = \App\Models\Department::find($donor->department_id);
-                $donor->department_name = $department ? $department->name : null;
-                $donor->faculty_name = $department && $department->faculty ? $department->faculty->name : null;
-            }
-            return response()->json($donor);
+        $donor = Donor::with(['faculty', 'department'])
+            ->where('reg_number', $reg_number)
+            ->first();
+
+        if (!$donor) {
+            return response()->json(['message' => 'Donor not found'], 404);
         }
-        return response()->json(['message' => 'Not found'], 404);
+
+        return new DonorResource($donor);
     }
 
     public function searchByPhone($phone)
     {
-        $donor = \App\Models\Donor::where('phone', $phone)->first();
-        if ($donor) {
-            $donor->full_name = trim("{$donor->surname} {$donor->name} {$donor->other_name}");
-            if ($donor->department_id) {
-                $department = \App\Models\Department::find($donor->department_id);
-                $donor->department_name = $department ? $department->name : null;
-                $donor->faculty_name = $department && $department->faculty ? $department->faculty->name : null;
-            }
-            return response()->json($donor);
+        $donor = Donor::with(['faculty', 'department'])
+            ->where('phone', $phone)
+            ->first();
+
+        if (!$donor) {
+            return response()->json(['message' => 'Donor not found'], 404);
         }
-        return response()->json(['message' => 'Not found'], 404);
+
+        return new DonorResource($donor);
     }
 
     public function searchByEmail($email)
     {
-        $donor = \App\Models\Donor::where('email', $email)->first();
-        if ($donor) {
-            $donor->full_name = trim("{$donor->surname} {$donor->name} {$donor->other_name}");
-            if ($donor->department_id) {
-                $department = \App\Models\Department::find($donor->department_id);
-                $donor->department_name = $department ? $department->name : null;
-                $donor->faculty_name = $department && $department->faculty ? $department->faculty->name : null;
-            }
-            return response()->json($donor);
+        $donor = Donor::with(['faculty', 'department'])
+            ->where('email', $email)
+            ->first();
+
+        if (!$donor) {
+            return response()->json(['message' => 'Donor not found'], 404);
         }
-        return response()->json(['message' => 'Not found'], 404);
+
+        return new DonorResource($donor);
+    }
+
+    // Additional method for registration number search (alias)
+    public function searchByRegistrationNumber($regNumber)
+    {
+        return $this->searchByRegNumber($regNumber);
     }
 }

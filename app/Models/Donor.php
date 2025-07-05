@@ -27,6 +27,8 @@ class Donor extends Model
         'ranking',
         'faculty_id',
         'department_id',
+        'city',
+        
     ];
 
     public function faculty()
@@ -42,5 +44,11 @@ class Donor extends Model
     public function donations()
     {
         return $this->hasMany(Donation::class);
+    }
+
+    // Accessor for full name
+    public function getFullNameAttribute()
+    {
+        return trim("{$this->surname} {$this->name} {$this->other_name}");
     }
 }
