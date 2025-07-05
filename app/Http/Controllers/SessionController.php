@@ -18,7 +18,7 @@ class SessionController extends Controller
         $request->validate([
             'donorData' => 'required|array',
             'deviceInfo' => 'required|array',
-            'verificationData' => 'required|array'
+            'verificationData' => 'nullable|array'
         ]);
 
         $donorData = $request->donorData;
@@ -30,7 +30,7 @@ class SessionController extends Controller
             [
                 'name' => $donorData['name'],
                 'phone' => $donorData['phone'],
-                'donor_type' => $donorData['donor_type'],
+                'donor_type' => $donorData['donor_type'] ?? 'alumni',
                 // Add other fields as needed
             ]
         );
@@ -40,13 +40,15 @@ class SessionController extends Controller
         DeviceSession::create([
             'user_id' => $user->id,
             'session_token' => $sessionToken,
-            'device_fingerprint' => $deviceInfo['fingerprint'],
+            'device_fingerprint' => $deviceInfo['fingerprint'] ?? md5($deviceInfo['userAgent'] . $request->ip()),
             'user_agent' => $deviceInfo['userAgent'],
             'ip_address' => $request->ip(),
             'expires_at' => now()->addDays(30)
         ]);
         
         return response()->json([
+            'success' => true,
+            'message' => 'Session created successfully',
             'user' => $user,
             'session_token' => $sessionToken
         ]);
