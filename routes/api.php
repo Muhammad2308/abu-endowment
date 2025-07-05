@@ -19,6 +19,8 @@ Route::put('/donors/{id}', [DonorController::class, 'update']); // Make this pub
 // Session routes (public)
 Route::post('/session/create', [SessionController::class, 'create']);
 Route::post('/session/check', [SessionController::class, 'check']);
+Route::post('/session/login', [SessionController::class, 'login']);
+Route::post('/session/login-with-donor', [SessionController::class, 'loginWithDonor']); // New donor-based login
 Route::post('/session/logout', [SessionController::class, 'logout']);
 
 // Verification routes (public)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\DeviceSession;
@@ -15,43 +16,89 @@ class SessionController extends Controller
      */
     public function create(Request $request)
     {
-        $request->validate([
-            'donorData' => 'required|array',
-            'deviceInfo' => 'required|array',
-            'verificationData' => 'nullable|array'
-        ]);
+        try {
+            Log::info('Session creation request received', [
+                'data' => $request->all()
+            ]);
 
-        $donorData = $request->donorData;
-        $deviceInfo = $request->deviceInfo;
-        
-        // Create or update user
-        $user = User::updateOrCreate(
-            ['email' => $donorData['email']],
-            [
-                'name' => $donorData['name'],
-                'phone' => $donorData['phone'],
-                'donor_type' => $donorData['donor_type'] ?? 'alumni',
-                // Add other fields as needed
-            ]
-        );
-        
-        // Create device session
-        $sessionToken = Str::random(64);
-        DeviceSession::create([
-            'user_id' => $user->id,
-            'session_token' => $sessionToken,
-            'device_fingerprint' => $deviceInfo['fingerprint'] ?? md5($deviceInfo['userAgent'] . $request->ip()),
-            'user_agent' => $deviceInfo['userAgent'],
-            'ip_address' => $request->ip(),
-            'expires_at' => now()->addDays(30)
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Session created successfully',
-            'user' => $user,
-            'session_token' => $sessionToken
-        ]);
+            $request->validate([
+                'donorData' => 'required|array',
+                'deviceInfo' => 'required|array',
+                'verificationData' => 'nullable|array' // Make verification data optional
+            ]);
+
+            $donorData = $request->donorData;
+            $deviceInfo = $request->deviceInfo;
+            
+            Log::info('Processing donor data', [
+                'donorData' => $donorData,
+                'deviceInfo' => $deviceInfo
+            ]);
+            
+            // Create or update user
+            $user = User::updateOrCreate(
+                ['email' => $donorData['email']],
+                [
+                    'name' => $donorData['name'],
+                    'phone' => $donorData['phone'],
+                    'donor_type' => $donorData['donor_type'] ?? 'alumni',
+                    // Add other fields as needed
+                ]
+            );
+            
+            Log::info('User created/updated', [
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+            
+            // Create device session
+            $sessionToken = Str::random(64);
+            $deviceFingerprint = $deviceInfo['fingerprint'] ?? md5($deviceInfo['userAgent'] . $request->ip());
+            
+            $deviceSession = DeviceSession::create([
+                'user_id' => $user->id,
+                'session_token' => $sessionToken,
+                'device_fingerprint' => $deviceFingerprint,
+                'user_agent' => $deviceInfo['userAgent'],
+                'ip_address' => $request->ip(),
+                'expires_at' => now()->addDays(30)
+            ]);
+            
+            Log::info('Device session created', [
+                'session_id' => $deviceSession->id,
+                'user_id' => $user->id
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Session created successfully',
+                'user' => $user,
+                'session_token' => $sessionToken
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Session creation validation failed', [
+                'errors' => $e->errors()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Session creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Session creation failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -59,27 +106,39 @@ class SessionController extends Controller
      */
     public function check(Request $request)
     {
-        $request->validate([
-            'deviceInfo' => 'required|array'
-        ]);
-
-        $deviceInfo = $request->deviceInfo;
-        
-        $session = DeviceSession::where('device_fingerprint', $deviceInfo['fingerprint'])
-            ->where('expires_at', '>', now())
-            ->with('user')
-            ->first();
-        
-        if ($session) {
-            return response()->json([
-                'valid' => true,
-                'user' => $session->user
+        try {
+            $request->validate([
+                'deviceInfo' => 'required|array'
             ]);
+
+            $deviceInfo = $request->deviceInfo;
+            
+            $session = DeviceSession::where('device_fingerprint', $deviceInfo['fingerprint'])
+                ->where('expires_at', '>', now())
+                ->with('user')
+                ->first();
+            
+            if ($session) {
+                return response()->json([
+                    'valid' => true,
+                    'user' => $session->user
+                ]);
+            }
+            
+            return response()->json([
+                'valid' => false
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Session check failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Session check failed'
+            ], 500);
         }
-        
-        return response()->json([
-            'valid' => false
-        ]);
     }
 
     /**
@@ -87,43 +146,57 @@ class SessionController extends Controller
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'phone' => 'required_without:email',
-            'email' => 'required_without:phone|email',
-            'deviceInfo' => 'required|array'
-        ]);
+        try {
+            $request->validate([
+                'phone' => 'required_without:email',
+                'email' => 'required_without:phone|email',
+                'deviceInfo' => 'required|array'
+            ]);
 
-        $deviceInfo = $request->deviceInfo;
-        
-        // Find user by phone or email
-        $user = null;
-        if ($request->phone) {
-            $user = User::where('phone', $request->phone)->first();
-        } else {
-            $user = User::where('email', $request->email)->first();
-        }
-        
-        if (!$user) {
+            $deviceInfo = $request->deviceInfo;
+            
+            // Find user by phone or email
+            $user = null;
+            if ($request->phone) {
+                $user = User::where('phone', $request->phone)->first();
+            } else {
+                $user = User::where('email', $request->email)->first();
+            }
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            
+            // Create new device session
+            $sessionToken = Str::random(64);
+            DeviceSession::create([
+                'user_id' => $user->id,
+                'session_token' => $sessionToken,
+                'device_fingerprint' => $deviceInfo['fingerprint'],
+                'user_agent' => $deviceInfo['userAgent'],
+                'ip_address' => $request->ip(),
+                'expires_at' => now()->addDays(30)
+            ]);
+            
             return response()->json([
-                'message' => 'User not found'
-            ], 404);
+                'success' => true,
+                'user' => $user,
+                'session_token' => $sessionToken
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Session login failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Login failed'
+            ], 500);
         }
-        
-        // Create new device session
-        $sessionToken = Str::random(64);
-        DeviceSession::create([
-            'user_id' => $user->id,
-            'session_token' => $sessionToken,
-            'device_fingerprint' => $deviceInfo['fingerprint'],
-            'user_agent' => $deviceInfo['userAgent'],
-            'ip_address' => $request->ip(),
-            'expires_at' => now()->addDays(30)
-        ]);
-        
-        return response()->json([
-            'user' => $user,
-            'session_token' => $sessionToken
-        ]);
     }
 
     /**
@@ -131,14 +204,118 @@ class SessionController extends Controller
      */
     public function logout(Request $request)
     {
-        $sessionToken = $request->header('X-Device-Session');
-        
-        if ($sessionToken) {
-            DeviceSession::where('session_token', $sessionToken)->delete();
+        try {
+            $sessionToken = $request->header('X-Device-Session');
+            
+            if ($sessionToken) {
+                DeviceSession::where('session_token', $sessionToken)->delete();
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Logged out successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Session logout failed', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Logout failed'
+            ], 500);
         }
-        
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+    }
+
+    /**
+     * Login with donor credentials (email/phone)
+     */
+    public function loginWithDonor(Request $request)
+    {
+        try {
+            $request->validate([
+                'phone' => 'required_without:email',
+                'email' => 'required_without:phone|email',
+                'deviceInfo' => 'required|array'
+            ]);
+
+            $deviceInfo = $request->deviceInfo;
+            
+            // Find donor by phone or email
+            $donor = null;
+            if ($request->phone) {
+                $donor = \App\Models\Donor::where('phone', $request->phone)->first();
+            } else {
+                $donor = \App\Models\Donor::where('email', $request->email)->first();
+            }
+            
+            if (!$donor) {
+                Log::warning('Donor not found for login', [
+                    'phone' => $request->phone,
+                    'email' => $request->email
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Donor not found. Please check your email/phone or register first.'
+                ], 404);
+            }
+            
+            Log::info('Donor found for login', [
+                'donor_id' => $donor->id,
+                'email' => $donor->email,
+                'phone' => $donor->phone
+            ]);
+            
+            // Create or update user from donor data
+            $user = User::updateOrCreate(
+                ['email' => $donor->email],
+                [
+                    'name' => $donor->name,
+                    'phone' => $donor->phone,
+                    'donor_type' => $donor->donor_type ?? 'alumni',
+                ]
+            );
+            
+            // Create device session
+            $sessionToken = Str::random(64);
+            $deviceFingerprint = $deviceInfo['fingerprint'] ?? md5($deviceInfo['userAgent'] . $request->ip());
+            
+            $deviceSession = DeviceSession::create([
+                'user_id' => $user->id,
+                'session_token' => $sessionToken,
+                'device_fingerprint' => $deviceFingerprint,
+                'user_agent' => $deviceInfo['userAgent'],
+                'ip_address' => $request->ip(),
+                'expires_at' => now()->addDays(30)
+            ]);
+            
+            Log::info('Donor login successful', [
+                'donor_id' => $donor->id,
+                'user_id' => $user->id,
+                'session_id' => $deviceSession->id
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Login successful',
+                'user' => $user,
+                'donor' => $donor,
+                'session_token' => $sessionToken
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Donor login failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Login failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 } 
