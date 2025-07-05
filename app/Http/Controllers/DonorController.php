@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Donor; // Make sure you have a Donation model
 use App\Http\Resources\DonorResource;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class DonorController extends Controller
 {
@@ -135,18 +136,39 @@ class DonorController extends Controller
             // Find the donor
             $donor = Donor::findOrFail($id);
             
+            // Log the incoming request for debugging
+            Log::info('Donor update request', [
+                'id' => $id,
+                'data' => $request->all()
+            ]);
+            
+            // Format phone number before validation
+            $phone = $this->formatPhoneNumber($request->phone);
+            
+            // Log formatted phone number
+            Log::info('Formatted phone number', [
+                'original' => $request->phone,
+                'formatted' => $phone
+            ]);
+            
             // Validate the request
-            $validator = Validator::make($request->all(), [
+            $validator = Validator::make(array_merge($request->all(), ['phone' => $phone]), [
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
-                'phone' => 'required|string|max:20',
+                'phone' => 'required|string|max:20|regex:/^\+[0-9]{10,15}$/',
                 'address' => 'required|string|max:500',
                 'state' => 'required|string|max:100',
                 'city' => 'required|string|max:100', // Frontend sends 'city'
                 'ranking' => 'nullable|integer|min:1',
+            ], [
+                'phone.regex' => 'Phone number must be in international format (e.g., +2348012345678)',
             ]);
 
             if ($validator->fails()) {
+                Log::warning('Donor update validation failed', [
+                    'errors' => $validator->errors()->toArray()
+                ]);
+                
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation failed',
@@ -157,21 +179,32 @@ class DonorController extends Controller
             // Parse the full name into components
             $nameComponents = $this->parseName($request->name);
             
+            // Log name parsing result
+            Log::info('Name parsing result', [
+                'original' => $request->name,
+                'parsed' => $nameComponents
+            ]);
+            
             // Update the donor with parsed name components
             $donor->update([
                 'name' => $nameComponents['name'],
                 'surname' => $nameComponents['surname'],
                 'other_name' => $nameComponents['other_names'],
                 'email' => $request->email,
-                'phone' => $request->phone,
+                'phone' => $phone, // Use formatted phone number
                 'address' => $request->address,
                 'state' => $request->state,
-                'lga' => $request->city, // Map 'city' from frontend to 'lga' in database
+                'lga' => $request->city, // Map frontend 'city' to database 'lga'
                 'ranking' => $request->ranking ?? $donor->ranking,
             ]);
 
             // Load relationships for response
             $donor->load(['faculty', 'department']);
+
+            Log::info('Donor updated successfully', [
+                'id' => $donor->id,
+                'name' => $donor->name
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -186,7 +219,7 @@ class DonorController extends Controller
                     'phone' => $donor->phone,
                     'address' => $donor->address,
                     'state' => $donor->state,
-                    'city' => $donor->lga, // Map 'lga' back to 'city' for frontend
+                    'city' => $donor->lga, // Map database 'lga' back to 'city' for frontend
                     'ranking' => $donor->ranking,
                     'donor_type' => $donor->donor_type,
                     'faculty_name' => $donor->faculty?->name,
@@ -200,15 +233,47 @@ class DonorController extends Controller
             ], 200);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Donor not found', ['id' => $id]);
             return response()->json([
                 'success' => false,
                 'message' => 'Donor not found'
             ], 404);
         } catch (\Exception $e) {
+            Log::error('Error updating donor', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating donor: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Format phone number to international format
+     */
+    private function formatPhoneNumber($phone)
+    {
+        // Remove all non-digit characters except +
+        $phone = preg_replace('/[^0-9+]/', '', $phone);
+
+        // If it doesn't start with +, assume it's a Nigerian number
+        if (!str_starts_with($phone, '+')) {
+            // Remove leading 0 if present
+            if (str_starts_with($phone, '0')) {
+                $phone = substr($phone, 1);
+            }
+            
+            // Add Nigerian country code if not present
+            if (!str_starts_with($phone, '234')) {
+                $phone = '234' . $phone;
+            }
+            
+            $phone = '+' . $phone;
+        }
+
+        return $phone;
     }
 }
