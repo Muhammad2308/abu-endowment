@@ -27,8 +27,6 @@ class Donor extends Model
         'ranking',
         'faculty_id',
         'department_id',
-        'city',
-        
     ];
 
     public function faculty()
