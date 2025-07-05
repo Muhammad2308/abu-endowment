@@ -84,39 +84,80 @@ class DonorController extends Controller
     }
 
     /**
-     * Update donor information
+     * Update the specified donor
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'surname' => 'sometimes|string|max:255',
-            'other_name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:donors,email,' . $id,
-            'phone' => 'sometimes|string|max:20',
-            'address' => 'sometimes|string',
-            'state' => 'sometimes|string|max:255',
-            'city' => 'sometimes|string|max:255',
-            'lga' => 'sometimes|string|max:255',
-            'nationality' => 'sometimes|string|max:255',
-            'entry_year' => 'sometimes|integer|min:1950|max:2050',
-            'graduation_year' => 'sometimes|integer|min:1950|max:2050',
-            'faculty_id' => 'sometimes|exists:faculties,id',
-            'department_id' => 'sometimes|exists:departments,id',
-            'donor_type' => 'sometimes|string|in:addressable_alumni,non_addressable_alumni,staff,anonymous',
-            'ranking' => 'sometimes|integer|min:1|max:100',
-        ]);
+        try {
+            // Find the donor
+            $donor = Donor::findOrFail($id);
+            
+            // Validate the request
+            $validator = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => 'required|string|max:20',
+                'address' => 'required|string|max:500',
+                'state' => 'required|string|max:100',
+                'city' => 'required|string|max:100',
+                'ranking' => 'nullable|integer|min:1',
+            ]);
 
-        $donor = Donor::findOrFail($id);
-        $donor->update($request->only([
-            'name', 'surname', 'other_name', 'email', 'phone', 'address',
-            'state', 'city', 'lga', 'nationality', 'entry_year', 'graduation_year',
-            'faculty_id', 'department_id', 'donor_type', 'ranking'
-        ]));
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
-        // Load relationships for response
-        $donor->load(['faculty', 'department']);
+            // Update the donor
+            $donor->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'state' => $request->state,
+                'city' => $request->city,
+                'ranking' => $request->ranking ?? $donor->ranking,
+            ]);
 
-        return new DonorResource($donor);
+            // Load relationships for response
+            $donor->load(['faculty', 'department']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Donor updated successfully',
+                'data' => [
+                    'id' => $donor->id,
+                    'name' => $donor->name,
+                    'email' => $donor->email,
+                    'phone' => $donor->phone,
+                    'address' => $donor->address,
+                    'state' => $donor->state,
+                    'city' => $donor->city,
+                    'ranking' => $donor->ranking,
+                    'donor_type' => $donor->donor_type,
+                    'faculty_name' => $donor->faculty?->name,
+                    'department_name' => $donor->department?->name,
+                    'faculty' => $donor->faculty,
+                    'department' => $donor->department,
+                    'graduation_year' => $donor->graduation_year,
+                    'entry_year' => $donor->entry_year,
+                    'registration_number' => $donor->registration_number,
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Donor not found'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating donor: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
