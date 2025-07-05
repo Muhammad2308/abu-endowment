@@ -13,6 +13,14 @@ class Donation extends Model
         'type',
         'frequency',
         'endowment',
+        'project',
+        'payment_reference',
+        'status',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'endowment' => 'boolean',
     ];
 
     public function donor()

@@ -8,6 +8,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -134,3 +135,11 @@ Route::post('/session/create', [SessionController::class, 'create']);
 Route::post('/session/check', [SessionController::class, 'check']);
 Route::post('/session/login', [SessionController::class, 'login']);
 Route::post('/session/logout', [SessionController::class, 'logout']);
+
+// Donor update route
+Route::put('/donors/{id}', [DonorController::class, 'update']);
+
+// Payment routes
+Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
+Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
+Route::post('/payments/webhook', [PaymentController::class, 'webhook']);

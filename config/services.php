@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'paystack' => [
+        'public_key' => env('pk_live_4b46f60c969e2f44a60c20bc05bdbb7adcc00b0a'),
+        'secret_key' => env('sk_live_ae38ba4f452a2f2791a4234eb9eecd49d9ad77d8'),
+    ],
+
 ];
