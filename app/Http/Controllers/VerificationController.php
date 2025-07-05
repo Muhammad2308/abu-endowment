@@ -6,9 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use App\Services\SmsService;
 
 class VerificationController extends Controller
 {
+    protected $smsService;
+
+    public function __construct(SmsService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
+
     /**
      * Send SMS verification code
      */
@@ -24,14 +32,22 @@ class VerificationController extends Controller
         // Store code in cache for 10 minutes
         Cache::put("sms_verification_{$phone}", $code, 600);
         
-        // TODO: Integrate with your SMS service (Twilio, etc.)
-        // For now, just return success
-        // You can log the code for testing: \Log::info("SMS Code for {$phone}: {$code}");
+        // Send SMS using Ozeki SMS Gateway
+        $smsResult = $this->smsService->sendVerificationSms($phone, $code);
         
-        return response()->json([
-            'message' => 'SMS verification code sent successfully',
-            'code' => $code // Remove this in production
-        ]);
+        if ($smsResult['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => 'SMS verification code sent successfully',
+                'message_id' => $smsResult['message_id']
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send SMS verification code',
+                'error' => $smsResult['error']
+            ], 500);
+        }
     }
 
     /**

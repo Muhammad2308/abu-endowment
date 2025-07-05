@@ -14,6 +14,13 @@ return [
     |
     */
 
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+        'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
+        'scheme' => 'https',
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
@@ -35,9 +42,20 @@ return [
         ],
     ],
 
+    // Ozeki SMS Gateway Configuration
+    'ozeki' => [
+        'username' => env('OZEKI_USERNAME', 'http_user'),
+        'password' => env('OZEKI_PASSWORD', 'qwe123'),
+        'api_url' => env('OZEKI_API_URL', 'http://127.0.0.1:9509/api?action=rest'),
+        'enabled' => env('SMS_VERIFICATION_ENABLED', true),
+    ],
+
+    // Paystack Configuration
     'paystack' => [
-        'public_key' => env('pk_live_4b46f60c969e2f44a60c20bc05bdbb7adcc00b0a'),
-        'secret_key' => env('sk_live_ae38ba4f452a2f2791a4234eb9eecd49d9ad77d8'),
+        'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+        'secret_key' => env('PAYSTACK_SECRET_KEY'),
+        'webhook_secret' => env('PAYSTACK_WEBHOOK_SECRET'),
+        'url' => env('PAYSTACK_URL', 'https://api.paystack.co'),
     ],
 
 ];
