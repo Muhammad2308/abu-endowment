@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DeviceSession extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id',
         'donor_id',
         'session_token',
         'device_fingerprint',
@@ -17,16 +19,11 @@ class DeviceSession extends Model
     ];
 
     protected $casts = [
-        'expires_at' => 'datetime'
+        'expires_at' => 'datetime',
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
 
     public function donor()
     {
-        return $this->belongsTo(\App\Models\Donor::class);
+        return $this->belongsTo(Donor::class);
     }
 } 

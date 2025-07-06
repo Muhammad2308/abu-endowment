@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Public routes (no authentication required) - like search endpoints
+Route::post('/donors', [DonorController::class, 'store']); // Create donor account
 Route::get('/donors/search/{reg_number}', [DonorController::class, 'searchByRegNumber']);
 Route::get('/donors/search/phone/{phone}', [DonorController::class, 'searchByPhone']);
 Route::get('/donors/search/email/{email}', [DonorController::class, 'searchByEmail']);
@@ -60,6 +61,65 @@ Route::get('/projects-with-photos', function () {
             }),
         ];
     });
+});
+
+// Faculty and Department vision for cascading dropdowns (public)
+Route::get('/faculty-vision', function (Request $request) {
+    $entryYear = $request->query('entry_year');
+    $graduationYear = $request->query('graduation_year');
+    
+    if (!$entryYear || !$graduationYear) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Entry year and graduation year are required'
+        ], 400);
+    }
+    
+    $faculties = \App\Models\FacultyVision::where('start_year', '<=', $entryYear)
+                                         ->where('end_year', '>=', $graduationYear)
+                                         ->get();
+    
+    return response()->json([
+        'success' => true,
+        'data' => $faculties->map(function ($faculty) {
+            return [
+                'id' => $faculty->id,
+                'name' => $faculty->name,
+                'start_year' => $faculty->start_year,
+                'end_year' => $faculty->end_year
+            ];
+        })
+    ]);
+});
+
+Route::get('/department-vision', function (Request $request) {
+    $facultyId = $request->query('faculty_id');
+    $entryYear = $request->query('entry_year');
+    $graduationYear = $request->query('graduation_year');
+    
+    if (!$facultyId || !$entryYear || !$graduationYear) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Faculty ID, entry year, and graduation year are required'
+        ], 400);
+    }
+    
+    $departments = \App\Models\DepartmentVision::where('faculty_id', $facultyId)
+                                              ->where('start_year', '<=', $entryYear)
+                                              ->where('end_year', '>=', $graduationYear)
+                                              ->get();
+    
+    return response()->json([
+        'success' => true,
+        'data' => $departments->map(function ($department) {
+            return [
+                'id' => $department->id,
+                'name' => $department->name,
+                'start_year' => $department->start_year,
+                'end_year' => $department->end_year
+            ];
+        })
+    ]);
 });
 
 // Protected routes (require authentication)
