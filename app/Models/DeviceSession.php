@@ -8,6 +8,7 @@ class DeviceSession extends Model
 {
     protected $fillable = [
         'user_id',
+        'donor_id',
         'session_token',
         'device_fingerprint',
         'user_agent',
@@ -22,5 +23,10 @@ class DeviceSession extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function donor()
+    {
+        return $this->belongsTo(\App\Models\Donor::class);
     }
 } 

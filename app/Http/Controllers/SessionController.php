@@ -242,7 +242,7 @@ class SessionController extends Controller
     }
 
     /**
-     * Login with donor credentials (email/phone)
+     * Login with donor credentials (email/phone) - Device-based auth without user records
      */
     public function loginWithDonor(Request $request)
     {
@@ -281,22 +281,16 @@ class SessionController extends Controller
                 'phone' => $donor->phone
             ]);
             
-            // Create or update user from donor data
-            $user = User::updateOrCreate(
-                ['email' => $donor->email],
-                [
-                    'name' => $donor->name,
-                    'phone' => $donor->phone,
-                    'donor_type' => $donor->donor_type ?? 'alumni',
-                ]
-            );
-            
-            // Create device session
+            // Create device session directly with donor_id (no user record needed)
             $sessionToken = Str::random(64);
             $deviceFingerprint = $deviceInfo['fingerprint'] ?? md5($deviceInfo['userAgent'] . $request->ip());
             
+            // First, delete any existing sessions for this device
+            DeviceSession::where('device_fingerprint', $deviceFingerprint)->delete();
+            
             $deviceSession = DeviceSession::create([
-                'user_id' => $user->id,
+                'user_id' => null, // No user record needed for donor device auth
+                'donor_id' => $donor->id, // Store donor_id directly
                 'session_token' => $sessionToken,
                 'device_fingerprint' => $deviceFingerprint,
                 'user_agent' => $deviceInfo['userAgent'],
@@ -304,18 +298,18 @@ class SessionController extends Controller
                 'expires_at' => now()->addDays(30)
             ]);
             
-            Log::info('Donor login successful', [
+            Log::info('Donor device session created', [
                 'donor_id' => $donor->id,
-                'user_id' => $user->id,
-                'session_id' => $deviceSession->id
+                'session_id' => $deviceSession->id,
+                'session_token' => $sessionToken
             ]);
             
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful',
-                'user' => $user,
                 'donor' => $donor,
-                'session_token' => $sessionToken
+                'session_token' => $sessionToken,
+                'auth_type' => 'device_based'
             ]);
 
         } catch (\Exception $e) {
