@@ -7,6 +7,7 @@ use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RankingController;
+use App\Http\Controllers\DeviceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -184,6 +185,15 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('/statistics', [DonorController::class, 'statistics']);
     Route::post('/notifications/send', [DonorController::class, 'sendNotifications']);
 });
+
+// Device session management (public - no authentication required)
+Route::get('/device/check', [DeviceController::class, 'check']);
+Route::post('/device/session', [DeviceController::class, 'createSession']);
+Route::get('/device/donor-info', [DeviceController::class, 'getDonorInfo']);
+
+// Payment routes (public - no authentication required)
+Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
+Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
