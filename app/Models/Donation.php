@@ -11,12 +11,13 @@ class Donation extends Model
         'project_id',
         'amount',
         'endowment',
-        'payment_reference',
         'status',
+        'payment_reference',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'endowment' => 'string', // 'yes' or 'no'
     ];
 
     public function donor()

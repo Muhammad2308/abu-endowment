@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DonorController;
+use App\Http\Controllers\ProfileController;
 
 // Welcome page
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -56,3 +57,7 @@ Route::get('/login', function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+});

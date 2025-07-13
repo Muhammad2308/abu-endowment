@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABU Endowment - Welcome</title>
+    @livewireStyles
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -21,9 +22,30 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="/admin/login" class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition duration-150 ease-in-out">
-                        Admin Login
-                    </a>
+                    @guest
+                        <div class="relative group">
+                            <button class="focus:outline-none">
+                                <i class="fas fa-user-circle text-2xl text-indigo-600"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                                <a href="/login" class="block px-4 py-2 text-gray-700 hover:bg-indigo-100">Login</a>
+                                <a href="/register" class="block px-4 py-2 text-gray-700 hover:bg-indigo-100">Sign Up</a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="relative group">
+                            <button class="focus:outline-none" @click="$dispatch('open-profile-modal')">
+                                <i class="fas fa-user-circle text-2xl text-indigo-600"></i>
+                            </button>
+                            <div class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                                <a href="#" @click.prevent="$dispatch('open-profile-modal')" class="block px-4 py-2 text-gray-700 hover:bg-indigo-100">Profile</a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-100">Sign Out</button>
+                                </form>
+                            </div>
+                        </div>
+                    @endguest
                 </div>
             </div>
         </div>
@@ -208,5 +230,9 @@
             </div>
         </div>
     </footer>
+    @livewireScripts
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js"></script>
+    <livewire:edit-profile-modal />
 </body>
 </html> 

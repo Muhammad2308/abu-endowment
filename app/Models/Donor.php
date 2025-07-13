@@ -44,6 +44,12 @@ class Donor extends Model
         return $this->hasMany(Donation::class);
     }
 
+    public function successfulDonations()
+    {
+        // Return all donations, regardless of status
+        return $this->hasMany(\App\Models\Donation::class);
+    }
+
     // Accessor for full name
     public function getFullNameAttribute()
     {

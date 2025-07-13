@@ -123,6 +123,9 @@ Route::get('/department-vision', function (Request $request) {
     ]);
 });
 
+// Add donation history as a public route
+Route::get('/donations/history', [DonorController::class, 'donationHistory']);
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     // Authentication
@@ -142,7 +145,6 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Donations
     Route::post('/donations', [DonorController::class, 'makeDonation']);
-    Route::get('/donations/history', [DonorController::class, 'donationHistory']);
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
     
     // Rankings
@@ -194,6 +196,7 @@ Route::get('/device/donor-info', [DeviceController::class, 'getDonorInfo']);
 // Payment routes (public - no authentication required)
 Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
 Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
+Route::get('/payments/test', [PaymentController::class, 'test']); // Test configuration
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);

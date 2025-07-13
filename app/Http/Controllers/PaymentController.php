@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Donation;
 use App\Models\Donor;
 use App\Models\DeviceSession;
@@ -19,6 +20,14 @@ class PaymentController extends Controller
     {
         $this->paystackSecretKey = config('services.paystack.secret_key');
         $this->paystackPublicKey = config('services.paystack.public_key');
+        
+        // Validate Paystack configuration
+        if (!$this->paystackSecretKey || !$this->paystackPublicKey) {
+            Log::error('Paystack configuration missing', [
+                'secret_key_exists' => !empty($this->paystackSecretKey),
+                'public_key_exists' => !empty($this->paystackPublicKey)
+            ]);
+        }
     }
 
     /**
@@ -29,7 +38,7 @@ class PaymentController extends Controller
         try {
             $request->validate([
                 'email' => 'required|email',
-                'amount' => 'required|numeric|min:100', // Minimum 100 kobo (₦1)
+                'amount' => 'required|numeric|min:1', // Minimum 1 naira
                 'metadata' => 'required|array',
                 'metadata.name' => 'required|string',
                 'metadata.phone' => 'required|string',
@@ -42,26 +51,40 @@ class PaymentController extends Controller
             $metadata = $request->metadata;
             $deviceFingerprint = $request->device_fingerprint;
 
+            // Add validation for endowment based on project_id
+            if (
+                (empty($metadata['project_id']) && $metadata['endowment'] !== 'yes') ||
+                (!empty($metadata['project_id']) && $metadata['endowment'] !== 'no')
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid donation type: If project_id is null, endowment must be yes. If project_id is set, endowment must be no.'
+                ], 422);
+            }
+
             // Find or create donor based on device session
             $donor = $this->findOrCreateDonor($deviceFingerprint, $metadata);
 
-            // Create donation record
+            $amountNaira = $request->amount; // e.g., 1000
+            $amountKobo = $this->nairaToKobo($amountNaira);
+
+            // 1. Create donation record FIRST (store naira)
             $donation = Donation::create([
                 'donor_id' => $donor->id,
                 'project_id' => $metadata['project_id'] ?? null,
-                'amount' => $request->amount,
+                'amount' => $amountNaira, // store in naira
                 'endowment' => $metadata['endowment'],
                 'status' => 'pending',
-                'payment_reference' => 'ABU_' . time() . '_' . $donation->id ?? 'TEMP_' . time(),
+                'payment_reference' => 'ABU_' . time() . '_' . $donor->id,
             ]);
 
-            // Initialize Paystack transaction
+            // 2. Initialize Paystack transaction with donation payment_reference
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->paystackSecretKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.paystack.co/transaction/initialize', [
                 'email' => $request->email,
-                'amount' => $request->amount, // Already in kobo
+                'amount' => $amountKobo, // send kobo to Paystack
                 'reference' => $donation->payment_reference,
                 'callback_url' => $request->callback_url,
                 'metadata' => [
@@ -76,7 +99,7 @@ class PaymentController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 
-                // Update donation with payment reference
+                // 3. Update donation with Paystack reference
                 $donation->update([
                     'payment_reference' => $data['data']['reference']
                 ]);
@@ -89,7 +112,8 @@ class PaymentController extends Controller
                     'donor_id' => $donor->id,
                     'amount' => $request->amount,
                     'endowment' => $metadata['endowment'],
-                    'project_id' => $metadata['project_id'] ?? null
+                    'project_id' => $metadata['project_id'] ?? null,
+                    'paystack_reference' => $data['data']['reference']
                 ]);
 
                 return response()->json([
@@ -109,10 +133,13 @@ class PaymentController extends Controller
                     ]
                 ]);
             } else {
+                // If Paystack fails, delete the donation record
+                $donation->delete();
+                
                 Log::error('Paystack initialization failed', $response->json());
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to initialize payment'
+                    'message' => 'Failed to initialize payment: ' . ($response->json()['message'] ?? 'Unknown error')
                 ], 500);
             }
 
@@ -164,6 +191,9 @@ class PaymentController extends Controller
                         'amount' => $donation->amount
                     ]);
 
+                    // Convert Paystack kobo amount to naira for API response
+                    $transaction['amount'] = $this->koboToNaira($transaction['amount']);
+
                     return response()->json([
                         'success' => true,
                         'message' => 'Payment verified successfully',
@@ -176,6 +206,9 @@ class PaymentController extends Controller
                     $donation->update([
                         'status' => 'failed'
                     ]);
+
+                    // Convert Paystack kobo amount to naira for API response
+                    $transaction['amount'] = $this->koboToNaira($transaction['amount']);
 
                     return response()->json([
                         'success' => false,
@@ -333,6 +366,71 @@ class PaymentController extends Controller
                 'ip_address' => $request->ip(),
                 'expires_at' => now()->addDays(30)
             ]);
+        }
+    }
+
+    /**
+     * Convert kobo to naira
+     */
+    private function koboToNaira($amountKobo)
+    {
+        return $amountKobo / 100;
+    }
+
+    /**
+     * Convert naira to kobo
+     */
+    private function nairaToKobo($amountNaira)
+    {
+        return $amountNaira * 100;
+    }
+
+    /**
+     * Test endpoint to verify configuration
+     */
+    public function test(Request $request)
+    {
+        try {
+            $config = [
+                'paystack_configured' => !empty($this->paystackSecretKey) && !empty($this->paystackPublicKey),
+                'paystack_secret_key_length' => strlen($this->paystackSecretKey ?? ''),
+                'paystack_public_key_length' => strlen($this->paystackPublicKey ?? ''),
+                'database_connected' => true,
+                'donations_table_exists' => \Illuminate\Support\Facades\Schema::hasTable('donations'),
+                'device_sessions_table_exists' => \Illuminate\Support\Facades\Schema::hasTable('device_sessions'),
+            ];
+
+            // Test Paystack connection
+            if ($config['paystack_configured']) {
+                try {
+                    $response = Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $this->paystackSecretKey,
+                    ])->get('https://api.paystack.co/transaction/totals');
+                    
+                    $config['paystack_connection'] = $response->successful();
+                    $config['paystack_response'] = $response->json();
+                } catch (\Exception $e) {
+                    $config['paystack_connection'] = false;
+                    $config['paystack_error'] = $e->getMessage();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Configuration test completed',
+                'config' => $config
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Configuration test failed: ' . $e->getMessage(),
+                'config' => [
+                    'paystack_configured' => !empty($this->paystackSecretKey) && !empty($this->paystackPublicKey),
+                    'database_connected' => false,
+                    'error' => $e->getMessage()
+                ]
+            ], 500);
         }
     }
 } 

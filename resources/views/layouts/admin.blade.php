@@ -34,13 +34,18 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span class="text-gray-700 dark:text-gray-300">Welcome, {{ Auth::user()->name ?? 'Admin' }}</span>
-                    <form method="POST" action="{{ route('admin.logout') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700">
-                            Logout
+                    <div class="relative group">
+                        <button class="focus:outline-none" @click="$dispatch('open-profile-modal')">
+                            <i class="fas fa-user-circle text-2xl text-indigo-600 dark:text-indigo-400"></i>
                         </button>
-                    </form>
+                        <div class="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">
+                            <a href="#" @click.prevent="$dispatch('open-profile-modal')" class="block px-4 py-2 text-gray-700 hover:bg-indigo-100">Profile</a>
+                            <form method="POST" action="{{ route('admin.logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-indigo-100">Sign Out</button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -56,6 +61,8 @@
     </main>
 
     @livewireScripts
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/flowbite@1.5.1/dist/flowbite.js"></script>
+    <livewire:edit-profile-modal />
 </body>
 </html> 

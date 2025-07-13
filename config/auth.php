@@ -74,7 +74,7 @@ return [
     /*
     |--------------------------------------------------------------------------
     | Resetting Passwords
-    |--------------------------------------------------------------------------
+    |---------------------------------------------------------------------------
     |
     | These configuration options specify the behavior of Laravel's password
     | reset functionality, including the table utilized for token storage

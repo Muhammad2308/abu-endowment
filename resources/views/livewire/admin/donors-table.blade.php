@@ -1,7 +1,7 @@
 <div>
     <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Alumni Donors</h3>
-        <input wire:model.debounce.300ms="search" type="text" placeholder="Search donors..." class="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Alumni Records</h3>
+        <input wire:model.live="search" type="text" placeholder="Search donors..." class="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
     </div>
 
     <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
@@ -24,7 +24,7 @@
                         Location
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                        Date Added
+                        Donations
                     </th>
                 </tr>
             </thead>
@@ -75,7 +75,14 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {{ $donor->created_at->format('M d, Y') }}
+                            @if($donor->donations->count() === 0)
+                                <span class="inline-block px-3 py-1 text-xs font-semibold bg-gray-200 text-gray-700 rounded-full">None</span>
+                            @else
+                                <button wire:click="showDonations({{ $donor->id }})" class="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200 focus:outline-none">
+                                    <span class="mr-2">Details</span>
+                                    <span class="inline-block bg-indigo-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ $donor->donations->count() }}</span>
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -92,4 +99,33 @@
     <div class="mt-4">
         {{ $donors->links() }}
     </div>
+
+    @if($showDonationsModal && $selectedDonor)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-data="{ show: @entangle('showDonationsModal') }" x-show="show" x-cloak>
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] flex flex-col">
+                <div class="flex items-center justify-between px-6 py-4 border-b">
+                    <h3 class="text-lg font-semibold">Donations for {{ $selectedDonor->surname }} {{ $selectedDonor->name }}</h3>
+                    <button @click="$wire.set('showDonationsModal', false)" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+                </div>
+                <div class="overflow-y-auto p-6 flex-1">
+                    <div class="mb-4 font-bold text-indigo-700 text-lg">
+                        Total Donations: ₦{{ number_format($selectedDonor->donations->sum('amount'), 2) }}
+                    </div>
+                    @forelse($selectedDonations as $donation)
+                        <div class="mb-4 p-4 border rounded-lg bg-gray-50">
+                            <div class="font-semibold text-indigo-700">Amount: ₦{{ number_format($donation->amount, 2) }}</div>
+                            <div class="text-sm text-gray-700">Date: {{ $donation->created_at->format('M d, Y H:i') }}</div>
+                            <div class="text-sm text-gray-700">Project: {{ $donation->project->name ?? 'Endowment' }}</div>
+                            <div class="text-sm text-gray-500">Reference: {{ $donation->payment_reference }}</div>
+                        </div>
+                    @empty
+                        <div class="text-gray-500">No donations found for this donor.</div>
+                    @endforelse
+                </div>
+                <div class="flex justify-end gap-2 px-6 py-4 border-t">
+                    <button @click="$wire.set('showDonationsModal', false)" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Close</button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

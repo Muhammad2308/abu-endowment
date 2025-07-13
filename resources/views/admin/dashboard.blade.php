@@ -135,7 +135,7 @@
             </div>
         </a>
 
-        <a href="/api/documentation" target="_blank" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+        <!-- <a href="/api/documentation" target="_blank" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
             <div class="p-6">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -147,7 +147,7 @@
                     </div>
                 </div>
             </div>
-        </a>
+        </a> -->
 
         <a href="/" target="_blank" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
             <div class="p-6">
@@ -179,6 +179,22 @@
                 </a>
             </div>
         </div>
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <div class="p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user-edit text-indigo-600 dark:text-indigo-400 text-3xl"></i>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Edit Profile</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Update your admin profile information</p>
+                    </div>
+                    <div>
+                        <button onclick="Livewire.dispatch('open-profile-modal')" class="ml-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Alumni Donors Table - Full Width -->
@@ -190,7 +206,7 @@
             <div class="flex justify-end mb-4">
                 <button onclick="Livewire.dispatch('open-add-donor-modal')" 
                         class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    <i class="fas fa-plus mr-2"></i>Add Donor
+                    <i class="fas fa-plus mr-2"></i>Add Alumni
                 </button>
             </div>
 

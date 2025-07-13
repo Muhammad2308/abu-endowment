@@ -7,6 +7,7 @@ use App\Models\Donor; // Make sure you have a Donation model
 use App\Http\Resources\DonorResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class DonorController extends Controller
 {
@@ -387,5 +388,26 @@ class DonorController extends Controller
                 'message' => 'Error creating non-addressable alumni account: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Return donation history for a recognized device (by fingerprint).
+     * Always uses X-Device-Fingerprint header. Returns all donations for the donor_id.
+     */
+    public function donationHistory(Request $request)
+    {
+        $fingerprint = $request->header('X-Device-Fingerprint');
+        $donations = [];
+
+        if ($fingerprint) {
+            $deviceSession = \App\Models\DeviceSession::where('device_fingerprint', $fingerprint)->first();
+            if ($deviceSession && $deviceSession->donor_id) {
+                $donations = \App\Models\Donation::where('donor_id', $deviceSession->donor_id)->get();
+            }
+        }
+
+        return response()->json([
+            'donations' => $donations
+        ], 200);
     }
 }
