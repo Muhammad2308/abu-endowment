@@ -13,6 +13,9 @@ class ProjectsManager extends Component
 
     public $search = '';
     public $perPage = 10;
+    public $showDonationsModal = false;
+    public $selectedProject = null;
+    public $selectedDonations = [];
     protected $listeners = ['project-added' => '$refresh'];
     protected $queryString = [
         'search' => ['except' => ''],
@@ -29,6 +32,14 @@ class ProjectsManager extends Component
     // {
     //     // This will trigger a re-render
     // }
+
+    public function showDonations($projectId)
+    {
+        $project = \App\Models\Project::find($projectId);
+        $this->selectedProject = $project;
+        $this->selectedDonations = $project ? $project->donations()->with('donor')->orderBy('created_at', 'desc')->get() : [];
+        $this->showDonationsModal = true;
+    }
 
     public function render()
     {

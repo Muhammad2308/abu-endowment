@@ -13,4 +13,10 @@ class ProjectController extends Controller
         $projects = Project::with('photos')->get();
         return response()->json($projects);
     }
+
+    public function donationsOverview()
+    {
+        $projects = Project::with('photos', 'donations')->get();
+        return view('admin.projects', compact('projects'));
+    }
 }

@@ -30,6 +30,7 @@ Route::prefix('admin')->group(function () {
         
         // Projects management
         Route::get('/projects', [ProjectController::class, 'index'])->name('admin.projects');
+        Route::get('/projects/donations', [\App\Http\Controllers\ProjectController::class, 'donationsOverview'])->name('admin.projects.donations');
         
         // Donor statistics
         Route::get('/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');

@@ -10,6 +10,8 @@ use App\Http\Controllers\RankingController;
 use App\Http\Controllers\DeviceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\DonorMessageController;
+use App\Http\Controllers\Api\SmsController;
 
 // Public routes (no authentication required) - like search endpoints
 Route::post('/donors', [DonorController::class, 'store']); // Create donor account
@@ -200,3 +202,7 @@ Route::get('/payments/test', [PaymentController::class, 'test']); // Test config
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
+Route::get('/donor/{donor}/messages', [DonorMessageController::class, 'index']);
+Route::post('/send-sms', [SmsController::class, 'sendSms']);
+Route::get('/sms-messages', [SmsController::class, 'getMessages']);

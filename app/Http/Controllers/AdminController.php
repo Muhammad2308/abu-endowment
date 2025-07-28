@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Donor;
 use App\Models\Project;
+use App\Models\Donation;
 
 class AdminController extends Controller
 {
@@ -37,7 +38,10 @@ class AdminController extends Controller
     {
         $totalDonors = Donor::count();
         $activeProjects = Project::count();
-        return view('admin.dashboard', compact('totalDonors', 'activeProjects'));
+        $totalDonations = Donation::sum('amount');
+        $totalDonationsThisMonth = Donation::where('created_at', '>=', now()->startOfMonth())->sum('amount');
+        return view('admin.dashboard', compact('totalDonors', 'activeProjects', 'totalDonations', 'totalDonationsThisMonth'));
+        // dd($totalDonations);
     }
 
     public function logout(Request $request)

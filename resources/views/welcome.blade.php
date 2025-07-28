@@ -17,7 +17,10 @@
                     <div class="flex-shrink-0">
                         <div class="flex items-center">
                             <img src="{{ asset('icon/Header.png') }}" alt="ABU Endowment" class="h-10 w-auto mr-3">
-                            <h1 class="text-2xl font-bold text-indigo-600">ABU Endowment</h1>
+                           <div class="">
+                             <h1 class="text-xl font-bold text-indigo-900">ABU Endowment</h1>
+                            <p class="text-lg font-medium text-gray-800 -mt-1">&amp; Crowd Funding</p>
+                           </div>
                         </div>
                     </div>
                 </div>

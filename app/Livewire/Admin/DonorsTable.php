@@ -16,6 +16,8 @@ class DonorsTable extends Component
     public $showDonationsModal = false;
     public $selectedDonor = null;
     public $selectedDonations = [];
+    public $messageSubject = '';
+    public $messageBody = '';
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -65,5 +67,26 @@ class DonorsTable extends Component
         $this->selectedDonor = $donor;
         $this->selectedDonations = $donor ? $donor->donations : [];
         $this->showDonationsModal = true;
+    }
+
+    public function sendMessage()
+    {
+        if (!$this->selectedDonor) {
+            session()->flash('error', 'No donor selected.');
+            return;
+        }
+        $this->validate([
+            'messageBody' => 'required|string',
+            'messageSubject' => 'nullable|string|max:255',
+        ]);
+        \App\Models\Message::create([
+            'donor_id' => $this->selectedDonor->id,
+            'subject' => $this->messageSubject,
+            'message' => $this->messageBody,
+        ]);
+        $this->messageSubject = '';
+        $this->messageBody = '';
+        session()->flash('message', 'Message sent successfully.');
+        $this->dispatch('message-sent');
     }
 }
