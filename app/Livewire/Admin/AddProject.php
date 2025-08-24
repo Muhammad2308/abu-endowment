@@ -32,7 +32,7 @@ class AddProject extends Component
     ];
 
     #[On('open-add-project-modal')]
-    public function openModal()
+    public function openModal(...$params)
     {
         $this->showModal = true;
     }

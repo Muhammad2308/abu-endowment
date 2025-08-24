@@ -128,6 +128,9 @@ Route::get('/department-vision', function (Request $request) {
 // Add donation history as a public route
 Route::get('/donations/history', [DonorController::class, 'donationHistory']);
 
+// Alumni contacts for contact tab (public)
+Route::get('/alumni/contacts', [DonorController::class, 'getAlumniContacts']);
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     // Authentication

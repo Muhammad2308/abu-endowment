@@ -410,4 +410,70 @@ class DonorController extends Controller
             'donations' => $donations
         ], 200);
     }
+
+    /**
+     * Get alumni donors without ranking for contact tab
+     */
+    public function getAlumniContacts(Request $request)
+    {
+        try {
+            // Get alumni donors where ranking is null
+            $alumni = Donor::with(['faculty', 'department'])
+                ->whereIn('donor_type', ['addressable_alumni', 'non_addressable_alumni'])
+                ->whereNull('ranking')
+                ->orderBy('surname')
+                ->orderBy('name')
+                ->get();
+
+            // Transform the data for frontend
+            $contacts = $alumni->map(function ($donor) {
+                return [
+                    'id' => $donor->id,
+                    'full_name' => $donor->full_name,
+                    'name' => $donor->name,
+                    'surname' => $donor->surname,
+                    'other_name' => $donor->other_name,
+                    'email' => $donor->email,
+                    'phone' => $donor->phone,
+                    'reg_number' => $donor->reg_number,
+                    'graduation_year' => $donor->graduation_year,
+                    'entry_year' => $donor->entry_year,
+                    'donor_type' => $donor->donor_type,
+                    'faculty_name' => $donor->faculty?->current_name,
+                    'department_name' => $donor->department?->current_name,
+                    'faculty' => $donor->faculty ? [
+                        'id' => $donor->faculty->id,
+                        'name' => $donor->faculty->current_name,
+                        'code' => $donor->faculty->code ?? null
+                    ] : null,
+                    'department' => $donor->department ? [
+                        'id' => $donor->department->id,
+                        'name' => $donor->department->current_name,
+                        'code' => $donor->department->code ?? null
+                    ] : null,
+                    'address' => $donor->address,
+                    'state' => $donor->state,
+                    'lga' => $donor->lga,
+                    'nationality' => $donor->nationality,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => $contacts,
+                'total' => $contacts->count()
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching alumni contacts', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching alumni contacts: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

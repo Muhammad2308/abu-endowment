@@ -4,6 +4,6 @@
 
 @section('content')
 
-    @livewire('admin.project-status-toggle')
+    @livewire('admin.projects-manager')
 
 @endsection 

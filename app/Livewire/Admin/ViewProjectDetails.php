@@ -11,11 +11,23 @@ class ViewProjectDetails extends Component
     public $showModal = false;
     public $project;
 
+    public function mount(Project $project)  {
+
+        $this->project = $project;
+
+        // dd($this->project);
+        
+    }
+
     #[On('open-view-project-modal')]
-    public function openModal($projectId)
+    public function openModal($payload = [])
     {
-        $this->project = Project::findOrFail($projectId);
-        $this->showModal = true;
+        dd('sojdjfdjfjdfjdjfjdfjdjfjd');
+        $projectId = is_array($payload) ? ($payload['projectId'] ?? null) : null;
+        if ($projectId) {
+            $this->project = Project::findOrFail($projectId);
+            $this->showModal = true;
+        }
     }
 
     public function closeModal()

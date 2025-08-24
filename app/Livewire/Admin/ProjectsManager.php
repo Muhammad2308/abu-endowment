@@ -14,6 +14,7 @@ class ProjectsManager extends Component
     public $search = '';
     public $perPage = 10;
     public $showDonationsModal = false;
+    public $showAddProjectModal = false;
     public $selectedProject = null;
     public $selectedDonations = [];
     protected $listeners = ['project-added' => '$refresh'];
@@ -41,6 +42,16 @@ class ProjectsManager extends Component
         $this->showDonationsModal = true;
     }
 
+    public function showAddProjectModal()
+    {
+        $this->showAddProjectModal = true;
+    }
+
+    public function closeAddProjectModal()
+    {
+        $this->showAddProjectModal = false;
+    }
+
     public function render()
     {
         $projects = Project::query()
@@ -53,7 +64,8 @@ class ProjectsManager extends Component
             ->paginate($this->perPage);
 
         return view('livewire.admin.projects-manager', [
-            'projects' => $projects
+            'projects' => $projects,
+            'showAddProjectModal' => $this->showAddProjectModal,
         ]);
     }
 }

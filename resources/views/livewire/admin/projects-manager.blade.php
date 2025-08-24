@@ -1,4 +1,10 @@
 <div>
+    <!-- Add Project Button -->
+    <div class="mb-4 flex justify-end">
+        <button wire:click="$dispatch('open-add-project-modal')" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+            <i class="fas fa-plus mr-2"></i> Add Project
+        </button>
+    </div>
     <!-- Search and Filters -->
     <div class="flex flex-col md:flex-row gap-4 mb-6">
         <div class="flex-1">
@@ -64,16 +70,8 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $project->created_at->format('M d, Y') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex space-x-2">
-                                <button wire:click="$dispatch('open-add-photos-modal', { projectId: {{ $project->id }} })" 
-                                        class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                        title="Manage Photos">
-                                    <i class="fas fa-images mr-1"></i> Photos
-                                </button>
-                                <button wire:click="$dispatch('open-view-project-modal', { projectId: {{ $project->id }} })" 
-                                        class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                        title="View Details">
-                                    <i class="fas fa-eye mr-1"></i> View
-                                </button>
+                                @livewire('admin.add-project-photos', ['project' => $project], key('photos-' . $project->id))
+                                @livewire('admin.view-project-details', ['project' => $project], key('view-' . $project->id))
                                 <button wire:click="showDonations({{ $project->id }})"
                                         class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                         title="View Donations">
