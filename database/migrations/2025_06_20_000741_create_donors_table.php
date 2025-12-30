@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('surname');
             $table->string('name');
             $table->string('other_name')->nullable();
-            $table->string('reg_number')->unique();
-            $table->string('lga');
-            $table->string('nationality');
-            $table->string('state');
+            $table->string('reg_number')->unique()->nullable();
+            $table->string('lga')->nullable();
+            $table->string('nationality')->nullable();
+            $table->string('state')->nullable();
             $table->text('address')->nullable();
             $table->string('email')->nullable()->unique();
             $table->string('profile_image')->nullable();
@@ -28,8 +28,8 @@ return new class extends Migration
             $table->integer('graduation_year')->nullable();
             $table->string('donor_type');
             $table->integer('ranking')->nullable();
-            $table->foreignId('faculty_id')->constrained('faculties')->onDelete('cascade');
-            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
+            $table->foreignId('faculty_id')->nullable()->constrained('faculties')->onDelete('cascade');
+            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('cascade');
             $table->timestamps();
         });
     }

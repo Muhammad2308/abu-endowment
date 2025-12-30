@@ -33,6 +33,17 @@
                         <input type="text" wire:model.defer="other_name" id="other_name" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm dark:bg-gray-700 dark:text-white">
                         @error('other_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
+
+                    <!-- Gender -->
+                    <div class="col-span-1">
+                        <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gender (Optional)</label>
+                        <select wire:model.defer="gender" id="gender" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm dark:bg-gray-700 dark:text-white">
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                        @error('gender') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
                     
                     <!-- Reg Number -->
                     <div class="col-span-1">
@@ -115,7 +126,7 @@
                         <select wire:model.defer="department_id" id="department_id" class="mt-1 block w-full border-gray-300 dark:border-gray-600 rounded-md shadow-sm dark:bg-gray-700 dark:text-white" @if(empty($departments)) disabled @endif>
                             <option value="">Select Department</option>
                             @foreach ($departments as $department)
-                                <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                <option value="{{ $department->id }}">{{ $department->current_name }}</option>
                             @endforeach
                         </select>
                         @error('department_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror

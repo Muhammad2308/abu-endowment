@@ -3,7 +3,7 @@
     <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" id="add-project-modal">
         <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Project</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $editingProjectId ? 'Edit Project' : 'Add New Project' }}</h3>
                 <div class="mt-2 px-7 py-3">
                     <form wire:submit.prevent="saveProject">
                         @if (session()->has('message'))
@@ -24,8 +24,22 @@
                         </div>
 
                         <div class="mb-4">
+                            <label for="target" class="block text-gray-700 text-sm font-bold mb-2 text-left">Target Amount (₦):</label>
+                            <div class="relative mt-1 rounded-md shadow-sm">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <span class="text-gray-500 sm:text-sm">₦</span>
+                                </div>
+                                <input type="number" step="0.01" wire:model.defer="target" id="target" class="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0.00">
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <span class="text-gray-500 sm:text-sm" id="price-currency">NGN</span>
+                                </div>
+                            </div>
+                            @error('target') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4">
                             <label for="projectDescription" class="block text-gray-700 text-sm font-bold mb-2 text-left">Project Description:</label>
-                            <textarea wire:model.defer="project_description" id="projectDescription" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Describe the project details..."></textarea>
+                            <textarea id="projectDescription" wire:model.defer="project_description" rows="4" placeholder="Describe the project details..." class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
                             @error('project_description') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
                         </div>
 
@@ -35,9 +49,18 @@
                             @error('icon_image') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
                         </div>
 
+                        <div class="mb-4">
+                            <label for="status" class="block text-gray-700 text-sm font-bold mb-2 text-left">Status:</label>
+                            <select wire:model.defer="status" id="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                                <option value="active">Active</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                            @error('status') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
+                        </div>
+
                         <div class="items-center px-4 py-3">
                             <button id="save-project-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                Save Project
+                                {{ $editingProjectId ? 'Update Project' : 'Save Project' }}
                             </button>
                         </div>
                     </form>
@@ -51,4 +74,4 @@
         </div>
     </div>
     @endif
-</div> 
+</div>

@@ -1,7 +1,7 @@
 <div>
     @if ($showModal)
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" id="project-upload-modal">
-        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white dark:bg-gray-800">
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50" id="project-upload-modal">
+        <div class="relative p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white dark:bg-gray-800 max-h-[90vh] overflow-y-auto">
             <div class="mt-3 text-center">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Upload Projects from Excel</h3>
                 <div class="mt-2 px-7 py-3">
@@ -14,6 +14,64 @@
                         @if ($errorMessage)
                             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                                 <span class="block sm:inline">{{ $errorMessage }}</span>
+                            </div>
+                        @endif
+
+                        <!-- Recently Uploaded Projects with Images -->
+                        @if($showRecentProjects && $recentProjects->count() > 0)
+                            <div class="mb-6">
+                                <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Recently Uploaded Projects</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                    @foreach($recentProjects as $project)
+                                        <div wire:key="project-{{ $project->id }}-{{ $project->photos->count() }}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 border border-gray-200 dark:border-gray-700">
+                                            <!-- Project Icon/Image -->
+                                            <div class="mb-2">
+                                                @if($project->icon_image)
+                                                    <img src="{{ $project->icon_image_url }}" 
+                                                         alt="{{ $project->project_title }}" 
+                                                         class="w-full h-32 object-cover rounded-lg"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                    <div class="hidden w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                        <span class="text-gray-500 dark:text-gray-400 text-xs">No image</span>
+                                                    </div>
+                                                @elseif($project->photos && $project->photos->count() > 0)
+                                                    @php
+                                                        $firstPhoto = $project->photos->first();
+                                                        $imageUrl = $firstPhoto->image_url;
+                                                    @endphp
+                                                    <img src="{{ $imageUrl }}" 
+                                                         alt="{{ $project->project_title }}" 
+                                                         class="w-full h-32 object-cover rounded-lg"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                    <div class="hidden w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                        <span class="text-gray-500 dark:text-gray-400 text-xs">No image</span>
+                                                    </div>
+                                                @else
+                                                    <div class="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-image text-gray-400 text-2xl"></i>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <!-- Project Info -->
+                                            <div>
+                                                <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
+                                                    {{ $project->project_title }}
+                                                </h5>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                                                    {{ Str::limit($project->project_description, 60) }}
+                                                </p>
+                                                @if($project->photos && $project->photos->count() > 0)
+                                                    <div class="mt-2">
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                            <i class="fas fa-images mr-1"></i>
+                                                            {{ $project->photos->count() }} {{ $project->photos->count() === 1 ? 'photo' : 'photos' }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         @endif
 

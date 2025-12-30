@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Project extends Model
 {
@@ -14,7 +16,22 @@ class Project extends Model
         'project_title',
         'project_description',
         'icon_image',
+        'target',
+        'raised',
+        'category_id',
+        'status',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updating(function ($project) {
+            if ($project->target > 0 && $project->raised >= $project->target) {
+                $project->status = 'closed';
+            }
+        });
+    }
 
     protected $dates = ['deleted_at'];
     /**
@@ -31,6 +48,8 @@ class Project extends Model
     public function getIconImageUrlAttribute()
     {
         if ($this->icon_image) {
+            // Use asset() helper which works better with symlinks and avoids CORS issues
+            // This generates a URL like: /storage/projects/icons/filename.jpg
             return asset('storage/' . $this->icon_image);
         }
         return null;
@@ -44,5 +63,13 @@ class Project extends Model
     public function getTotalDonationsAttribute()
     {
         return $this->donations()->sum('amount');
+    }
+
+    /**
+     * Get the category that owns this project.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProjectCategory::class);
     }
 }

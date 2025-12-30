@@ -20,6 +20,10 @@ class ProjectUpload extends Component
     public $skippedCount = 0;
     public $failures = [];
     public $errorMessage = '';
+    public $recentProjects = [];
+    public $showRecentProjects = false;
+
+    protected $listeners = ['photos-updated' => 'handlePhotosUpdated'];
 
     protected $rules = [
         'excel_file' => 'required|file|mimes:xlsx,xls|max:10240', // 10MB max
@@ -36,6 +40,26 @@ class ProjectUpload extends Component
     public function openModal()
     {
         $this->showModal = true;
+        // Refresh recent projects if they're already shown
+        if ($this->showRecentProjects) {
+            $this->refreshRecentProjects();
+        }
+    }
+
+    public function refreshRecentProjects()
+    {
+        $this->recentProjects = Project::with(['photos'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+    }
+
+    public function handlePhotosUpdated($projectId)
+    {
+        // Refresh recent projects if modal is open and showing projects
+        if ($this->showModal && $this->showRecentProjects) {
+            $this->refreshRecentProjects();
+        }
     }
 
     public function closeModal()
@@ -51,6 +75,8 @@ class ProjectUpload extends Component
         $this->skippedCount = 0;
         $this->failures = [];
         $this->errorMessage = '';
+        $this->recentProjects = [];
+        $this->showRecentProjects = false;
         $this->resetValidation();
     }
 
@@ -68,6 +94,19 @@ class ProjectUpload extends Component
             $this->failures = $import->failures()->toArray();
 
             if ($this->importedCount > 0) {
+                // Get recently uploaded projects (last 10, ordered by created_at desc)
+                // Use fresh() to ensure we get the latest data including photos
+                $this->recentProjects = Project::with(['photos'])
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10)
+                    ->get()
+                    ->map(function ($project) {
+                        // Refresh the photos relationship to ensure we have the latest
+                        $project->load('photos');
+                        return $project;
+                    });
+                $this->showRecentProjects = true;
+                
                 session()->flash('message', "Successfully imported {$this->importedCount} projects!");
                 $this->dispatch('projects-uploaded');
             } else {

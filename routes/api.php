@@ -12,13 +12,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DonorMessageController;
 use App\Http\Controllers\Api\SmsController;
+use App\Http\Controllers\Api\AlumniController;
+use App\Http\Controllers\Api\FacultiesVisionController;
+use App\Http\Controllers\Api\DepartmentVisionController;
+use App\Http\Controllers\Api\DonorsController;
+use App\Http\Controllers\Api\DonorSessionController;
 
 // Public routes (no authentication required) - like search endpoints
 Route::post('/donors', [DonorController::class, 'store']); // Create donor account
-Route::get('/donors/search/{reg_number}', [DonorController::class, 'searchByRegNumber']);
-Route::get('/donors/search/phone/{phone}', [DonorController::class, 'searchByPhone']);
-Route::get('/donors/search/email/{email}', [DonorController::class, 'searchByEmail']);
+Route::get('/donors/search/{reg_number}', [DonorController::class, 'searchByRegNumber'])
+    ->where('reg_number', '.*');
+Route::get('/donors/search/phone/{phone}', [DonorController::class, 'searchByPhone'])
+    ->where('phone', '.*');
+Route::get('/donors/search/email/{email}', [DonorController::class, 'searchByEmail'])
+    ->where('email', '.*');
 Route::put('/donors/{id}', [DonorController::class, 'update']); // Make this public like search
+// Route::get('/donors', [DonorController::class, 'index']); // Moved to messaging section for consistency
 
 // Session routes (public)
 Route::post('/session/create', [SessionController::class, 'create']);
@@ -36,6 +45,9 @@ Route::post('/verification/verify-email', [VerificationController::class, 'verif
 // Projects (public)
 Route::get('/projects', [ProjectController::class, 'index']);
 
+// Donations (public - no authentication required)
+Route::post('/donations', [DonorController::class, 'makeDonation']);
+
 // Donor types (public)
 Route::get('/donor-types', function () {
     return response()->json([
@@ -50,16 +62,21 @@ Route::get('/donor-types', function () {
 
 // Projects with photos for slider (public)
 Route::get('/projects-with-photos', function () {
-    return \App\Models\Project::with(['photos'])->orderBy('created_at', 'desc')->get()->map(function ($project) {
+    return \App\Models\Project::where('status', 'active')->with(['photos'])->orderBy('created_at', 'desc')->get()->map(function ($project) {
         return [
             'id' => $project->id,
             'project_title' => $project->project_title,
             'project_description' => $project->project_description,
             'icon_image_url' => $project->icon_image_url,
+            'target' => $project->target ?? 0, // Fundraising target in naira
+            'raised' => $project->raised ?? 0, // Amount raised in naira
+            'status' => $project->status,
             'created_at' => $project->created_at,
             'photos' => $project->photos->map(function ($photo) {
                 return [
                     'image_url' => $photo->image_url,
+                    'title' => $photo->title,
+                    'description' => $photo->description,
                 ];
             }),
         ];
@@ -131,6 +148,34 @@ Route::get('/donations/history', [DonorController::class, 'donationHistory']);
 // Alumni contacts for contact tab (public)
 Route::get('/alumni/contacts', [DonorController::class, 'getAlumniContacts']);
 
+// Test route to verify API is working
+Route::get('/test', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'API is working correctly',
+        'timestamp' => now()->toISOString(),
+        'device_sessions_count' => \App\Models\DeviceSession::count(),
+        'donors_count' => \App\Models\Donor::count()
+    ]);
+});
+
+// Public Faculty/Department data (no authentication required)
+Route::get('/faculties', [\App\Http\Controllers\Api\FacultyController::class, 'index']);
+
+// Statistics routes (public for admin dashboard)
+Route::prefix('statistics')->group(function () {
+    Route::get('/donors', [\App\Http\Controllers\Api\StatisticsController::class, 'donors']);
+    Route::get('/donor-types', [\App\Http\Controllers\Api\StatisticsController::class, 'donorTypes']);
+    Route::get('/departments', [\App\Http\Controllers\Api\StatisticsController::class, 'departments']);
+    Route::get('/states', [\App\Http\Controllers\Api\StatisticsController::class, 'states']);
+    Route::get('/lgas', [\App\Http\Controllers\Api\StatisticsController::class, 'lgas']);
+    Route::get('/gender', [\App\Http\Controllers\Api\StatisticsController::class, 'gender']);
+    Route::get('/summary', [\App\Http\Controllers\Api\StatisticsController::class, 'summary']);
+});
+Route::get('/faculties/{id}/departments', [\App\Http\Controllers\Api\FacultyController::class, 'departments']);
+Route::get('/public/faculties', [\App\Http\Controllers\Api\FacultyController::class, 'index']);
+Route::get('/public/faculties/{id}/departments', [\App\Http\Controllers\Api\FacultyController::class, 'departments']);
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     // Authentication
@@ -148,8 +193,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/donors/faculty/{faculty_id}', [DonorController::class, 'getByFaculty']);
     Route::get('/donors/department/{department_id}', [DonorController::class, 'getByDepartment']);
     
-    // Donations
-    Route::post('/donations', [DonorController::class, 'makeDonation']);
+    // Donations (summary requires auth)
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
     
     // Rankings
@@ -158,10 +202,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rankings/faculty', [RankingController::class, 'facultyRankings']);
     Route::get('/rankings/department', [RankingController::class, 'departmentRankings']);
     
-    // Faculty and Department data
-    Route::get('/faculties', function () {
-        return \App\Models\Faculty::with('visions')->get();
-    });
+    // Protected Faculty and Department data (authenticated users)
+    // These are duplicates but with authentication - kept for backward compatibility
     
     Route::get('/departments', function () {
         return \App\Models\Department::with('visions')->get();
@@ -175,9 +217,6 @@ Route::middleware('auth:sanctum')->group(function () {
         return $department->visions;
     });
     
-    // Payment routes (protected)
-    Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
-    Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
 });
 
 // Admin routes (protected by role middleware)
@@ -194,9 +233,23 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
 });
 
 // Device session management (public - no authentication required)
-Route::get('/device/check', [DeviceController::class, 'check']);
-Route::post('/device/session', [DeviceController::class, 'createSession']);
-Route::get('/device/donor-info', [DeviceController::class, 'getDonorInfo']);
+Route::post('/devices/register', [DeviceController::class, 'register']);
+Route::post('/devices/test-register', function(Request $request) {
+    // Test endpoint to debug device registration
+    return response()->json([
+        'received_data' => $request->all(),
+        'headers' => $request->headers->all(),
+        'method' => $request->method(),
+        'content_type' => $request->header('Content-Type'),
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent()
+    ]);
+});
+Route::post('/sessions/check', [DeviceController::class, 'checkSession']);
+Route::get('/devices/check/{fingerprint}', [DeviceController::class, 'checkDevice']);
+Route::get('/device/check', [DeviceController::class, 'check']); // Keep existing
+Route::post('/device/session', [DeviceController::class, 'createSession']); // Keep existing
+Route::get('/device/donor-info', [DeviceController::class, 'getDonorInfo']); // Keep existing
 
 // Payment routes (public - no authentication required)
 Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
@@ -206,6 +259,74 @@ Route::get('/payments/test', [PaymentController::class, 'test']); // Test config
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+use App\Http\Controllers\Api\MessageController;
+
 Route::get('/donor/{donor}/messages', [DonorMessageController::class, 'index']);
+
+// Messaging API (Authenticated)
+Route::prefix('messages')->group(function () {
+    Route::get('/received', [MessageController::class, 'getReceivedMessages']);
+    Route::get('/sent', [MessageController::class, 'getSentMessages']);
+    Route::post('/', [MessageController::class, 'send']);
+    Route::put('/{id}/read', [MessageController::class, 'markAsRead']);
+    Route::get('/unread-count', [MessageController::class, 'getUnreadCount']);
+    Route::get('/conversation', [MessageController::class, 'getConversation']); // Keeping for internal use
+});
+
+// Alumni Directory (Authenticated)
+Route::get('/donors', [DonorController::class, 'index']);
+
 Route::post('/send-sms', [SmsController::class, 'sendSms']);
 Route::get('/sms-messages', [SmsController::class, 'getMessages']);
+
+Route::get('alumni/lookup', [AlumniController::class, 'lookup']); // ?reg_number=
+Route::get('alumni/search', [AlumniController::class, 'search']); // ?query=
+Route::get('faculties-visions', [FacultiesVisionController::class, 'index']); // ?year=
+Route::get('department-visions', [DepartmentVisionController::class, 'index']); // ?year=&faculty_id=
+Route::post('donors', [DonorsController::class, 'store']);
+Route::put('donors/{id}', [DonorsController::class, 'update']);
+Route::post('donors/check-device', [DonorsController::class, 'checkByDevice']);
+Route::get('donors/search/email/{email}', [DonorsController::class, 'searchByEmail']);
+Route::get('donors/search/addressable-alumni/{regNumber}', [DonorsController::class, 'searchAddressableAlumni']);
+
+// Donor Sessions routes (public - standard login/logout functionality)
+Route::post('/donor-sessions/register', [DonorSessionController::class, 'register']);
+Route::post('/donor-sessions/login', [DonorSessionController::class, 'login']);
+Route::post('/donor-sessions/google-login', [DonorSessionController::class, 'googleLogin']);
+Route::post('/donor-sessions/google-register', [DonorSessionController::class, 'googleRegister']);
+
+// Password Reset Routes (link flow)
+Route::post('/donor-sessions/forgot-password', [DonorSessionController::class, 'forgotPassword']);
+Route::get('/donor-sessions/reset/{token}', [DonorSessionController::class, 'getResetToken']);
+Route::post('/donor-sessions/reset/{token}', [DonorSessionController::class, 'resetPasswordWithToken']);
+
+// Debug route for Google token verification (remove in production)
+Route::get('/test-google-token', function (Request $request) {
+    $token = $request->get('token');
+    if (!$token) {
+        return response()->json(['error' => 'Token required. Use: ?token=YOUR_TOKEN'], 400);
+    }
+
+    $googleAuth = app(\App\Services\GoogleAuthService::class);
+    $result = $googleAuth->verifyToken($token);
+
+    return response()->json([
+        'success' => $result !== false,
+        'data' => $result,
+        'debug' => [
+            'client_id_from_config' => config('services.google.client_id'),
+            'client_id_from_env' => env('GOOGLE_CLIENT_ID'),
+            'client_id_empty' => empty(config('services.google.client_id')),
+        ],
+    ]);
+});
+
+Route::post('/donor-sessions/logout', [DonorSessionController::class, 'logout']);
+Route::post('/donor-sessions/me', [DonorSessionController::class, 'me']);
+Route::get('/donor-sessions/check-device', [DonorSessionController::class, 'checkDevice']);
+
+// Profile update routes (require authentication - using session_id for now)
+Route::put('/donor-sessions/{session_id}/username', [DonorSessionController::class, 'updateUsername']);
+Route::put('/donor-sessions/{session_id}/password', [DonorSessionController::class, 'updatePassword']);
+Route::post('/donor-sessions/profile', [DonorSessionController::class, 'createOrUpdateProfile']); // ✅ Create/update donor profile for authenticated user
+Route::post('/donors/{id}/profile-image', [DonorsController::class, 'uploadProfileImage']);

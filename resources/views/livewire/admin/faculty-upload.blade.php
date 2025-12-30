@@ -15,8 +15,9 @@
     </div>
 
     @if($showModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900 bg-opacity-50">
-        <div class="relative p-4 w-full max-w-lg h-full md:h-auto">
+    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900 bg-opacity-50" 
+         wire:click.self="$set('showModal', false)">
+        <div class="relative p-4 w-full max-w-lg h-full md:h-auto" wire:click.stop>
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                 <div class="flex justify-between items-start p-4 rounded-t border-b dark:border-gray-600">
                     <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Upload Faculties</h3>

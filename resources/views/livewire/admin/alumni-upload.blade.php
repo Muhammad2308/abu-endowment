@@ -104,6 +104,9 @@
                                         <span class="font-mono text-xs">other_name</span>
                                     </div>
                                     <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-mono text-xs">gender (male|female)</span>
+                                    </div>
+                                    <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-mono text-xs">reg_number</span>
                                     </div>
                                     <div class="bg-gray-100 dark:bg-gray-700 p-2 rounded">

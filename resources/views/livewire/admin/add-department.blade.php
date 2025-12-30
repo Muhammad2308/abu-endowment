@@ -23,6 +23,41 @@
                             @error('departmentName') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
                         </div>
 
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="started_at" class="block text-gray-700 text-sm font-bold mb-2 text-left">
+                                    Start Year <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    wire:model.defer="started_at" 
+                                    type="number" 
+                                    id="started_at" 
+                                    min="1900"
+                                    max="2100"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="e.g., 1980"
+                                    required
+                                >
+                                @error('started_at') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label for="ended_at" class="block text-gray-700 text-sm font-bold mb-2 text-left">
+                                    End Year <span class="text-gray-400 text-xs">(Optional)</span>
+                                </label>
+                                <input 
+                                    wire:model.defer="ended_at" 
+                                    type="number" 
+                                    id="ended_at" 
+                                    min="1900"
+                                    max="2100"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="Leave empty if active"
+                                >
+                                @error('ended_at') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
                         <div class="items-center px-4 py-3">
                             <button id="save-department-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
                                 Save Department

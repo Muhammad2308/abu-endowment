@@ -10,13 +10,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
+
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsErrors;
 use Illuminate\Support\Facades\Log;
 
-class DonorsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure, SkipsOnError, WithBatchInserts, WithChunkReading
+class DonorsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFailure, SkipsOnError, WithChunkReading
 {
     use SkipsFailures, SkipsErrors;
 
@@ -80,10 +80,17 @@ class DonorsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFa
 
             Log::info("Department: " . $department->current_name . " (ID: " . $department->id . ")");
 
+            // Normalize gender if provided
+            $gender = isset($row['gender']) ? strtolower(trim($row['gender'])) : null;
+            if (!in_array($gender, ['male', 'female'])) {
+                $gender = null;
+            }
+
             $donor = new Donor([
                 'surname'            => trim($row['surname']),
                 'name'               => trim($row['name']),
                 'other_name'         => trim($row['other_name'] ?? ''),
+                'gender'             => $gender,
                 'reg_number'         => trim($row['reg_number']),
                 'lga'                => trim($row['lga']),
                 'nationality'        => trim($row['nationality']),
@@ -192,10 +199,7 @@ class DonorsImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnFa
         ];
     }
 
-    public function batchSize(): int
-    {
-        return 100;
-    }
+
 
     public function chunkSize(): int
     {

@@ -19,12 +19,24 @@ class PermissionSeeder extends Seeder
         DB::table('permissions')->truncate();
 
         $permissions = [
+            // Admin permissions
             ['permission_title' => 'manage_users'],
-            ['permission_title' => 'view_dashboard_stats'],
             ['permission_title' => 'manage_projects'],
             ['permission_title' => 'manage_donors'],
-            ['permission_title' => 'make_donations'],
+            ['permission_title' => 'manage_all_settings'],
+            ['permission_title' => 'view_all_reports'],
+            
+            // Finance permissions
+            ['permission_title' => 'manage_finances'],
+            ['permission_title' => 'view_financial_reports'],
+            ['permission_title' => 'process_donations'],
+            ['permission_title' => 'view_donations'],
+            
+            // Executive permissions
+            ['permission_title' => 'view_dashboard_stats'],
             ['permission_title' => 'view_reports'],
+            ['permission_title' => 'view_projects'],
+            ['permission_title' => 'view_donors'],
         ];
 
         foreach ($permissions as $permission) {

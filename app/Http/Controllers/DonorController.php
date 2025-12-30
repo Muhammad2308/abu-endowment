@@ -9,35 +9,200 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
+use App\Traits\ResolvesDonorSession;
+
 class DonorController extends Controller
 {
-    public function makeDonation(Request $request)
+    use ResolvesDonorSession;
+    /**
+     * Display a listing of donors.
+     */
+    public function index(Request $request)
     {
-        // Validate input
-        $validator = Validator::make($request->all(), [
-            'amount' => 'required|numeric|min:1',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            // Add other fields as needed
-        ]);
+        // Ensure user is authenticated
+        $donor = $this->resolveDonorOrError($request);
+        if ($donor instanceof \Illuminate\Http\JsonResponse) return $donor;
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        $query = Donor::query();
+
+        // Optional filtering
+        if ($request->has('type')) {
+            $query->where('donor_type', $request->type);
         }
 
-        // Save donation (customize as needed)
-        $donation = Donor::create([
-            'amount' => $request->amount,
-            'name' => $request->name,
-            'email' => $request->email,
-            // Add other fields as needed
-        ]);
+        // Search by name/email/phone
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('surname', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
 
-        // Return success response
+        // Limit fields for privacy as requested
+        $donors = $query->paginate(50);
+
+        $data = collect($donors->items())->map(function($d) {
+            return [
+                'id' => $d->id,
+                'name' => $d->name,
+                'surname' => $d->surname,
+                'email' => $d->email,
+                'profile_image' => $d->profile_image_url, // Use accessor for full URL
+            ];
+        });
+
         return response()->json([
-            'message' => 'Donation successful!',
-            'donation' => $donation
-        ], 201);
+            'success' => true,
+            'data' => $data,
+            'meta' => [
+                'current_page' => $donors->currentPage(),
+                'last_page' => $donors->lastPage(),
+                'total' => $donors->total(),
+            ]
+        ]);
+    }
+
+    public function makeDonation(Request $request)
+    {
+        try {
+            // Validate input
+            $validator = Validator::make($request->all(), [
+                'amount' => 'required|numeric|min:100',
+                'email' => 'required|email',
+                'name' => 'required|string|max:255',
+                'surname' => 'required|string|max:255',
+                'other_name' => 'nullable|string|max:255',
+                'phone' => 'required|string|max:20',
+                'project_id' => 'nullable|exists:projects,id',
+                'endowment' => 'required|in:yes,no',
+                'type' => 'required|in:endowment,project',
+                'device_fingerprint' => 'nullable|string',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Check for authenticated session first
+            $sessionToken = $request->header('X-Device-Session');
+            $fingerprint = $request->header('X-Device-Fingerprint');
+            $donor = null;
+
+            if ($sessionToken) {
+                $deviceSession = \App\Models\DeviceSession::where('session_token', $sessionToken)->first();
+                if ($deviceSession && $deviceSession->donor_id) {
+                    $donor = Donor::find($deviceSession->donor_id);
+                }
+            }
+
+            if (!$donor && $fingerprint) {
+                $deviceSession = \App\Models\DeviceSession::where('device_fingerprint', $fingerprint)->first();
+                if ($deviceSession && $deviceSession->donor_id) {
+                    $donor = Donor::find($deviceSession->donor_id);
+                }
+            }
+
+            if ($donor) {
+                // Update existing donor from session - SAVE SEPARATE NAME FIELDS
+                // We trust the session donor is the correct one. 
+                // Optionally update contact info if provided and different?
+                // For now, let's update phone/names if they are provided in the form
+                $donor->name = trim($request->name);
+                $donor->surname = trim($request->surname);
+                $donor->other_name = $request->other_name ? trim($request->other_name) : null;
+                $donor->phone = $request->phone;
+                // Only update email if it's not set or if we want to allow changing email via donation form (risky)
+                // $donor->email = $request->email; 
+                $donor->save();
+            } else {
+                // Fallback: Find or create donor by email
+                $donor = Donor::where('email', $request->email)->first();
+
+                if ($donor) {
+                    // Update existing donor - SAVE SEPARATE NAME FIELDS
+                    $donor->name = trim($request->name);
+                    $donor->surname = trim($request->surname);
+                    $donor->other_name = $request->other_name ? trim($request->other_name) : null;
+                    $donor->phone = $request->phone;
+                    $donor->save();
+                } else {
+                    // Create new donor - SAVE SEPARATE NAME FIELDS
+                    $donor = Donor::create([
+                        'name' => trim($request->name),
+                        'surname' => trim($request->surname),
+                        'other_name' => $request->other_name ? trim($request->other_name) : null,
+                        'email' => $request->email,
+                        'phone' => $request->phone,
+                        'donor_type' => 'addressable_alumni', // Default type
+                    ]);
+                }
+            }
+
+            // Create donation record - INCLUDE TYPE FIELD
+            $donation = \App\Models\Donation::create([
+                'donor_id' => $donor->id,
+                'project_id' => $request->project_id ?? null,
+                'amount' => $request->amount,
+                'endowment' => $request->endowment,
+                'type' => $request->type, // CRITICAL: Required by database
+                'frequency' => 'onetime', // Default to onetime
+                'status' => 'completed', // Dummy payment = success
+                'payment_reference' => 'FLUTTERWAVE_' . time() . '_' . $donor->id,
+            ]);
+
+            // Load relationships for response
+            $donation->load(['donor', 'project']);
+
+            Log::info('Donation recorded successfully', [
+                'donation_id' => $donation->id,
+                'donor_id' => $donor->id,
+                'amount' => $request->amount,
+                'type' => $request->type,
+            ]);
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Donation recorded successfully',
+                'data' => [
+                    'id' => $donation->id,
+                    'donor_id' => $donation->donor_id,
+                    'project_id' => $donation->project_id,
+                    'amount' => $donation->amount,
+                    'endowment' => $donation->endowment,
+                    'type' => $donation->type,
+                    'status' => $donation->status,
+                    'payment_reference' => $donation->payment_reference,
+                    'created_at' => $donation->created_at,
+                    'donor' => [
+                        'id' => $donor->id,
+                        'name' => $donor->name,
+                        'surname' => $donor->surname,
+                        'other_name' => $donor->other_name,
+                        'email' => $donor->email,
+                        'phone' => $donor->phone,
+                    ],
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Error recording donation', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while recording donation: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function searchByRegNumber($reg_number)
@@ -155,6 +320,8 @@ class DonorController extends Controller
             // Validate the request
             $validator = Validator::make(array_merge($request->all(), ['phone' => $phone]), [
                 'name' => 'required|string|max:255',
+                'surname' => 'required|string|max:255',
+                'other_name' => 'nullable|string|max:255',
                 'email' => 'required|email|max:255',
                 'phone' => 'required|string|max:20|regex:/^\+[0-9]{10,15}$/',
                 'address' => 'required|string|max:500',
@@ -177,34 +344,47 @@ class DonorController extends Controller
                 ], 422);
             }
 
-            // Parse the full name into components
-            $nameComponents = $this->parseName($request->name);
-            
-            // Log name parsing result
-            Log::info('Name parsing result', [
-                'original' => $request->name,
-                'parsed' => $nameComponents
+            // Log the update data BEFORE assignment
+            Log::info('Donor update data - REQUEST VALUES', [
+                'name' => $request->name,
+                'surname' => $request->surname,
+                'other_name' => $request->other_name,
             ]);
             
-            // Update the donor with parsed name components
-            $donor->update([
-                'name' => $nameComponents['name'],
-                'surname' => $nameComponents['surname'],
-                'other_name' => $nameComponents['other_names'],
-                'email' => $request->email,
-                'phone' => $phone, // Use formatted phone number
-                'address' => $request->address,
-                'state' => $request->state,
-                'lga' => $request->city, // Map frontend 'city' to database 'lga'
-                'ranking' => $request->ranking ?? $donor->ranking,
+            // Explicitly set each field individually to avoid any mass assignment issues
+            $donor->name = trim($request->name);
+            $donor->surname = trim($request->surname);
+            $donor->other_name = $request->other_name ? trim($request->other_name) : null;
+            $donor->email = $request->email;
+            $donor->phone = $phone;
+            $donor->address = $request->address;
+            $donor->state = $request->state;
+            $donor->lga = $request->city;
+            if ($request->has('ranking')) {
+                $donor->ranking = $request->ranking;
+            }
+            
+            // Log values BEFORE saving
+            Log::info('Donor update data - MODEL VALUES BEFORE SAVE', [
+                'name' => $donor->name,
+                'surname' => $donor->surname,
+                'other_name' => $donor->other_name,
             ]);
-
+            
+            $donor->save();
+            
+            // Refresh to get actual database values
+            $donor->refresh();
+            
             // Load relationships for response
             $donor->load(['faculty', 'department']);
 
-            Log::info('Donor updated successfully', [
+            // Log values AFTER saving to verify
+            Log::info('Donor updated successfully - DATABASE VALUES AFTER SAVE', [
                 'id' => $donor->id,
-                'name' => $donor->name
+                'name' => $donor->name,
+                'surname' => $donor->surname,
+                'other_name' => $donor->other_name,
             ]);
 
             return response()->json([
@@ -394,16 +574,34 @@ class DonorController extends Controller
      * Return donation history for a recognized device (by fingerprint).
      * Always uses X-Device-Fingerprint header. Returns all donations for the donor_id.
      */
+    /**
+     * Return donation history for a recognized device (by fingerprint or session token).
+     */
     public function donationHistory(Request $request)
     {
         $fingerprint = $request->header('X-Device-Fingerprint');
+        $sessionToken = $request->header('X-Device-Session'); // Support session token
         $donations = [];
+        $donorId = null;
 
-        if ($fingerprint) {
-            $deviceSession = \App\Models\DeviceSession::where('device_fingerprint', $fingerprint)->first();
-            if ($deviceSession && $deviceSession->donor_id) {
-                $donations = \App\Models\Donation::where('donor_id', $deviceSession->donor_id)->get();
+        if ($sessionToken) {
+            $deviceSession = \App\Models\DeviceSession::where('session_token', $sessionToken)->first();
+            if ($deviceSession) {
+                $donorId = $deviceSession->donor_id;
             }
+        }
+
+        if (!$donorId && $fingerprint) {
+            $deviceSession = \App\Models\DeviceSession::where('device_fingerprint', $fingerprint)->first();
+            if ($deviceSession) {
+                $donorId = $deviceSession->donor_id;
+            }
+        }
+
+        if ($donorId) {
+            $donations = \App\Models\Donation::where('donor_id', $donorId)
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
 
         return response()->json([

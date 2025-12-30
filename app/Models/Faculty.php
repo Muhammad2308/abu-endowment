@@ -11,6 +11,13 @@ class Faculty extends Model
 
     protected $fillable = [
         'current_name',
+        'started_at',
+        'ended_at',
+    ];
+
+    protected $casts = [
+        'started_at' => 'integer',
+        'ended_at' => 'integer',
     ];
 
     public function departments(){

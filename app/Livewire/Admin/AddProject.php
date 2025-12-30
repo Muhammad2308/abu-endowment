@@ -17,11 +17,17 @@ class AddProject extends Component
     public $project_title = '';
     public $project_description = '';
     public $icon_image;
+    public $target = '';
+    public $status = 'active';
+    public $editingProjectId = null;
+    public $existing_icon_image = null;
 
     protected $rules = [
         'project_title' => 'required|string|max:255',
         'project_description' => 'required|string',
-        'icon_image' => 'nullable|image|max:2048', // 2MB max
+        'target' => 'nullable|numeric|min:0',
+        'status' => 'required|in:active,closed',
+        'icon_image' => 'nullable|image|max:5048', // 2MB max
     ];
 
     protected $messages = [
@@ -34,6 +40,7 @@ class AddProject extends Component
     #[On('open-add-project-modal')]
     public function openModal(...$params)
     {
+        $this->resetForm();
         $this->showModal = true;
     }
 
@@ -47,20 +54,40 @@ class AddProject extends Component
     {
         $this->project_title = '';
         $this->project_description = '';
+        $this->target = '';
+        $this->status = 'active';
         $this->icon_image = null;
+        $this->existing_icon_image = null;
+        $this->editingProjectId = null;
         $this->resetValidation();
+    }
+
+    #[On('edit-project')]
+    public function editProject($projectId)
+    {
+        $project = Project::findOrFail($projectId);
+
+        $this->editingProjectId = $project->id;
+        $this->project_title = $project->project_title;
+        $this->project_description = $project->project_description;
+        $this->target = $project->target;
+        $this->status = $project->status;
+        $this->existing_icon_image = $project->icon_image;
+        $this->icon_image = null; // reset new upload
+
+        $this->showModal = true;
     }
 
     public function saveProject()
     {
         Log::info('saveProject method called.');
 
-        $validatedData = $this->validate();
-        Log::info('Validation successful.', $validatedData);
+        // $validatedData = $this->validate();
+        // Log::info('Validation successful.', $validatedData);
 
         try {
-            $iconImagePath = null;
-            
+            $iconImagePath = $this->existing_icon_image;
+
             if ($this->icon_image) {
                 Log::info('Icon image present. Storing...');
                 $iconImagePath = $this->icon_image->store('projects/icons', 'public');
@@ -70,16 +97,31 @@ class AddProject extends Component
             $projectData = [
                 'project_title' => $this->project_title,
                 'project_description' => $this->project_description,
+                'target' => $this->target ?: 0,
+                'status' => $this->status,
                 'icon_image' => $iconImagePath,
             ];
 
-            Log::info('Creating project with data:', $projectData);
-            Project::create($projectData);
-            Log::info('Project created successfully.');
+            if ($this->editingProjectId) {
+                $project = Project::findOrFail($this->editingProjectId);
+                $project->update($projectData);
+                Log::info('Project updated successfully with data:', $project->toArray());
+                session()->flash('message', 'Project updated successfully!');
+            } else {
+                Log::info('Creating project with data:', $projectData);
+                $project = Project::create($projectData);
+                Log::info('Project saved successfully with data:', $project->toArray());
+                Log::info('Project created successfully.', [
+                    'project_id' => $project->id,
+                    'icon_image' => $project->icon_image,
+                    'icon_image_url' => $project->icon_image_url
+                ]);
+                session()->flash('message', 'Project added successfully!');
+            }
 
             $this->closeModal();
+            $this->resetForm();
             $this->dispatch('project-added');
-            session()->flash('message', 'Project added successfully!');
             
         } catch (\Exception $e) {
             Log::error('Error adding project: ' . $e->getMessage());

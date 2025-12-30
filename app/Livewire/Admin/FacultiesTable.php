@@ -13,8 +13,15 @@ class FacultiesTable extends Component
 
     public $search = '';
 
+    public function initComponent()
+    {
+        // Force Livewire to initialize properly
+    }
+
     #[On('facultiesUpdated')] 
     #[On('departmentAdded')] 
+    #[On('facultyAdded')]
+    #[On('refreshFaculties')]
     public function render()
     {
         $faculties = Faculty::with(['departments', 'visions'])

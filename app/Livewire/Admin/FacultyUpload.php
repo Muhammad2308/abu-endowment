@@ -25,8 +25,13 @@ class FacultyUpload extends Component
 
     public function openModal()
     {
-        $this->reset();
+        $this->resetForm();
         $this->showModal = true;
+    }
+
+    public function resetForm()
+    {
+        $this->reset(['upload', 'importing', 'importFinished', 'successMessage', 'errorMessage']);
     }
 
     public function import()

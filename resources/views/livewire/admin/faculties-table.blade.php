@@ -1,8 +1,32 @@
-<div>
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Faculties & Departments</h3>
-        <input wire:model.debounce.300ms="search" type="text" placeholder="Search faculties..." class="w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+<div wire:init="initComponent">
+    
+    {{-- Flash Messages --}}
+    @if (session()->has('message'))
+    <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline">{{ session('message') }}</span>
     </div>
+    @endif
+    
+    @if (session()->has('error'))
+    <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline">{{ session('error') }}</span>
+    </div>
+    @endif
+    
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Faculties & Departments</h3>
+            <div class="flex items-center space-x-4">
+                <input wire:model="search" type="text" placeholder="Search faculties..." class="w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                {{-- Add Faculty button that dispatches to the dedicated AddFaculty component --}}
+                <button wire:click="$dispatchTo('admin.add-faculty', 'openModal')" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add Faculty
+                </button>
+            </div>
+        </div>
+    </div>
+    
 
     <div class="overflow-x-auto bg-white dark:bg-gray-800 shadow-md rounded-lg">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -84,6 +108,13 @@
         {{ $faculties->links() }}
     </div>
 
+    
+
     @livewire('admin.add-department')
+    
     @livewire('admin.add-faculty-vision')
+
+    {{-- Ensure the AddFaculty component is present on the page and can receive dispatched events --}}
+    @livewire('admin.add-faculty')
+
 </div>

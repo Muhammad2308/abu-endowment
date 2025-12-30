@@ -12,14 +12,17 @@
                         Name
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
-                        Contact
+                        Gender
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
+                        Contact
+                    </th>
+                    <!-- <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                         Academic Info
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                         Faculty/Department
-                    </th>
+                    </th> -->
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">
                         Location
                     </th>
@@ -43,6 +46,15 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
+                            @if($donor->gender)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $donor->gender === 'male' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200' }}">
+                                    {{ ucfirst($donor->gender) }}
+                                </span>
+                            @else
+                                <span class="text-gray-400 dark:text-gray-500 text-sm">—</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900 dark:text-white">
                                 {{ $donor->email }}
                             </div>
@@ -50,22 +62,22 @@
                                 {{ $donor->phone }}
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <!-- <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900 dark:text-white">
                                 {{ $donor->entry_year }} - {{ $donor->graduation_year }}
                             </div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ $donor->graduation_year - $donor->entry_year }} years
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        </td> -->
+                        <!-- <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900 dark:text-white">
                                 {{ $donor->faculty->current_name ?? 'N/A' }}
                             </div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ $donor->department->current_name ?? 'N/A' }}
                             </div>
-                        </td>
+                        </td> -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900 dark:text-white">
                                 {{ $donor->state }}
@@ -93,7 +105,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                             No donors found. Try adjusting your search or upload some alumni data.
                         </td>
                     </tr>

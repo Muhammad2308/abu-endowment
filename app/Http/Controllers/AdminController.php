@@ -64,8 +64,4 @@ class AdminController extends Controller
         return view('admin.statistics');
     }
 
-    public function notifications()
-    {
-        return view('admin.notifications');
-    }
 }

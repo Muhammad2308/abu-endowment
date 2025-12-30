@@ -13,6 +13,7 @@ class Donor extends Model
         'surname',
         'name',
         'other_name',
+        'gender',
         'reg_number',
         'lga',
         'nationality',
@@ -50,9 +51,25 @@ class Donor extends Model
         return $this->hasMany(\App\Models\Donation::class);
     }
 
+    public function donorSession()
+    {
+        return $this->hasOne(DonorSession::class);
+    }
+
     // Accessor for full name
     public function getFullNameAttribute()
     {
         return trim("{$this->surname} {$this->name} {$this->other_name}");
+    }
+
+    /**
+     * Get the profile image URL
+     */
+    public function getProfileImageUrlAttribute()
+    {
+        if ($this->profile_image) {
+            return asset('storage/' . $this->profile_image);
+        }
+        return null;
     }
 }

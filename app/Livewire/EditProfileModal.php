@@ -12,6 +12,11 @@ class EditProfileModal extends Component
     use WithFileUploads;
 
     public $showModal = false;
+    public $name;
+    public $email;
+    public $password;
+    public $donor_type;
+    public $role_id;
     public $address;
     public $phone;
     public $states = [];
@@ -24,6 +29,11 @@ class EditProfileModal extends Component
     public $asCard = false;
 
     protected $rules = [
+        'name' => 'nullable|string|max:255',
+        'email' => 'nullable|email|max:255',
+        'password' => 'nullable|string|min:8',
+        'donor_type' => 'nullable|string|max:255',
+        'role_id' => 'nullable|integer',
         'address' => 'nullable|string|max:255',
         'phone' => 'nullable|string|max:255',
         'selectedState' => 'nullable|string|max:255',
@@ -36,6 +46,11 @@ class EditProfileModal extends Component
         $user = \Illuminate\Support\Facades\Auth::user();
         if (!$user) {
             // Not logged in, set defaults or skip loading user info
+            $this->name = '';
+            $this->email = '';
+            $this->password = '';
+            $this->donor_type = '';
+            $this->role_id = null;
             $this->address = '';
             $this->phone = '';
             $this->selectedState = '';
@@ -43,6 +58,14 @@ class EditProfileModal extends Component
             $this->current_photo = null;
             return;
         }
+        
+        // Load user data
+        $this->name = $user->name ?? '';
+        $this->email = $user->email ?? '';
+        $this->password = '';
+        $this->donor_type = $user->donor_type ?? '';
+        $this->role_id = $user->role_id ?? null;
+        
         // Load LGA.json
         $lgaJson = file_get_contents(public_path('LGA.json'));
         $lgaData = json_decode($lgaJson, true);
@@ -77,6 +100,29 @@ class EditProfileModal extends Component
     {
         $this->validate();
         $user = Auth::user();
+        
+        // Update user data
+        $userData = [];
+        if ($this->name) {
+            $userData['name'] = $this->name;
+        }
+        if ($this->email) {
+            $userData['email'] = $this->email;
+        }
+        if ($this->password) {
+            $userData['password'] = $this->password;
+        }
+        if ($this->donor_type !== null) {
+            $userData['donor_type'] = $this->donor_type;
+        }
+        if ($this->role_id !== null) {
+            $userData['role_id'] = $this->role_id;
+        }
+        if (!empty($userData)) {
+            $user->update($userData);
+        }
+        
+        // Update user info
         $userInfo = $user->userInfo;
         $data = [
             'address' => $this->address,

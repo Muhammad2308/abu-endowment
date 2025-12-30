@@ -5,7 +5,6 @@ namespace App\Livewire\Admin;
 use App\Models\Project;
 use Livewire\Component;
 use Livewire\WithPagination;
-// use Livewire\Attributes\On;
 
 class ProjectsManager extends Component
 {
@@ -13,14 +12,22 @@ class ProjectsManager extends Component
 
     public $search = '';
     public $perPage = 10;
+    public $statusFilter = 'active';
     public $showDonationsModal = false;
     public $showAddProjectModal = false;
     public $selectedProject = null;
     public $selectedDonations = [];
-    protected $listeners = ['project-added' => '$refresh'];
+    
+    protected $listeners = ['project-added' => 'refreshProjects'];
+    
+    public function refreshProjects()
+    {
+        $this->resetPage();
+    }
     protected $queryString = [
         'search' => ['except' => ''],
         'perPage' => ['except' => 10],
+        'statusFilter' => ['except' => ''],
     ];
 
     public function updatingSearch()
@@ -36,10 +43,15 @@ class ProjectsManager extends Component
 
     public function showDonations($projectId)
     {
-        $project = \App\Models\Project::find($projectId);
+        $project = \App\Models\Project::with('photos')->find($projectId);
         $this->selectedProject = $project;
         $this->selectedDonations = $project ? $project->donations()->with('donor')->orderBy('created_at', 'desc')->get() : [];
         $this->showDonationsModal = true;
+    }
+
+    public function editProject($projectId)
+    {
+        $this->dispatch('edit-project', projectId: $projectId);
     }
 
     public function showAddProjectModal()
@@ -52,12 +64,18 @@ class ProjectsManager extends Component
         $this->showAddProjectModal = false;
     }
 
+
     public function render()
     {
         $projects = Project::query()
             ->when($this->search, function ($query) {
-                $query->where('project_title', 'like', '%' . $this->search . '%')
+                $query->where(function($q) {
+                    $q->where('project_title', 'like', '%' . $this->search . '%')
                       ->orWhere('project_description', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->statusFilter, function ($query) {
+                $query->where('status', $this->statusFilter);
             })
             ->withCount('photos')
             ->orderBy('created_at', 'desc')

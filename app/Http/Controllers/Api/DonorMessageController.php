@@ -10,7 +10,7 @@ class DonorMessageController extends Controller
 {
     public function index(Donor $donor)
     {
-        $messages = Message::where('donor_id', $donor->id)
+        $messages = Message::where('receiver_id', $donor->id)
             ->orderBy('created_at', 'desc')
             ->get(['id', 'subject', 'message', 'created_at']);
 

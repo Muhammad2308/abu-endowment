@@ -10,6 +10,8 @@ class Donation extends Model
         'donor_id',
         'project_id',
         'amount',
+        'type',
+        'frequency',
         'endowment',
         'status',
         'payment_reference',

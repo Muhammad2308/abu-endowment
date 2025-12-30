@@ -26,4 +26,12 @@ class DeviceSession extends Model
     {
         return $this->belongsTo(Donor::class);
     }
+
+    /**
+     * Get all donor sessions associated with this device session.
+     */
+    public function donorSessions()
+    {
+        return $this->hasMany(DonorSession::class);
+    }
 } 
