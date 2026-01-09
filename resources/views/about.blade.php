@@ -26,29 +26,26 @@
 <body>
     <!-- Header -->
     @livewire('home.header-section')
+    
     @livewire('home.auth-modal')
     
-    <!-- Breadcrumb Area -->
-    <div class="bradcam_area breadcam_bg overlay d-flex align-items-center justify-content-center">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-12">
-                    <div class="bradcam_text text-center">
-                        <h3>About Us</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Hero Section -->
+    @livewire('home.about-hero')
 
     <!-- Reason Area -->
-    @livewire('home.reason-area')
+    @livewire('home.about-reason')
+
+    <!-- Core Values & History -->
+    @livewire('home.core-values')
+
+    <!-- Our Leadership -->
+    @livewire('home.our-leaders')
 
     <!-- Mission Section -->
-    @livewire('home.mission-section')
+    <!-- livewire('home.mission-section') -->
 
     <!-- Vision Section -->
-    @livewire('home.vision-section')
+    <!-- livewire('home.vision-section') -->
 
     <!-- Counter Area -->
     <!-- livewire('home.counter-area') -->
@@ -60,7 +57,7 @@
      </div>
 
     <!-- Project Donations Section -->
-    @livewire('home.project-donations')
+    <!-- livewire('home.project-donations') -->
 
     <!-- Footer -->
     @livewire('home.footer-area')

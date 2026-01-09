@@ -76,20 +76,7 @@
 
         <!-- Admin Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Faculty Management Card -->
-            <a href="{{ route('admin.faculty.index') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-                <div class="p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-university text-cyan-600 dark:text-cyan-400 text-3xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Faculty Management</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Manage faculties and visions</p>
-                        </div>
-                    </div>
-                </div>
-            </a>
+            <!-- Faculty Management Card Removed -->
 
             <!-- Department Management Card -->
             <a href="{{ route('admin.department.index') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">

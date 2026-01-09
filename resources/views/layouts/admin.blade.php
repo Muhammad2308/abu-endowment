@@ -187,24 +187,6 @@
                 <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
                     <nav class="mt-5 flex-1 px-2 space-y-1">
                         <!-- Dashboard -->
-                        <a href="{{ route('admin.dashboard') }}" 
-                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-                            <i class="fas fa-tachometer-alt mr-3 flex-shrink-0 h-5 w-5"></i>
-                            Dashboard
-                        </a>
-
-                        <!-- Faculty Management -->
-                        <a href="{{ route('admin.faculty.index') }}" 
-                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.faculty.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-                            <i class="fas fa-university mr-3 flex-shrink-0 h-5 w-5"></i>
-                            Faculties
-                        </a>
-
-                        <!-- Department Management -->
-                        <a href="{{ route('admin.department.index') }}" 
-                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.department.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-                            <i class="fas fa-building mr-3 flex-shrink-0 h-5 w-5"></i>
-                            Departments
                         </a>
 
                         <!-- Donor Management -->

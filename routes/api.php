@@ -160,6 +160,7 @@ Route::get('/test', function () {
 });
 
 // Public Faculty/Department data (no authentication required)
+Route::get('/departments', [\App\Http\Controllers\Api\DepartmentController::class, 'index']);
 Route::get('/faculties', [\App\Http\Controllers\Api\FacultyController::class, 'index']);
 
 // Statistics routes (public for admin dashboard)

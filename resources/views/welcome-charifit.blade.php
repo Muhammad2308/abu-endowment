@@ -9,6 +9,7 @@
     <livewire:home.slider-area />
     <livewire:home.reason-area />
     <livewire:home.project-donations />
+    <livewire:home.about />
     <livewire:home.latest-activities />
     <!-- <livewire:home.popular-causes /> -->
     <!-- <livewire:home.counter-area /> -->

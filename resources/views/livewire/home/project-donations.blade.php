@@ -4,7 +4,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
                 <div class="section_title text-center mb-5">
-                    <h3 style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">
+                    <h3 style="color: #064e3b; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">
                         Popular Projects
                     </h3>
                     <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">
@@ -18,73 +18,65 @@
         <div class="row">
             @forelse($projects as $project)
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="single_cause" style="border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.3s ease; border: none;">
-                    <div class="thumb" style="position: relative; overflow: hidden;">
+                @php
+                    $raised = floatval($project->raised ?? 0);
+                    $target = floatval($project->target ?? 0);
+                    $percentage = ($target > 0) ? round(($raised / $target) * 100, 1) : 0;
+                @endphp
+                <div class="single_cause" style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; height: 100%; display: flex; flex-direction: column;">
+                    <div class="thumb" style="position: relative; height: 220px; overflow: hidden;">
                         <img src="{{ $project->icon_image ? asset('storage/' . $project->icon_image) : asset('img/causes/1.png') }}" 
                              alt="{{ $project->project_title }}" 
                              wire:click.prevent="openImageGallery({{ $project->id }})" 
-                             style="cursor: pointer; width: 100%; height: 250px; object-fit: cover; transition: transform 0.5s ease;">
+                             style="cursor: pointer; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
                         
-                        <!-- Category Badge -->
-                        <div style="position: absolute; top: 15px; left: 15px;">
-                            <span class="badge badge-light" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 20px; background: rgba(255,255,255,0.95); color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                                {{ $project->category_id ? 'Infrastructure' : 'Education' }}
-                            </span>
+                        <!-- Need your support Badge -->
+                        <div style="position: absolute; top: 0; right: 0; background: #ff5722; color: white; padding: 6px 16px; font-size: 0.85rem; font-weight: 600; border-radius: 0 0 0 8px; z-index: 2;">
+                            Need your support
                         </div>
                         
-                        <!-- Progress Badge -->
-                        <div style="position: absolute; top: 15px; right: 15px;">
-                            @php
-                                $raised = floatval($project->raised ?? 0);
-                                $target = floatval($project->target ?? 0);
-                                $percentage = ($target > 0) ? round(($raised / $target) * 100, 1) : 0;
-                            @endphp
-                            <span class="badge" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 20px; background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: white; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">
-                                {{ $percentage }}%
-                            </span>
+                        <!-- Eye Icon Overlay -->
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); pointer-events: none;">
+                            <i class="fa fa-eye" style="color: #333; font-size: 1.2rem;"></i>
                         </div>
                     </div>
                     
-                    <div class="causes_content" style="padding: 1.5rem;">
+                    <div class="causes_content" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
                         <!-- Project Title -->
-                        <h4 style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 0.75rem; line-height: 1.4;">
+                        <h4 style="font-size: 1.1rem; font-weight: 700; color: #1f2937; margin-bottom: 20px; border-left: 4px solid #ff5722; padding-left: 15px; line-height: 1.4;">
                             {{ $project->project_title }}
                         </h4>
                         
+                        <!-- Stats Row -->
+                        <div class="d-flex justify-content-between align-items-center mb-2" style="font-size: 0.85rem; color: #6b7280;">
+                            <div>
+                                Raised: <span style="color: #374151; font-weight: 500;">₦{{ number_format($project->raised ?? 0, 2) }}</span>
+                            </div>
+                            <div>
+                                Goal: <span style="color: #374151; font-weight: 500;">₦{{ number_format($project->target ?? 0, 2) }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress mb-3" style="height: 8px; border-radius: 4px; background-color: #e5e7eb; overflow: hidden;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ min($percentage, 100) }}%; background-color: #2e7d32; border-radius: 4px;" 
+                                 aria-valuenow="{{ $percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        
                         <!-- Project Description -->
-                        <p style="color: #6b7280; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <p style="color: #6b7280; font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; flex: 1;">
                             {{ $project->project_description }}
                         </p>
-                        
-                        <!-- Progress Bar -->
-                        <div class="custom_progress_bar mb-3">
-                            <div class="progress" style="height: 8px; border-radius: 10px; background-color: #e5e7eb;">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: {{ min($percentage, 100) }}%; background: linear-gradient(90deg, #10b981 0%, #14b8a6 100%); border-radius: 10px; transition: width 0.5s ease;" 
-                                     aria-valuenow="{{ $percentage }}" 
-                                     aria-valuemin="0" 
-                                     aria-valuemax="100">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Raised and Goal -->
-                        <div class="balance d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <small class="text-muted d-block" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Raised</small>
-                                <span style="font-weight: 700; color: #10b981; font-size: 0.95rem;">₦{{ number_format($project->raised ?? 0, 2) }}</span>
-                            </div>
-                            <div class="text-right">
-                                <small class="text-muted d-block" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Goal</small>
-                                <span style="font-weight: 700; color: #1f2937; font-size: 0.95rem;">₦{{ number_format($project->target ?? 0, 2) }}</span>
-                            </div>
-                        </div>
                         
                         <!-- Donate Button -->
                         <button wire:click="openDonationModal({{ $project->id }})" 
                                 class="btn btn-block" 
-                                style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: white; font-weight: 600; padding: 12px; border-radius: 10px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(16,185,129,0.2);">
-                            Donate Now
+                                style="background-color: #2e7d32; color: white; font-weight: 600; padding: 12px; border-radius: 6px; border: none; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <i class="fas fa-hand-holding-usd"></i> Support this project
                         </button>
                     </div>
                 </div>
@@ -202,69 +194,377 @@
     </div>
     @endif
 
-    <!-- Image Gallery Modal (keeping existing functionality) -->
+    <!-- Detailed Project View Modal -->
     @if($showImageGallery && $galleryProject)
-    <div class="image-gallery-modal" id="imageGalleryModal" style="display: block;">
-        <div class="image-gallery-overlay" wire:click="closeImageGallery"></div>
-        <div class="image-gallery-container">
+    @php
+        $galleryPhotos = [];
+        // Add main project image
+        $galleryPhotos[] = [
+            'url' => $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png'),
+            'description' => $galleryProject->project_description,
+            'title' => $galleryProject->project_title
+        ];
+        // Add other photos
+        foreach($galleryProject->photos as $photo) {
+            $galleryPhotos[] = [
+                'url' => asset('storage/' . $photo->body_image),
+                'description' => $photo->description ?? '',
+                'title' => $photo->title ?? ''
+            ];
+        }
+    @endphp
+    <div class="project-details-modal" style="display: block;" 
+         x-data="{ 
+            activeIndex: 0,
+            showDesc: true,
+            photos: {{ json_encode($galleryPhotos) }}
+         }">
+        
+        <div class="project-details-overlay" wire:click="closeImageGallery"></div>
+        
+        <div class="project-details-container">
             <!-- Header -->
-            <div class="image-gallery-header">
-                <div class="gallery-title">
-                    <span>{{ $galleryProject->project_title }}</span>
-                    <span class="image-counter" id="imageCounter">Image 1 of {{ count($galleryProject->photos) + 1 }}</span>
+            <div class="project-details-header">
+                <div class="d-flex align-items-center">
+                    <div class="project-icon mr-3">
+                        <img src="{{ $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png') }}" alt="Icon">
+                    </div>
+                    <div>
+                        <h3 class="mb-0" style="font-weight: 700; font-size: 1.5rem; color: #064e3b;">{{ $galleryProject->project_title }}</h3>
+                        <span class="text-muted" style="font-size: 0.9rem;">{{ count($galleryProject->photos) + 1 }} Photos</span>
+                    </div>
                 </div>
-                <button type="button" class="gallery-close-btn" wire:click="closeImageGallery">
-                    <span>&times;</span>
+                <button type="button" class="close-btn" wire:click="closeImageGallery">
+                    <i class="fa fa-times"></i>
                 </button>
             </div>
 
-            <!-- Main Image Area -->
-            <div class="image-gallery-main">
-                <!-- Navigation Arrows -->
-                @if((count($galleryProject->photos) + 1) > 1)
-                <button class="gallery-nav-btn gallery-nav-prev" id="prevBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                <button class="gallery-nav-btn gallery-nav-next" id="nextBtn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-                @endif
+            <!-- Body -->
+            <div class="project-details-body">
+                <div class="row h-100">
+                    <!-- Left Column: Image Viewer -->
+                    <div class="col-lg-8 mb-4 mb-lg-0 d-flex flex-column">
+                        <!-- Main Image -->
+                        <div class="main-image-area mb-3 position-relative">
+                            <template x-if="photos.length > 0">
+                                <img :src="photos[activeIndex].url" class="main-image" :alt="photos[activeIndex].title">
+                            </template>
+                            
+                            <!-- Image Counter -->
+                            <div class="image-counter-badge">
+                                <span x-text="(activeIndex + 1) + ' / ' + photos.length"></span>
+                            </div>
 
-                <!-- Large Center Image -->
-                <div class="gallery-main-image-wrapper">
-                    <img id="mainGalleryImage" 
-                         src="{{ $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png') }}" 
-                         alt="{{ $galleryProject->project_title }}"
-                         class="gallery-main-image">
-                    
-                    <!-- Project Description Overlay -->
-                    <div class="gallery-description-overlay">
-                        <p class="gallery-description-text">{{ $galleryProject->project_description }}</p>
+                            <!-- Description Overlay -->
+                            <div class="image-desc-overlay" x-show="showDesc && (photos[activeIndex].title || photos[activeIndex].description)" x-transition>
+                                <button @click="showDesc = false" class="close-desc-btn"><i class="fa fa-times"></i></button>
+                                <h5 x-text="photos[activeIndex].title || 'Photo Details'"></h5>
+                                <p x-text="photos[activeIndex].description"></p>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnails -->
+                        <div class="thumbnails-strip">
+                            <template x-for="(photo, index) in photos" :key="index">
+                                <div class="thumbnail-item" 
+                                     :class="{'active': activeIndex === index}"
+                                     @click="activeIndex = index; showDesc = true">
+                                    <img :src="photo.url" alt="Thumbnail">
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Info -->
+                    <div class="col-lg-4">
+                        <div class="project-info-sidebar">
+                            <!-- Funding Status -->
+                            <div class="info-card mb-4">
+                                <h5 class="card-title">Funding Status</h5>
+                                <div class="progress-wrapper mb-3">
+                                    @php
+                                        $raised = floatval($galleryProject->raised ?? 0);
+                                        $target = floatval($galleryProject->target ?? 0);
+                                        $percentage = ($target > 0) ? round(($raised / $target) * 100, 1) : 0;
+                                    @endphp
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-success font-weight-bold">Raised</span>
+                                        <span class="text-muted">Target</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2 align-items-end">
+                                        <span class="h4 mb-0 text-success font-weight-bold">₦{{ number_format($raised) }}</span>
+                                        <span class="h6 mb-0 text-muted">₦{{ number_format($target) }}</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; border-radius: 5px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ min($percentage, 100) }}%"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2 small font-weight-bold">
+                                        <span class="text-success">{{ $percentage }}% Funded</span>
+                                        <span class="text-muted">₦{{ number_format(max(0, $target - $raised)) }} Remaining</span>
+                                    </div>
+                                </div>
+                                <button wire:click="openDonationModal({{ $galleryProject->id }})" class="btn btn-success btn-block rounded-pill font-weight-bold py-2">
+                                    Donate Now <i class="fa fa-heart ml-1"></i>
+                                </button>
+                            </div>
+
+                            <!-- About Project -->
+                            <div class="info-card">
+                                <h5 class="card-title">About This Project</h5>
+                                <div class="description-text">
+                                    {{ $galleryProject->project_description }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Thumbnail Navigation -->
-            <div class="image-gallery-thumbnails">
-                <!-- Icon Image Thumbnail -->
-                <div class="gallery-thumbnail active" data-image-index="0" data-image-src="{{ $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png') }}">
-                    <img src="{{ $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png') }}" alt="Main">
-                </div>
-                <!-- Project Photos Thumbnails -->
-                @foreach($galleryProject->photos as $index => $photo)
-                <div class="gallery-thumbnail" 
-                     data-image-index="{{ $index + 1 }}" 
-                     data-image-src="{{ asset('storage/' . $photo->body_image) }}">
-                    <img src="{{ asset('storage/' . $photo->body_image) }}" alt="Photo {{ $index + 1 }}">
-                </div>
-                @endforeach
-            </div>
         </div>
     </div>
+
+    <style>
+        .project-details-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .project-details-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+        }
+
+        .project-details-container {
+            position: relative;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 10001;
+            animation: modalSlideUp 0.3s ease-out;
+        }
+
+        @keyframes modalSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .project-details-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+
+        .project-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .project-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .close-btn {
+            background: #f3f4f6;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4b5563;
+        }
+
+        .close-btn:hover {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .project-details-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #f9fafb;
+        }
+
+        /* Image Viewer Styles */
+        .main-image-area {
+            width: 100%;
+            height: 500px;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .image-counter-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .image-desc-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .close-desc-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+        }
+
+        .image-desc-overlay h5 {
+            margin-bottom: 5px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .image-desc-overlay p {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .thumbnails-strip {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .thumbnail-item {
+            width: 80px;
+            height: 80px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .thumbnail-item:hover {
+            opacity: 1;
+        }
+
+        .thumbnail-item.active {
+            border-color: #10b981;
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Sidebar Styles */
+        .info-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f3f4f6;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecfdf5;
+            display: inline-block;
+        }
+
+        .description-text {
+            color: #4b5563;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        /* Scrollbar for thumbnails */
+        .thumbnails-strip::-webkit-scrollbar {
+            height: 6px;
+        }
+        .thumbnails-strip::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .thumbnails-strip::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 991px) {
+            .project-details-container {
+                height: 100%;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+            }
+            .main-image-area {
+                height: 300px;
+            }
+        }
+    </style>
     @endif
 
     <!-- Paystack Integration Script -->
@@ -284,7 +584,7 @@
                         console.log('Payment window closed.');
                     },
                     callback: function(response){
-                        Livewire.dispatch('payment-success', { reference: response.reference });
+                        Livewire.dispatch('project-payment-success', { reference: response.reference });
                     }
                 });
                 
@@ -319,375 +619,6 @@
                     setTimeout(() => toast.remove(), 300);
                 }, 5000);
             });
-
-            // Image Gallery Navigation
-            let currentImageIndex = 0;
-            let galleryImages = [];
-            let galleryInitialized = false;
-            let keyDownHandler = null;
-
-            function initImageGallery() {
-                if (galleryInitialized) return;
-                const modal = document.getElementById('imageGalleryModal');
-                if (!modal || modal.style.display === 'none') return;
-
-                const thumbnails = modal.querySelectorAll('.gallery-thumbnail');
-                const mainImage = document.getElementById('mainGalleryImage');
-                const prevBtn = document.getElementById('prevBtn');
-                const nextBtn = document.getElementById('nextBtn');
-                const imageCounter = document.getElementById('imageCounter');
-
-                if (!mainImage) return;
-
-                galleryImages = Array.from(thumbnails).map(thumb => ({
-                    src: thumb.dataset.imageSrc,
-                    index: parseInt(thumb.dataset.imageIndex)
-                }));
-
-                if (galleryImages.length === 0) {
-                    const mainImgSrc = mainImage.src;
-                    galleryImages = [{ src: mainImgSrc, index: 0 }];
-                }
-
-                currentImageIndex = 0;
-                updateMainImage();
-
-                thumbnails.forEach((thumb, index) => {
-                    thumb.addEventListener('click', () => {
-                        currentImageIndex = index;
-                        updateMainImage();
-                    });
-                });
-
-                if (prevBtn) {
-                    prevBtn.onclick = () => {
-                        currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-                        updateMainImage();
-                    };
-                }
-
-                if (nextBtn) {
-                    nextBtn.onclick = () => {
-                        currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-                        updateMainImage();
-                    };
-                }
-
-                keyDownHandler = (e) => {
-                    if (!modal || modal.style.display === 'none') return;
-                    
-                    if (e.key === 'ArrowLeft') {
-                        e.preventDefault();
-                        currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-                        updateMainImage();
-                    } else if (e.key === 'ArrowRight') {
-                        e.preventDefault();
-                        currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-                        updateMainImage();
-                    } else if (e.key === 'Escape') {
-                        e.preventDefault();
-                        @this.closeImageGallery();
-                        galleryInitialized = false;
-                        if (keyDownHandler) {
-                            document.removeEventListener('keydown', keyDownHandler);
-                            keyDownHandler = null;
-                        }
-                    }
-                };
-
-                document.addEventListener('keydown', keyDownHandler);
-                galleryInitialized = true;
-
-                function updateMainImage() {
-                    if (galleryImages.length === 0) return;
-
-                    const currentImage = galleryImages[currentImageIndex];
-                    if (mainImage && currentImage) {
-                        mainImage.src = currentImage.src;
-                    }
-
-                    thumbnails.forEach((thumb, index) => {
-                        thumb.classList.toggle('active', index === currentImageIndex);
-                    });
-
-                    if (imageCounter) {
-                        imageCounter.textContent = `Image ${currentImageIndex + 1} of ${galleryImages.length}`;
-                    }
-                }
-            }
-
-            Livewire.hook('morph.updated', ({ el }) => {
-                const modal = document.getElementById('imageGalleryModal');
-                if (!modal || modal.style.display === 'none') {
-                    galleryInitialized = false;
-                    if (keyDownHandler) {
-                        document.removeEventListener('keydown', keyDownHandler);
-                        keyDownHandler = null;
-                    }
-                } else if (modal.style.display === 'block' && !galleryInitialized) {
-                    setTimeout(() => {
-                        galleryInitialized = false;
-                        initImageGallery();
-                    }, 150);
-                }
-            });
         });
     </script>
-
-    <style>
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-
-        /* Card Hover Effects */
-        .single_cause:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-        }
-
-        .single_cause:hover .thumb img {
-            transform: scale(1.08);
-        }
-
-        /* Radio Button Styling */
-        input[type="radio"]:checked + label {
-            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%) !important;
-            color: white !important;
-            border-color: #10b981 !important;
-        }
-
-        /* Button Hover Effects */
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16,185,129,0.4) !important;
-        }
-
-        /* Image Gallery Modal Styles */
-        .image-gallery-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .image-gallery-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            cursor: pointer;
-        }
-
-        .image-gallery-container {
-            position: relative;
-            width: 95%;
-            max-width: 1400px;
-            height: 95vh;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            z-index: 10001;
-        }
-
-        .image-gallery-header {
-            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-            z-index: 10002;
-        }
-
-        .gallery-title {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .gallery-title span:first-child {
-            font-weight: 600;
-            font-size: 18px;
-        }
-
-        .image-counter {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .gallery-close-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 32px;
-            cursor: pointer;
-            padding: 0;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.3s ease;
-        }
-
-        .gallery-close-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .image-gallery-main {
-            flex: 1;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-            overflow: hidden;
-        }
-
-        .gallery-main-image-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .gallery-main-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: opacity 0.3s ease;
-        }
-
-        .gallery-description-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.5) 70%, transparent 100%);
-            padding: 40px 30px 30px;
-            color: white;
-        }
-
-        .gallery-description-text {
-            margin: 0;
-            font-size: 16px;
-            line-height: 1.6;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-
-        .gallery-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 10003;
-            transition: all 0.3s ease;
-            color: #333;
-        }
-
-        .gallery-nav-btn:hover {
-            background: white;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .gallery-nav-prev {
-            left: 20px;
-        }
-
-        .gallery-nav-next {
-            right: 20px;
-        }
-
-        .image-gallery-thumbnails {
-            display: flex;
-            gap: 10px;
-            padding: 15px 20px;
-            background: rgba(0, 0, 0, 0.8);
-            overflow-x: auto;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .gallery-thumbnail {
-            flex-shrink: 0;
-            width: 80px;
-            height: 80px;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.3s ease;
-            opacity: 0.6;
-        }
-
-        .gallery-thumbnail:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-
-        .gallery-thumbnail.active {
-            border-color: #10b981;
-            opacity: 1;
-            transform: scale(1.1);
-        }
-
-        .gallery-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        @media (max-width: 768px) {
-            .image-gallery-container {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
-            }
-
-            .gallery-nav-btn {
-                width: 40px;
-                height: 40px;
-            }
-
-            .gallery-nav-prev {
-                left: 10px;
-            }
-
-            .gallery-nav-next {
-                right: 10px;
-            }
-
-            .gallery-thumbnail {
-                width: 60px;
-                height: 60px;
-            }
-        }
-    </style>
 </div>

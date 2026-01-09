@@ -118,10 +118,15 @@ class MakeDonationArea extends Component
         ]);
     }
 
-    public function verifyPayment($reference)
+    public function verifyPayment($data = null)
     {
+        if (!$data) {
+            return;
+        }
+
         // Verify with Paystack via backend API or direct check
         // For simplicity and security, we'll verify here using the secret key
+        $reference = is_array($data) ? $data['reference'] : $data;
         
         try {
             $response = Http::withHeaders([

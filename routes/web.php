@@ -101,7 +101,7 @@ Route::prefix('admin')->group(function () {
         // The alumni upload is now a Livewire component on the dashboard
         
         // Faculty Management
-        Route::get('/faculty', [FacultyController::class, 'index'])->name('admin.faculty.index');
+
         
         // Department Management
         Route::get('/departments', [\App\Http\Controllers\Admin\DepartmentController::class, 'index'])->name('admin.department.index');

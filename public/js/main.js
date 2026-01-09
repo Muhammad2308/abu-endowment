@@ -113,10 +113,21 @@
     if (menu.length) {
         menu.slicknav({
             prependTo: ".mobile_menu",
-            closedSymbol: '+',
-            openedSymbol: '-'
+            closedSymbol: '<i class="fa fa-bars"></i>',
+            openedSymbol: '<i class="fa fa-times"></i>',
+            label: '', // Remove the "MENU" label
+            closeOnClick: true // Close menu when a link is clicked
         });
     };
+
+    // Click away to close menu
+    $(document).on('click', function (e) {
+        if (!$(e.target).closest('.slicknav_menu').length && !$(e.target).closest('.mobile_menu').length) {
+            $('.slicknav_nav').slideUp();
+            $('.slicknav_btn').removeClass('slicknav_open').addClass('slicknav_collapsed');
+            $('.slicknav_btn').attr('aria-expanded', 'false');
+        }
+    });
 
 })(jQuery);
 

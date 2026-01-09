@@ -33,7 +33,7 @@ class DonorsController extends Controller
         $donorType = $request->input('donor_type');
         
         $validationRules = [
-            'donor_type' => 'required|string|in:supporter,addressable_alumni,non_addressable_alumni,Individual,Organization,NGO',
+            'donor_type' => 'required|string|in:Alumni,Staff,Individual,Corporate,supporter,addressable_alumni,non_addressable_alumni,Organization,NGO',
             'name' => 'required|string|max:255', // ✅ Required when creating donor
             'surname' => 'required|string|max:255', // ✅ Required when creating donor
             'other_name' => 'nullable|string|max:255',
@@ -43,12 +43,17 @@ class DonorsController extends Controller
         ];
         
         // Add conditional validation based on donor type
-        if (in_array($donorType, ['addressable_alumni', 'non_addressable_alumni'])) {
-            $validationRules['reg_number'] = 'required|string|max:255|unique:donors,reg_number';
-            $validationRules['faculty_id'] = 'required|exists:faculties,id';
+        if ($donorType === 'Alumni') {
             $validationRules['department_id'] = 'required|exists:departments,id';
-            $validationRules['entry_year'] = 'nullable|integer|min:1950|max:' . date('Y');
-            $validationRules['graduation_year'] = 'nullable|integer|min:1950|max:' . date('Y');
+            $validationRules['entry_year'] = 'required|integer|min:1950|max:' . date('Y');
+            $validationRules['graduation_year'] = 'required|integer|min:1950|max:' . date('Y');
+            $validationRules['reg_number'] = 'nullable|string|max:255|unique:donors,reg_number';
+
+        } elseif ($donorType === 'Staff') {
+            $validationRules['department_id'] = 'required|exists:departments,id';
+
+        } elseif ($donorType === 'Corporate') {
+            $validationRules['organization_name'] = 'required|string|max:255';
         } else {
             $validationRules['reg_number'] = 'nullable|string|max:255';
             $validationRules['faculty_id'] = 'nullable|exists:faculties,id';
@@ -109,7 +114,25 @@ class DonorsController extends Controller
 
             // Create donor
             $donor = Donor::create($donorData);
-            $this->linkDonorToSession($donor, $request->input('session_id'), $donor->email);
+            // Handle session for auto-login
+            $session = null;
+            if ($request->input('session_id')) {
+                $session = DonorSession::find($request->input('session_id'));
+                if ($session) {
+                    $session->update(['donor_id' => $donor->id]);
+                }
+            }
+            
+            // If no session exists (or not provided), create one
+            if (!$session) {
+                $session = DonorSession::create([
+                    'donor_id' => $donor->id,
+                    'username' => $donor->email,
+                    'is_active' => true,
+                    'last_login_at' => now(),
+                    'expires_at' => now()->addDays(30),
+                ]);
+            }
             
             Log::info('Donor created successfully', [
                 'donor_id' => $donor->id,
@@ -121,7 +144,10 @@ class DonorsController extends Controller
 
             return response()->json([
                 'message' => 'Registration successful!',
-                'donor' => new DonorResource($donor)
+                'donor' => new DonorResource($donor),
+                'session_id' => $session->id,
+                'username' => $session->username,
+                'auth_token' => $session->id,
             ], 201);
         } catch (\Exception $e) {
             Log::error('Donor registration error: ' . $e->getMessage());

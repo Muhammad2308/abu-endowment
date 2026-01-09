@@ -1,160 +1,198 @@
 <header>
-    <div class="header-area ">
-        <div class="header-top_area">
+    <div class="header-area">
+        <!-- Top Bar -->
+        <div class="header-top-bar" style="background: #fff; padding: 10px 0; border-bottom: 1px solid #eee;">
             <div class="container-fluid">
-                <div class="row">
-                    <div class="col-xl-6 col-md-12 col-lg-8">
-                        <div class="short_contact_list">
-                            <ul>
-                                <li><a href="#"><i class="fa fa-phone"></i> +234 (454) 556-5656</a></li>
-                                <li><a href="#"><i class="fa fa-envelope"></i>abuendowment@gmail.com</a></li>
-                            </ul>
+                <div class="row align-items-center">
+                    <div class="col-lg-6 d-none d-lg-block">
+                        <div class="top-bar-left d-flex align-items-center" style="gap: 25px;">
+                            <a href="tel:+2344545565656" style="color: #064e3b; font-size: 13px; font-weight: 500; text-decoration: none;">
+                                <i class="fa fa-phone mr-2"></i> +234 (454) 556-5656
+                            </a>
+                            <a href="mailto:abuendowment@gmail.com" style="color: #064e3b; font-size: 13px; font-weight: 500; text-decoration: none;">
+                                <i class="fa fa-envelope mr-2"></i> abuendowment@gmail.com
+                            </a>
                         </div>
                     </div>
-                    <div class="col-xl-6 col-md-6 col-lg-4">
-                        <div class="social_media_links d-none d-lg-block">
-                            <a href="#">
-                                <i class="fa fa-facebook"></i>
-                            </a>
-                            <a href="#">
-                                <i class="fa fa-pinterest-p"></i>
-                            </a>
-                            <a href="#">
-                                <i class="fa fa-linkedin"></i>
-                            </a>
-                            <a href="#">
-                                <i class="fa fa-twitter"></i>
-                            </a>
+                    <div class="col-lg-6 col-md-12">
+                        <div class="top-bar-right d-flex align-items-center justify-content-end" style="gap: 20px;">
+                            <div class="social-icons d-flex align-items-center" style="gap: 15px;">
+                                <a href="#" style="color: #064e3b;"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" style="color: #064e3b;"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#" style="color: #064e3b;"><i class="fab fa-twitter"></i></a>
+                            </div>
+                            <div class="language-selector">
+                                <a href="#" style="color: #064e3b; font-size: 13px; font-weight: 500; text-decoration: none;">
+                                    <i class="fa fa-globe mr-1"></i> ENG <i class="fa fa-chevron-down ml-1" style="font-size: 10px;"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div id="sticky-header" class="main-header-area">
+
+        <!-- Main Header -->
+        <div id="sticky-header" class="main-header-area" style="background: #1b6b38; padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
             <div class="container-fluid">
                 <div class="row align-items-center">
-                    <div class="col-xl-3 col-lg-3">
+                    <!-- Logo Section -->
+                    <div class="col-6 col-lg-3">
                         <div class="logo">
                             <a href="{{ url('/') }}" class="d-flex align-items-center" style="text-decoration: none;">
-                                <img src="{{ asset('img/abu_logo_white.png') }}" alt="ABU Endowment" style="height: 50px; width: auto; margin-right: 12px;">
+                                <img src="{{ asset('abu_logo.png') }}" alt="ABU Endowment" style="height: 50px; width: auto; margin-right: 15px; filter: brightness(0) invert(1);">
                                 <div class="logo-text" style="display: flex; flex-direction: column; line-height: 1.2;">
-                                    <span style="font-size: 18px; font-weight: 600; color: #fff;">ABU Endowment</span>
-                                    <span style="font-size: 14px; font-weight: 400; color: #fff;">& Crowd Funding</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">ABU Endowment</span>
+                                    <span style="font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.9); letter-spacing: 0.5px;">& Crowd Funding</span>
                                 </div>
                             </a>
                         </div>
                     </div>
-                    <div class="col-xl-9 col-lg-9">
-                        <div class="main-menu">
+
+                    <!-- Menu Section (Desktop) -->
+                    <div class="col-lg-9 d-none d-lg-block">
+                        <div class="main-menu d-flex align-items-center justify-content-end">
                             <nav>
-                                <ul id="navigation">
-                                    <li><a href="{{ url('/') }}">home</a></li>
+                                <ul id="navigation" class="d-flex align-items-center" style="gap: 40px; margin: 0;">
+                                    <li><a href="{{ url('/') }}">Home</a></li>
                                     <li><a href="{{ route('about') }}">About</a></li>
-                                    <!-- <li><a href="#">blog <i class="ti-angle-down"></i></a>
-                                        <ul class="submenu">
-                                            <li><a href="#">blog</a></li>
-                                            <li><a href="#">single-blog</a></li>
-                                        </ul>
-                                    </li> -->
-                                    <!-- <li><a href="#">pages <i class="ti-angle-down"></i></a>
-                                        <ul class="submenu">
-                                            <li><a href="#">elements</a></li>
-                                            <li><a href="#">Cause</a></li>
-                                        </ul>
-                                    </li> -->
-                                    <li><a href="#">Contact</a></li>
-                                    <li class="d-lg-none"><a href="#make-donation">Make a Donation</a></li>
+                                    <li><a href="#">Contact us</a></li>
                                     
-                                    <!-- Authentication Section -->
-                                    <!-- Authentication Section -->
-                                    <li id="authSection" class="d-lg-none">
-                                        @if(!$isLoggedIn)
-                                        <!-- Not Logged In (Mobile) -->
-                                        <div>
-                                            <a href="#" wire:click.prevent="$dispatch('openLoginModal')">Sign In</a>
-                                        </div>
-                                        @else
-                                        <!-- Logged In (Mobile) -->
-                                        <div>
-                                            <a href="#"><i class="fa fa-user"></i> {{ $user['name'] ?? 'User' }} <i class="ti-angle-down"></i></a>
-                                            <ul class="submenu">
-                                                <li><a href="#" wire:click.prevent="$dispatch('openEditProfileModal')"><i class="fa fa-user-edit"></i> Edit Profile</a></li>
-                                                <li><a href="#" wire:click.prevent="logout"><i class="fa fa-sign-out-alt"></i> Logout</a></li>
-                                            </ul>
-                                        </div>
-                                        @endif
-                                    </li>
+                                    <!-- Mobile Only Items -->
+                                    <li class="d-lg-none"><a href="#make-donation">Make Donation</a></li>
+                                    @if(!$isLoggedIn)
+                                        <li class="d-lg-none"><a href="#" wire:click.prevent="$dispatch('openLoginModal')">Sign In</a></li>
+                                    @else
+                                        <li class="d-lg-none"><a href="#" wire:click.prevent="logout">Logout</a></li>
+                                    @endif
                                 </ul>
                             </nav>
-                            <div class="Appointment">
-                                <!-- Desktop Authentication -->
-                                <div class="d-none d-lg-flex align-items-center" style="gap: 10px;">
-                                    @if(!$isLoggedIn)
-                                    <!-- Not Logged In -->
-                                    <div>
-                                        <a href="#" class="boxed-btn3-white" 
-                                           wire:click.prevent="$dispatch('openLoginModal')" 
-                                           style="padding: 10px 25px; font-size: 14px; cursor: pointer;">
-                                            <i class="fa fa-sign-in-alt"></i> Sign In
-                                        </a>
-                                    </div>
-                                    @else
-                                    <!-- Logged In -->
-                                    <div class="dropdown" style="position: relative;">
-                                        <a href="#" class="user-dropdown-toggle d-flex align-items-center" 
-                                           id="userDropdown" 
-                                           data-toggle="dropdown" 
-                                           aria-haspopup="true" 
-                                           aria-expanded="false"
-                                           style="color: #fff; text-decoration: none; gap: 10px; padding: 5px 15px; background: rgba(255,255,255,0.1); border-radius: 50px; transition: all 0.3s;">
-                                            
+
+                            <!-- Desktop Actions -->
+                            <div class="header-right-btn d-flex align-items-center ml-5" style="gap: 15px;">
+                                <!-- Auth Section -->
+                                @if(!$isLoggedIn)
+                                    <a href="#" wire:click.prevent="$dispatch('openLoginModal')" 
+                                       class="btn header-btn-outline">
+                                        <i class="fa fa-user mr-2"></i> Sign in
+                                    </a>
+                                @else
+                                    <div class="dropdown">
+                                        <a href="#" class="d-flex align-items-center" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="text-decoration: none; cursor: pointer; color: #fff;">
                                             @if(isset($user['avatar']) && $user['avatar'])
-                                                <img src="{{ $user['avatar'] }}" alt="User" 
-                                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #fff;">
+                                                <img src="{{ $user['avatar'] }}" alt="User" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #fff;">
                                             @else
-                                                <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; color: #3CC78F; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                                                    <i class="fa fa-user"></i>
+                                                <div style="width: 35px; height: 35px; border-radius: 50%; background: rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.5);">
+                                                    <i class="fa fa-user" style="font-size: 14px;"></i>
                                                 </div>
                                             @endif
-                                            
-                                            <div class="d-flex flex-column" style="line-height: 1.2;">
-                                                <span style="font-size: 14px; font-weight: 600;">{{ $user['name'] ?? 'User' }}</span>
-                                                <i class="fa fa-chevron-down" style="font-size: 10px; opacity: 0.7;"></i>
-                                            </div>
+                                            <span class="ml-2 font-weight-bold">{{ $user['name'] ?? 'User' }}</span>
                                         </a>
-
-                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" 
-                                             style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); min-width: 220px; padding: 10px; margin-top: 10px;">
-                                            
-                                            <div class="px-3 py-2 border-bottom mb-2">
-                                                <small class="text-muted d-block">Signed in as</small>
-                                                <strong class="text-dark text-truncate d-block" style="max-width: 180px;">{{ $user['email'] ?? '' }}</strong>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" style="border-radius: 0px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 10px;">
+                                            <div class="px-3 py-2 border-bottom">
+                                                <small class="text-muted">{{ $user['email'] ?? '' }}</small>
                                             </div>
-
-                                            <a class="dropdown-item rounded-lg py-2" href="#" wire:click.prevent="$dispatch('openEditProfileModal')">
-                                                <i class="fa fa-user-edit mr-2 text-primary"></i> Edit Profile
-                                            </a>
-                                            
-                                            <div class="dropdown-divider"></div>
-                                            
-                                            <a class="dropdown-item rounded-lg py-2 text-danger" href="#" wire:click.prevent="logout">
-                                                <i class="fa fa-sign-out-alt mr-2"></i> Logout
-                                            </a>
+                                            <a class="dropdown-item py-2" href="#" wire:click.prevent="$dispatch('openEditProfileModal')">Profile</a>
+                                            <a class="dropdown-item py-2 text-danger" href="#" wire:click.prevent="logout">Logout</a>
                                         </div>
                                     </div>
-                                    @endif
-                                </div>
-                                <div class="book_btn d-none d-lg-block" style="margin-left: 10px;">
-                                    <a data-scroll-nav="1" href="#make-donation">Make a Donation</a>
-                                </div>
+                                @endif
+
+                                <!-- Donate Button -->
+                                <a data-scroll-nav="1" href="#make-donation" class="btn header-btn-fill">
+                                    <i class="fa fa-heart mr-2"></i> Make Donation
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-12">
-                        <div class="mobile_menu d-block d-lg-none"></div>
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <div class="col-6 d-lg-none">
+                        <div class="mobile_menu d-flex justify-content-end"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <style>
+        /* Desktop Menu Links */
+        #navigation li a {
+            color: #fff;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        /* Mobile Menu Fixes */
+        .slicknav_nav {
+            background: #fff;
+            margin-top: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .slicknav_nav a {
+            color: #333 !important; /* Force dark color for mobile menu links */
+            margin: 0;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .slicknav_nav a:hover {
+            background: #f9fafb;
+            color: #1b6b38 !important;
+        }
+        
+        /* Hamburger Menu Alignment */
+        .slicknav_menu {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+        .slicknav_btn {
+            margin: 5px 0 0 0;
+            background-color: transparent;
+            float: right;
+        }
+        .slicknav_icon-bar {
+            background-color: #fff !important; /* White hamburger lines */
+            height: 3px;
+            margin-bottom: 4px;
+        }
+        
+        /* Remove Rounded Edges Globally for Header Elements */
+        .header-area, 
+        .main-header-area, 
+        .header-btn-outline, 
+        .header-btn-fill,
+        .slicknav_nav,
+        .dropdown-menu {
+            border-radius: 0px !important;
+        }
+
+        /* Button Styles */
+        .header-btn-outline {
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 10px 30px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .header-btn-outline:hover {
+            background: #fff;
+            color: #1b6b38;
+        }
+        
+        .header-btn-fill {
+            background-color: #fff;
+            color: #1b6b38;
+            border: none;
+            padding: 10px 30px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .header-btn-fill:hover {
+            background-color: #f0fdf4;
+        }
+    </style>
 </header>

@@ -112,6 +112,71 @@
             color: #999;
         }
     </style>
+    <!-- Toast Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+    <script>
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-notification ${type}`;
+            toast.style.cssText = `
+                background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 300px;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+            
+            toast.innerHTML = `
+                <i class="fa ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span style="font-weight: 500;">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(0)';
+            });
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        document.addEventListener('livewire:initialized', () => {
+            Livewire.on('show-toast', (data) => {
+                const toastData = Array.isArray(data) ? data[0] : data;
+                showToast(toastData.message, toastData.type);
+            });
+        });
+
+        // Check for session flash messages
+        @if(session('message'))
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast("{{ session('message') }}", 'success');
+            });
+        @endif
+        
+        @if(session('error'))
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast("{{ session('error') }}", 'error');
+            });
+        @endif
+    </script>
 </body>
 
 </html>

@@ -29,7 +29,7 @@ class ProjectDonations extends Component
     public $name;
     public $phone;
     
-    protected $listeners = ['payment-success' => 'verifyPayment'];
+    protected $listeners = ['project-payment-success' => 'verifyPayment'];
 
     public function mount()
     {
@@ -39,6 +39,19 @@ class ProjectDonations extends Component
 
     public function loadProjects()
     {
+        // Recalculate raised amount for all projects
+        $allProjects = Project::all();
+        foreach ($allProjects as $project) {
+            $totalRaised = Donation::where('project_id', $project->id)
+                                   ->where('status', 'completed')
+                                   ->sum('amount');
+            
+            if ($project->raised != $totalRaised) {
+                $project->raised = $totalRaised;
+                $project->save();
+            }
+        }
+
         // Load projects from database
         $this->projects = Project::with('photos')->get();
     }
@@ -145,7 +158,7 @@ class ProjectDonations extends Component
         ]);
 
         // Close modal before opening Paystack
-        $this->showModal = false;
+        // $this->showModal = false; // Kept open to show progress/wait for completion
         
         // Dispatch event to frontend to open Paystack
         $this->dispatch('initiate-paystack', [
@@ -169,8 +182,12 @@ class ProjectDonations extends Component
         ]);
     }
 
-    public function verifyPayment($data)
+    public function verifyPayment($data = null)
     {
+        if (!$data) {
+            return;
+        }
+
         $reference = is_array($data) ? $data['reference'] : $data;
         
         try {
@@ -184,21 +201,32 @@ class ProjectDonations extends Component
                 if ($paymentData['status'] === 'success') {
                     $donation = Donation::where('payment_reference', $reference)->first();
                     
-                    if ($donation) {
+                    if ($donation && $donation->status !== 'completed') {
                         $donation->update([
                             'status' => 'completed',
                             'verified_at' => now(),
                             'paid_at' => now(),
                         ]);
+
+                        // Update Project Raised Amount - Recalculate total from donations table
+                        if ($donation->project_id) {
+                            $project = Project::find($donation->project_id);
+                            if ($project) {
+                                $totalRaised = Donation::where('project_id', $project->id)
+                                                       ->where('status', 'completed')
+                                                       ->sum('amount');
+                                $project->update(['raised' => $totalRaised]);
+                            }
+                        }
                         
-                        // Dispatch success event for toast notification
-                        $this->dispatch('show-toast', [
-                            'type' => 'success',
-                            'message' => 'Thank you for your donation! Your support means the world to us.'
-                        ]);
+                        // Close the modal
+                        $this->showModal = false;
                         
-                        // Reload projects to update raised amounts
-                        $this->loadProjects();
+                        // Flash success message for toast
+                        session()->flash('message', 'Thank you for your donation! Your support means the world to us.');
+                        
+                        // Redirect to home page
+                        return redirect()->to('/');
                     }
                 } else {
                     $this->dispatch('show-toast', [

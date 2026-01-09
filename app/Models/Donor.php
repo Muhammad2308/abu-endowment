@@ -25,6 +25,7 @@ class Donor extends Model
         'entry_year',
         'graduation_year',
         'donor_type',
+        'organization_name',
         'ranking',
         'faculty_id',
         'department_id',
