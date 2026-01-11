@@ -91,6 +91,16 @@
             @endforelse
         </div>
 
+        @if($limit)
+        <div class="row justify-content-center mt-4">
+            <div class="col-auto">
+                <a href="{{ route('projects') }}" class="btn btn-outline-success rounded-pill px-5 py-3 font-weight-bold shadow-sm" style="border-width: 2px; transition: all 0.3s ease;">
+                    Preview More Projects <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+        @endif
+
         <!-- Bottom CTA -->
         <div class="row mt-5">
             <div class="col-12 text-center">

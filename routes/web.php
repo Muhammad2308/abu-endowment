@@ -79,6 +79,9 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 // About page
 Route::get('/about', [\App\Http\Controllers\AboutController::class, 'index'])->name('about');
 
+// Projects page
+Route::view('/projects', 'projects')->name('projects');
+
 // Admin root route - redirect based on authentication status
 Route::get('/admin', function () {
     if (auth()->check()) {
