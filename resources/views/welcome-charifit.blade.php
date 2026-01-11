@@ -8,7 +8,7 @@
 
     <livewire:home.slider-area />
     <livewire:home.reason-area />
-    <livewire:home.project-donations />
+    <livewire:home.project-donations :limit="3" />
     <livewire:home.about />
     <livewire:home.latest-activities />
     <!-- <livewire:home.popular-causes /> -->
