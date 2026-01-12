@@ -3,9 +3,9 @@
     position: absolute;
     left: -9999px;
 }
-[type="radio"]:checked + label,
-[type="radio"]:not(:checked) + label
-{
+
+[type="radio"]:checked+label,
+[type="radio"]:not(:checked)+label {
     position: relative;
     padding-left: 20px;
     cursor: pointer;
@@ -14,8 +14,9 @@
     color: #666;
     margin-bottom: 0;
 }
-[type="radio"]:checked + label:before,
-[type="radio"]:not(:checked) + label:before {
+
+[type="radio"]:checked+label:before,
+[type="radio"]:not(:checked)+label:before {
     content: '';
     position: absolute;
     left: 0;
@@ -27,14 +28,15 @@
     background: #fff;
     top: 50%;
 
-transform: translateY(-50%);
+    transform: translateY(-50%);
 }
-[type="radio"]:checked + label:after,
-[type="radio"]:not(:checked) + label:after {
+
+[type="radio"]:checked+label:after,
+[type="radio"]:not(:checked)+label:after {
     content: '';
     width: 8px;
-    height:8px;
-    background: #3CC78F;
+    height: 8px;
+    background: #227722;
     position: absolute;
     top: 4px;
     left: 2px;
@@ -42,25 +44,28 @@ transform: translateY(-50%);
     -webkit-transition: all 0.2s ease;
     transition: all 0.2s ease;
 }
-[type="radio"]:not(:checked) + label:after {
+
+[type="radio"]:not(:checked)+label:after {
     opacity: 0;
     -webkit-transform: scale(0);
-    transform: scale(0) ;
+    transform: scale(0);
 }
-[type="radio"]:checked + label:after {
+
+[type="radio"]:checked+label:after {
     opacity: 1;
     -webkit-transform: scale(1);
 }
 
-.make_donation_area{
-    .donation_form{
-        .input_field{
+.make_donation_area {
+    .donation_form {
+        .input_field {
             .input-group {
                 width: 100%;
                 border: 1px solid #3CC78F;
                 border-radius: 7px;
                 padding: 5px 10px;
-                @include box-shadow(0 3px 6px rgba(0, 0, 0,.16));
+                @include box-shadow(0 3px 6px rgba(0, 0, 0, .16));
+
                 .input-group-text {
                     font-size: 16px;
                     background: transparent;
@@ -68,6 +73,7 @@ transform: translateY(-50%);
                     font-family: $font2;
                     font-weight: 400;
                 }
+
                 .form-control {
                     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
                     border-bottom: 0;
@@ -79,58 +85,66 @@ transform: translateY(-50%);
                     font-family: $font2;
                     font-size: 16px;
                     color: #000;
-                    &::placeholder{
+
+                    &::placeholder {
                         font-size: 16px;
                         color: #7A7B7C;
                         font-family: $font2;
                         font-weight: 400;
                     }
-                    &:focus{
+
+                    &:focus {
                         outline: none;
                         box-shadow: none;
                     }
                 }
             }
         }
-        .single_amount{
-            .fixed_donat{
-                @include box-shadow(0 3px 6px rgba(0, 0, 0,.16));
+
+        .single_amount {
+            .fixed_donat {
+                @include box-shadow(0 3px 6px rgba(0, 0, 0, .16));
                 padding: 18px 27px;
                 border-radius: 7px;
                 border: 1px solid#3CC78F;
                 display: block;
                 overflow: hidden;
+
                 @media #{$mobile_device} {
                     display: block !important;
                     margin-top: 15px;
                 }
-                .select_prise{
-                    h4{
+
+                .select_prise {
+                    h4 {
                         font-size: 16px;
                         font-family: $font2;
                         color: #7A7B7C;
                         margin-bottom: 0;
                     }
                 }
-                .single_doonate{
-                    label{
+
+                .single_doonate {
+                    label {
                         font-family: $font2;
                         font-size: 16px;
                         font-weight: 400;
                         color: #7A7B7C;
                         margin-bottom: 0;
                     }
+
                     @media #{$mobile_device} {
                         width: 33.33%;
                         float: left;
                         margin-top: 15px;
-                        
+
                     }
                 }
             }
         }
     }
-    .donate_now_btn{
+
+    .donate_now_btn {
         margin-top: 50px;
     }
 }
