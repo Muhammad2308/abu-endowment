@@ -3,7 +3,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-6">
                 <div class="section_title text-center mb-55">
-                    <h3><span>Make a Donation</span></h3>
+                    <!-- <h3><span>Make a Donation</span></h3> -->
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-12 mb-4">
                             <div class="single_amount">
-                                <div class="input_field">
+                                <!-- <div class="input_field">
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fa fa-envelope"></i></span>
@@ -33,13 +33,13 @@
                                         <input type="email" wire:model="email" class="form-control" placeholder="Email Address" required>
                                     </div>
                                     @error('email') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
                         <div class="col-md-4">
                             <div class="single_amount">
-                                <div class="input_field">
+                                <!-- <div class="input_field">
                                     <div class="input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text" id="basic-addon1">₦</span>
@@ -47,12 +47,12 @@
                                         <input type="number" wire:model.live="customAmount" class="form-control" placeholder="Custom Amount" aria-label="Amount">
                                     </div>
                                     @error('amount') <span class="text-danger small">{{ $message }}</span> @enderror
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="col-md-8">
                             <div class="single_amount">
-                                <div class="fixed_donat d-flex align-items-center justify-content-between flex-wrap">
+                                <!-- <div class="fixed_donat d-flex align-items-center justify-content-between flex-wrap">
                                     <div class="select_prise">
                                         <h4>Select Amount:</h4>
                                     </div>
@@ -72,7 +72,7 @@
                                         <input type="radio" id="Other" wire:model.live="selectedAmount" value="custom">
                                         <label for="Other">Other</label>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                     <div class="row mt-4">
                         <div class="col-12">
                             <div class="donate_now_btn text-center">
-                                <button type="submit" class="boxed-btn4">
+                                <button type="submit" class="boxed-btn4 custom-green">
                                     Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
                                 </button>
                             </div>

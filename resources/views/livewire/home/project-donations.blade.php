@@ -116,12 +116,12 @@
 
     <!-- Donation Modal -->
     @if($showModal && $selectedProject)
-    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background: rgba(23, 23, 23, 0.66);">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
                 <!-- Modal Header -->
-                <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border: none; padding: 1.5rem;">
-                    <h5 class="modal-title text-white font-weight-bold">Donate to {{ $selectedProject->project_title }}</h5>
+                <div class="modal-header" style="background: linear-gradient(135deg, #227722 0%, #227722 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(4, 63, 44, 0.3);">
+                    <h3 class="modal-title text-white font-weight-bold">Donate to {{ $selectedProject->project_title }}</h3>
                     <button type="button" class="close text-white" wire:click="closeModal" style="opacity: 1;">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -151,25 +151,25 @@
                             <div class="row no-gutters mb-3" style="gap: 0.5rem;">
                                 <div class="col">
                                     <input type="radio" id="modal_blns_1" wire:model.live="selectedAmount" value="1000" class="d-none">
-                                    <label for="modal_blns_1" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                    <label for="modal_blns_1" class="btn btn-outline-success btn-block mb-0" style="background: linear-gradient(135deg, #227722 0%, #227722 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(4, 63, 44, 0.3);">
                                         1k
                                     </label>
                                 </div>
                                 <div class="col">
                                     <input type="radio" id="modal_blns_2" wire:model.live="selectedAmount" value="5000" class="d-none">
-                                    <label for="modal_blns_2" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                    <label for="modal_blns_2" class="btn btn-outline-success btn-block mb-0" style="background: linear-gradient(135deg, #227722 0%, #227722 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(4, 63, 44, 0.3);">
                                         5k
                                     </label>
                                 </div>
                                 <div class="col">
                                     <input type="radio" id="modal_blns_3" wire:model.live="selectedAmount" value="10000" class="d-none">
-                                    <label for="modal_blns_3" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                        10k
+                                    <label for="modal_blns_3" class="btn btn-outline-success btn-block mb-0" style="background: linear-gradient(135deg, #227722 0%, #227722 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(4, 63, 44, 0.3);">
+                                       10k
                                     </label>
                                 </div>
                                 <div class="col">
                                     <input type="radio" id="modal_Other" wire:model.live="selectedAmount" value="custom" class="d-none">
-                                    <label for="modal_Other" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                   <label for="modal_Other" class="btn btn-outline-success btn-block mb-0" style="background: linear-gradient(135deg, #227722 0%, #227722 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(4, 63, 44, 0.3);">
                                         Other
                                     </label>
                                 </div>
@@ -193,7 +193,7 @@
 
                         <!-- Submit Button -->
                         <button type="submit" class="btn btn-block btn-lg" 
-                                style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                                style="background: linear-gradient(135deg, #227722 0%, #227722 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(4, 63, 44, 0.3);">
                             Donate ₦{{ number_format($amount, 2) }}
                             <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
                         </button>
