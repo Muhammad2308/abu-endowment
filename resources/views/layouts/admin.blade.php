@@ -8,6 +8,21 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -22,160 +37,220 @@
     @livewireStyles
     
     <style>
-        /* Ensure dropdowns appear above all other content */
-        .dropdown-menu, [x-show] {
-            z-index: 9999 !important;
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-        
-        /* Smooth transitions for sidebar navigation */
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Sidebar Active State */
+        .nav-link.active {
+            background-color: #10b981;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06);
+        }
         .nav-link {
             transition: all 0.2s ease-in-out;
         }
-        
-        /* Custom scrollbar for sidebar */
-        .overflow-y-auto::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        .overflow-y-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        
-        .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
-        }
-        
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-        
-        /* Dark mode scrollbar */
-        .dark .overflow-y-auto::-webkit-scrollbar-track {
-            background: #374151;
-        }
-        
-        .dark .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #6b7280;
-        }
-        
-        .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+        .nav-link:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
         }
 
-        /* Trix Editor Dark Mode - Global Inversion Fix */
-        .dark trix-toolbar {
-            background-color: #ffffff !important;
-            filter: invert(1) hue-rotate(180deg) !important;
-            border-radius: 0.5rem !important;
-            padding: 0.25rem !important;
-            margin-bottom: 0.5rem !important;
-        }
-        .dark trix-toolbar .trix-button-group {
-            border: 1px solid #e5e7eb !important;
-            background-color: #ffffff !important;
-        }
+        /* Trix Editor Dark Mode Support */
         .dark trix-toolbar .trix-button {
-            background-color: #ffffff !important;
-            border-right: 1px solid #e5e7eb !important;
-        }
-        .dark trix-toolbar .trix-button:hover {
-            background-color: #f3f4f6 !important;
-        }
-        .dark trix-toolbar .trix-button--active {
-            background-color: #e5e7eb !important;
+            background-color: #f3f4f6;
         }
         .dark trix-editor {
-            color: #f3f4f6 !important;
-            background-color: #1f2937 !important;
-            border: 1px solid #374151 !important;
-        }
-        .dark trix-editor:focus {
-            border-color: #6366f1 !important;
-        }
-        .dark .trix-content {
-            color: #f3f4f6 !important;
-        }
-        .dark trix-toolbar .trix-dialog {
-            filter: invert(1) hue-rotate(180deg) !important;
-            background-color: #374151 !important;
-            border: 1px solid #4b5563 !important;
-            color: #f3f4f6 !important;
-        }
-        .dark trix-toolbar .trix-dialog input {
-            background-color: #1f2937 !important;
-            border: 1px solid #4b5563 !important;
-            color: #f3f4f6 !important;
+            background-color: #1f2937;
+            color: #f3f4f6;
+            border-color: #374151;
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900" x-data="{ sidebarOpen: false }">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <!-- Mobile menu button -->
-                    <div class="lg:hidden">
-                        <button @click="sidebarOpen = !sidebarOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
-                            <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <div class="flex-shrink-0 ml-4 lg:ml-0">
+
+<body class="bg-slate-50 dark:bg-slate-900 font-sans antialiased" x-data="{ sidebarOpen: false }">
+    
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar Overlay for Mobile -->
+        <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 lg:hidden"></div>
+
+        <!-- Sidebar -->
+        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] text-slate-300 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex flex-col">
+            <!-- Logo -->
+            <div class="flex items-center justify-center h-20 border-b border-slate-700/50">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-white font-bold text-xl tracking-wide">
+                    <img src="{{ asset('icon/Header.png') }}" alt="Logo" class="h-8 w-auto">
+                    <span>ABU Endowment</span>
+                </a>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+                
+                <!-- Dashboard -->
+                <a href="{{ route('admin.dashboard') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <div class="w-8 flex justify-center"><i class="fas fa-th-large text-lg"></i></div>
+                    <span>Dashboard</span>
+                </a>
+
+                <!-- Donors -->
+                <a href="{{ route('admin.donors.index') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.donors.*') ? 'active' : '' }}">
+                    <div class="w-8 flex justify-center"><i class="fas fa-users text-lg"></i></div>
+                    <span>Donors</span>
+                </a>
+
+                <!-- Projects Dropdown -->
+                <div x-data="{ open: {{ request()->routeIs('admin.projects*') || request()->routeIs('admin.project-categories*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="nav-link w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.projects*') || request()->routeIs('admin.project-categories*') ? 'text-white bg-white/5' : '' }}">
                         <div class="flex items-center">
-                            <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold text-indigo-600 dark:text-indigo-400 flex items-center">
-                                <img src="{{ asset('icon/Header.png') }}" alt="ABU Endowment" class="h-12 w-auto mr-3">
-                                <span class="hidden sm:block">ABU Endowment Admin</span>
-                            </a>
+                            <div class="w-8 flex justify-center"><i class="fas fa-project-diagram text-lg"></i></div>
+                            <span>Projects</span>
                         </div>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200" :class="{'rotate-180': open}"></i>
+                    </button>
+                    <div x-show="open" x-collapse class="pl-12 pr-2 space-y-1 mb-2">
+                        <a href="{{ route('admin.projects') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.projects') ? 'text-emerald-400' : '' }}">All Projects</a>
+                        @if(Route::has('admin.project-categories.index'))
+                        <a href="{{ route('admin.project-categories.index') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.project-categories.*') ? 'text-emerald-400' : '' }}">Categories</a>
+                        @endif
+                        <a href="{{ route('admin.projects.donations') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.projects.donations') ? 'text-emerald-400' : '' }}">Donations Overview</a>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
+
+                <!-- Statistics -->
+                <a href="{{ route('admin.statistics') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.statistics') ? 'active' : '' }}">
+                    <div class="w-8 flex justify-center"><i class="fas fa-chart-pie text-lg"></i></div>
+                    <span>Statistics</span>
+                </a>
+
+                <!-- Notifications -->
+                <a href="{{ route('admin.notifications.index') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                    <div class="w-8 flex justify-center"><i class="fas fa-bell text-lg"></i></div>
+                    <span>Notifications</span>
+                </a>
+
+                <!-- Manage Dropdown -->
+                <div x-data="{ open: {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') ? 'true' : 'false' }} }">
+                    <button @click="open = !open" class="nav-link w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') ? 'text-white bg-white/5' : '' }}">
+                        <div class="flex items-center">
+                            <div class="w-8 flex justify-center"><i class="fas fa-cog text-lg"></i></div>
+                            <span>Manage</span>
+                        </div>
+                        <i class="fas fa-chevron-down text-xs transition-transform duration-200" :class="{'rotate-180': open}"></i>
+                    </button>
+                    <div x-show="open" x-collapse class="pl-12 pr-2 space-y-1 mb-2">
+                        @if(Route::has('admin.users.index'))
+                        <a href="{{ route('admin.users.index') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.users.*') ? 'text-emerald-400' : '' }}">Users</a>
+                        @endif
+                        @if(Route::has('admin.roles.index'))
+                        <a href="{{ route('admin.roles.index') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.roles.*') ? 'text-emerald-400' : '' }}">Roles</a>
+                        @endif
+                        @if(Route::has('admin.permissions.index'))
+                        <a href="{{ route('admin.permissions.index') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.permissions.*') ? 'text-emerald-400' : '' }}">Permissions</a>
+                        @endif
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- User Profile (Bottom Sidebar) -->
+            <div class="p-4 border-t border-slate-700/50">
+                <div class="flex items-center gap-3 px-2">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-white truncate">{{ Auth::user()->name ?? 'Admin User' }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ Auth::user()->email ?? 'admin@example.com' }}</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+            
+            <!-- Top Header -->
+            <header class="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-8 z-10">
+                <!-- Left: Title -->
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Admin Dashboard</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Welcome back! Here's what's happening today.</p>
+                </div>
+
+                <!-- Right: Actions -->
+                <div class="flex items-center gap-4">
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <button @click="sidebarOpen = !sidebarOpen" class="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+
+                    <!-- Notification Icon -->
+                    <button class="relative w-10 h-10 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600 hover:text-emerald-600 transition-colors">
+                        <i class="far fa-bell text-lg"></i>
+                        <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-700"></span>
+                    </button>
+
                     <!-- Profile Dropdown -->
-                    <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen = false">
-                        <button @click="profileOpen = !profileOpen" class="flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rounded-full">
-                            <i class="fas fa-user-circle text-2xl text-indigo-600 dark:text-indigo-400"></i>
-                            <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
+                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                        <button @click="open = !open" class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-700">
+                            <div class="text-right hidden md:block">
+                                <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ Auth::user()->name ?? 'Admin' }}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Administrator</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border-2 border-white dark:border-slate-700 shadow-sm">
+                                <span class="font-bold">{{ substr(Auth::user()->name ?? 'A', 0, 1) }}</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-xs text-slate-400"></i>
                         </button>
-                        
+
                         <!-- Dropdown Menu -->
-                        <div x-show="profileOpen" 
+                        <div x-show="open" 
                              x-transition:enter="transition ease-out duration-100"
                              x-transition:enter-start="transform opacity-0 scale-95"
                              x-transition:enter-end="transform opacity-100 scale-100"
                              x-transition:leave="transition ease-in duration-75"
                              x-transition:leave-start="transform opacity-100 scale-100"
                              x-transition:leave-end="transform opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
-                            <div class="py-1">
-                                <a href="#" 
-                                   @click.prevent="$dispatch('open-profile-modal'); profileOpen = false" 
-                                   class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                                    <i class="fas fa-user mr-3 text-indigo-600 dark:text-indigo-400"></i>
-                                    Profile Settings
-                                </a>
-                                <div class="border-t border-gray-100 dark:border-gray-700"></div>
-                                <form method="POST" action="{{ route('admin.logout') }}">
-                                    @csrf
-                                    <button type="submit" 
-                                            class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
-                                        <i class="fas fa-sign-out-alt mr-3 text-red-600 dark:text-red-400"></i>
-                                        Sign Out
-                                    </button>
-                                </form>
-                            </div>
+                             class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 py-1 z-50">
+                            
+                            <a href="#" @click.prevent="$dispatch('open-profile-modal'); open = false" class="flex items-center px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-emerald-600">
+                                <i class="fas fa-user-cog w-5 mr-2"></i> Profile Settings
+                            </a>
+                            
+                            <div class="border-t border-slate-100 dark:border-slate-700 my-1"></div>
+                            
+                            <form method="POST" action="{{ route('admin.logout') }}">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    <i class="fas fa-sign-out-alt w-5 mr-2"></i> Sign Out
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </nav>
+            </header>
 
+<<<<<<< HEAD
     <!-- Sidebar Navigation -->
     <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
         <!-- Mobile sidebar overlay -->
@@ -307,14 +382,17 @@
                         @yield('content')
                     </div>
                 </div>
+=======
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-8">
+                @yield('content')
+                {{ $slot ?? '' }}
+>>>>>>> 33e9575b334311455b926704b6fd78629e658ba3
             </main>
         </div>
     </div>
 
     @livewireScripts
-    
-    {{-- No need to load Alpine.js separately - it's included with Livewire --}}
-    
     <livewire:edit-profile-modal />
 </body>
 </html>

@@ -324,9 +324,9 @@ class DonorController extends Controller
                 'other_name' => 'nullable|string|max:255',
                 'email' => 'required|email|max:255',
                 'phone' => 'required|string|max:20|regex:/^\+[0-9]{10,15}$/',
-                'address' => 'required|string|max:500',
-                'state' => 'required|string|max:100',
-                'city' => 'required|string|max:100', // Frontend sends 'city'
+                'address' => 'nullable|string|max:500',
+                'state' => 'nullable|string|max:100',
+                'city' => 'nullable|string|max:100', // Frontend sends 'city'
                 'ranking' => 'nullable|integer|min:1',
             ], [
                 'phone.regex' => 'Phone number must be in international format (e.g., +2348012345678)',
@@ -461,113 +461,122 @@ class DonorController extends Controller
     /**
      * Store a newly created donor (for non-addressable alumni)
      */
+    /**
+     * Store a newly created donor (for non-addressable alumni)
+     */
     public function store(Request $request)
     {
-        try {
-            Log::info('Creating new non-addressable alumni donor', [
-                'data' => $request->all()
-            ]);
-
-            // Format phone number before validation
-            $phone = $this->formatPhoneNumber($request->phone);
-            
-            // Validate the request for non-addressable alumni
-            $validator = Validator::make(array_merge($request->all(), ['phone' => $phone]), [
-                'name' => 'required|string|max:255',
-                'surname' => 'required|string|max:255',
-                'other_name' => 'nullable|string|max:255',
-                'gender' => 'required|in:male,female',
-                'country' => 'required|string|max:100',
-                'state' => 'required|string|max:100',
-                'city' => 'required|string|max:100',
-                'address' => 'required|string|max:500',
-                'email' => 'required|email|max:255|unique:donors,email',
-                'phone' => 'required|string|max:20|regex:/^\+[0-9]{10,15}$/|unique:donors,phone',
-                'donor_type' => 'required|string|in:non_addressable_alumni',
-            ], [
-                'phone.regex' => 'Phone number must be in international format (e.g., +2348012345678)',
-                'email.unique' => 'This email is already registered',
-                'phone.unique' => 'This phone number is already registered',
-            ]);
-
-            if ($validator->fails()) {
-                Log::warning('Non-addressable alumni creation validation failed', [
-                    'errors' => $validator->errors()->toArray()
+        // Start transaction to ensure atomicity
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            try {
+                Log::info('Creating new donor', [
+                    'data' => $request->all()
                 ]);
+
+                // Format phone number before validation
+                $phone = $this->formatPhoneNumber($request->phone);
                 
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+                // Validate the request
+                $validator = Validator::make(array_merge($request->all(), ['phone' => $phone]), [
+                    'name' => 'required|string|max:255',
+                    'surname' => 'required|string|max:255',
+                    'other_name' => 'nullable|string|max:255',
+                    'gender' => 'required|in:male,female',
+                    'country' => 'required|string|max:100',
+                    'state' => 'nullable|string|max:100',
+                    'city' => 'nullable|string|max:100',
+                    'address' => 'nullable|string|max:500',
+                    'email' => 'required|email|max:255|unique:donors,email',
+                    'phone' => 'required|string|max:20|regex:/^\+[0-9]{10,15}$/|unique:donors,phone',
+                    'donor_type' => 'required|string',
+                ], [
+                    'phone.regex' => 'Phone number must be in international format (e.g., +2348012345678)',
+                    'email.unique' => 'This email is already registered',
+                    'phone.unique' => 'This phone number is already registered',
+                ]);
 
-            // Create the donor with minimal fields for non-addressable alumni
-            $donor = Donor::create([
-                'name' => $request->name,
-                'surname' => $request->surname,
-                'other_name' => $request->other_name,
-                'gender' => $request->gender,
-                'country' => $request->country,
-                'email' => $request->email,
-                'phone' => $phone,
-                'address' => $request->address,
-                'state' => $request->state,
-                'lga' => $request->city, // Map frontend 'city' to database 'lga'
-                'donor_type' => 'non_addressable_alumni',
-                'nationality' => $request->country,
-                // Set other fields to null for non-addressable alumni
-                'graduation_year' => null,
-                'entry_year' => null,
-                'reg_number' => null,
-                'faculty_id' => null,
-                'department_id' => null,
-                'ranking' => null,
-            ]);
+                if ($validator->fails()) {
+                    Log::warning('Donor creation validation failed', [
+                        'errors' => $validator->errors()->toArray()
+                    ]);
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Validation failed',
+                        'errors' => $validator->errors()
+                    ], 422);
+                }
 
-            Log::info('Non-addressable alumni donor created successfully', [
-                'id' => $donor->id,
-                'name' => $donor->name,
-                'email' => $donor->email
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Non-addressable alumni account created successfully',
-                'data' => [
-                    'id' => $donor->id,
-                    'name' => $donor->name,
-                    'surname' => $donor->surname,
-                    'other_names' => $donor->other_name,
-                    'full_name' => trim(implode(' ', array_filter([$donor->surname, $donor->name, $donor->other_name]))),
-                    'gender' => $donor->gender,
-                    'country' => $donor->country,
-                    'email' => $donor->email,
-                    'phone' => $donor->phone,
-                    'address' => $donor->address,
-                    'state' => $donor->state,
-                    'city' => $donor->lga,
-                    'donor_type' => $donor->donor_type,
-                    'faculty_name' => null,
-                    'department_name' => null,
-                    'faculty' => null,
-                    'department' => null,
+                // Create the donor
+                $donor = Donor::create([
+                    'name' => $request->name,
+                    'surname' => $request->surname,
+                    'other_name' => $request->other_name,
+                    'gender' => $request->gender,
+                    'country' => $request->country,
+                    'email' => $request->email,
+                    'phone' => $phone,
+                    'address' => $request->address,
+                    'state' => $request->state,
+                    'lga' => $request->city, // Map frontend 'city' to database 'lga'
+                    'donor_type' => $request->donor_type,
+                    'nationality' => $request->country,
+                    // Set other fields to null
                     'graduation_year' => null,
                     'entry_year' => null,
-                    'registration_number' => null,
-                ]
-            ], 201);
+                    'reg_number' => null,
+                    'faculty_id' => null,
+                    'department_id' => null,
+                    'ranking' => null,
+                ]);
 
-        } catch (\Exception $e) {
-            Log::error('Error creating non-addressable alumni donor', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'success' => false,
-                'message' => 'Error creating non-addressable alumni account: ' . $e->getMessage()
-            ], 500);
-        }
+                Log::info('Donor created successfully', [
+                    'id' => $donor->id,
+                    'name' => $donor->name,
+                    'email' => $donor->email
+                ]);
+
+                // 1. Determine the username (email) and password (phone)
+                $username = $donor->email;
+                $password = $donor->phone;
+
+                // 2. CRITICAL FIX: Use updateOrCreate to handle existing sessions gracefully
+                $session = \App\Models\DonorSession::updateOrCreate(
+                    ['username' => $username],
+                    [
+                        'donor_id' => $donor->id,
+                        'password' => $password,
+                    ]
+                );
+
+                // Send welcome email with login details
+                try {
+                    \Illuminate\Support\Facades\Mail::to($donor->email)->send(new \App\Mail\WelcomeDonorMail($donor, $session->username, $donor->phone));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send welcome email', ['error' => $e->getMessage()]);
+                    // Continue execution
+                }
+
+                // 3. Return the SUCCESS response with session details
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Donor registered successfully',
+                    'data' => [
+                        'donor' => $donor,
+                        'session_id' => $session->id,
+                        'username' => $session->username,
+                    ]
+                ], 201);
+
+            } catch (\Exception $e) {
+                Log::error('Error creating donor', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Transaction will automatically rollback if exception is thrown
+                throw $e;
+            }
+        });
     }
 
     /**

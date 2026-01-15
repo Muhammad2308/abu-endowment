@@ -78,6 +78,9 @@ class ProjectsManager extends Component
                 $query->where('status', $this->statusFilter);
             })
             ->withCount('photos')
+            ->withSum(['donations as calculated_raised' => function($query) {
+                $query->whereIn('status', ['success', 'paid', 'completed']);
+            }], 'amount')
             ->orderBy('created_at', 'desc')
             ->paginate($this->perPage);
 

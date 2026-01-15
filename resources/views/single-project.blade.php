@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Projects - ABU Endowment & Crowd Funding</title>
-    <meta name="description" content="Explore ABU Zaria Endowment Projects">
+    <title>{{ $project->project_title }} - ABU Endowment</title>
+    <meta name="description" content="{{ Str::limit($project->project_description, 160) }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/abu_logo_white.png') }}">
     
@@ -32,12 +32,9 @@
     
     @livewire('home.auth-modal')
     
-    <!-- Hero Section -->
-    @livewire('home.projects-hero')
-    
-    <!-- Projects Section -->
-    <div>
-        @livewire('home.project-donations-page')
+    <!-- Project Content -->
+    <div class="pt-5 mt-5">
+        @livewire('home.project-contents', ['project' => $project])
     </div>
 
     <!-- Footer -->

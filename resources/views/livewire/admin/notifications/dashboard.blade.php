@@ -1,64 +1,64 @@
 <div class="space-y-6">
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">
+                <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
                     <i class="fas fa-file-alt text-2xl"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Templates</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $totalTemplates }}</p>
+                    <p class="text-sm font-bold text-slate-500">Total Templates</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ $totalTemplates }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
+                <div class="p-3 rounded-full bg-emerald-50 text-emerald-600">
                     <i class="fas fa-paper-plane text-2xl"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Emails Sent (Month)</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $emailsSentThisMonth }}</p>
+                    <p class="text-sm font-bold text-slate-500">Emails Sent (Month)</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ $emailsSentThisMonth }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300">
+                <div class="p-3 rounded-full bg-rose-50 text-rose-600">
                     <i class="fas fa-exclamation-circle text-2xl"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Failed Emails</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ $failedEmails }}</p>
+                    <p class="text-sm font-bold text-slate-500">Failed Emails</p>
+                    <p class="text-2xl font-bold text-slate-800">{{ $failedEmails }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
         <div class="flex flex-wrap gap-4">
-            <a href="{{ route('admin.notifications.templates.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('admin.notifications.templates.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                 <i class="fas fa-plus mr-2"></i>
                 Create Email Template
             </a>
-            <a href="{{ route('admin.notifications.send') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <a href="{{ route('admin.notifications.send') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
                 <i class="fas fa-paper-plane mr-2"></i>
                 Send Notification
             </a>
-            <a href="{{ route('admin.notifications.templates') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('admin.notifications.templates') }}" class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                 <i class="fas fa-list mr-2"></i>
                 Manage Templates
             </a>
-            <button @click="openSmsModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+            <button @click="openSmsModal()" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors">
                 <i class="fas fa-sms mr-2"></i>
                 Send SMS
             </button>
-            <a href="{{ route('admin.notifications.logs') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <a href="{{ route('admin.notifications.logs') }}" class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                 <i class="fas fa-history mr-2"></i>
                 View Logs
             </a>
@@ -66,31 +66,37 @@
     </div>
 
     <!-- SMS Modal -->
-    <div x-data="smsModal()" x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" x-cloak>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6 relative">
-            <button @click="open = false" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Send SMS Notification</h2>
-            <form @submit.prevent="sendSms()" class="flex flex-col gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
-                    <input type="tel" x-model="phone" placeholder="e.g. +12345678901" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" required />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
-                    <textarea x-model="message" rows="4" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" required maxlength="160"></textarea>
-                </div>
-                <div class="flex justify-end gap-2 mt-4">
-                    <button type="button" @click="open = false" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-500">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50" :disabled="loading">
-                        <span x-show="!loading">Send SMS</span>
-                        <span x-show="loading">Sending...</span>
-                    </button>
-                </div>
-                <div x-show="success" class="text-green-600 dark:text-green-400 text-sm mt-2" x-text="success"></div>
-                <div x-show="error" class="text-red-600 dark:text-red-400 text-sm mt-2" x-text="error"></div>
-            </form>
+    <div x-data="smsModal()" x-show="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" x-cloak>
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md flex flex-col relative overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">Send SMS Notification</h2>
+                <button @click="open = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <form @submit.prevent="sendSms()" class="flex flex-col gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Phone Number</label>
+                        <input type="tel" x-model="phone" placeholder="e.g. +12345678901" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Message</label>
+                        <textarea x-model="message" rows="4" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200" required maxlength="160"></textarea>
+                        <p class="text-xs text-slate-400 text-right mt-1" x-text="message.length + '/160'"></p>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-2">
+                        <button type="button" @click="open = false" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 transition-colors">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm" :disabled="loading">
+                            <span x-show="!loading">Send SMS</span>
+                            <span x-show="loading"><i class="fas fa-spinner fa-spin mr-2"></i>Sending...</span>
+                        </button>
+                    </div>
+                    <div x-show="success" class="p-3 bg-emerald-50 text-emerald-700 rounded-lg text-sm border border-emerald-100 flex items-center" x-text="success"></div>
+                    <div x-show="error" class="p-3 bg-rose-50 text-rose-700 rounded-lg text-sm border border-rose-100 flex items-center" x-text="error"></div>
+                </form>
+            </div>
         </div>
     </div>
 

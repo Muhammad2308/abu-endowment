@@ -5,68 +5,76 @@
 @section('content')
 <div>
     <div class="px-4 py-6 sm:px-0">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h2>
+        <h2 class="text-2xl font-bold text-slate-800 mb-6">Admin Dashboard</h2>
         
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-users text-indigo-600 dark:text-indigo-400 text-2xl"></i>
+                            <div class="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                                <i class="fas fa-users text-indigo-600 text-xl"></i>
+                            </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                             <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Donors</dt>
-                                <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ $totalDonors }}</dd>
+                                <dt class="text-sm font-medium text-slate-500 truncate">Total Donors</dt>
+                                <dd class="text-lg font-bold text-slate-800">{{ $totalDonors }}</dd>
                             </dl>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-project-diagram text-green-600 dark:text-green-400 text-2xl"></i>
+                            <div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                                <i class="fas fa-project-diagram text-emerald-600 text-xl"></i>
+                            </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                             <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Active Projects</dt>
-                                <dd class="text-lg font-medium text-gray-900 dark:text-white">{{ $activeProjects }}</dd>
+                                <dt class="text-sm font-medium text-slate-500 truncate">Active Projects</dt>
+                                <dd class="text-lg font-bold text-slate-800">{{ $activeProjects }}</dd>
                             </dl>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-money-bill-wave text-yellow-600 dark:text-yellow-400 text-2xl"></i>
+                            <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
+                                <i class="fas fa-money-bill-wave text-amber-600 text-xl"></i>
+                            </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
-                            <dlv>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Donations</dt>
-                                <dd class="text-lg font-medium text-gray-900 dark:text-white">₦ {{ number_format($totalDonations, 2) }}</dd>
-                            </dlv>
+                            <dl>
+                                <dt class="text-sm font-medium text-slate-500 truncate">Total Donations</dt>
+                                <dd class="text-lg font-bold text-slate-800">₦ {{ number_format($totalDonations, 0) }}</dd>
+                            </dl>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200">
                 <div class="p-5">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-chart-line text-purple-600 dark:text-purple-400 text-2xl"></i>
+                            <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
+                                <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                            </div>
                         </div>
                         <div class="ml-5 w-0 flex-1">
                             <dl>
-                                <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">This Month</dt>
-                                <dd class="text-lg font-medium text-gray-900 dark:text-white">₦ {{ number_format($totalDonationsThisMonth, 2) }}</dd>
+                                <dt class="text-sm font-medium text-slate-500 truncate">This Month</dt>
+                                <dd class="text-lg font-bold text-slate-800">₦ {{ number_format($totalDonationsThisMonth, 0) }}</dd>
                             </dl>
                         </div>
                     </div>
@@ -74,158 +82,161 @@
             </div>
         </div>
 
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+
         <!-- Admin Actions -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Faculty Management Card Removed -->
-
+            
             <!-- Department Management Card -->
-            <a href="{{ route('admin.department.index') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="{{ route('admin.department.index') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-building text-orange-600 dark:text-orange-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-building text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Departments/Programmes</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Manage departments and programmes</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Departments/Programmes</h3>
+                            <p class="text-sm text-slate-500 mt-1">Manage departments and programmes</p>
                         </div>
                     </div>
                 </div>
             </a>
 
             <!-- Donor Management Card -->
-            <a href="{{ route('admin.donors.index') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="{{ route('admin.donors.index') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-users text-blue-600 dark:text-blue-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-users text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Manage Donors</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">View and manage alumni and donors</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Manage Donors</h3>
+                            <p class="text-sm text-slate-500 mt-1">View and manage alumni and donors</p>
                         </div>
                     </div>
                 </div>
             </a>
 
-            <a href="{{ route('admin.projects') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="{{ route('admin.projects') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-project-diagram text-green-600 dark:text-green-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-trash-alt text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Manage Projects</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Create and manage endowment projects</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Manage Projects</h3>
+                            <p class="text-sm text-slate-500 mt-1">Create and manage endowment projects</p>
                         </div>
                     </div>
                 </div>
             </a>
 
-            <a href="{{ route('admin.projects.donations') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="{{ route('admin.projects.donations') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-donate text-green-600 dark:text-green-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-dollar-sign text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Projects/Donations</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">View all projects and their total donations</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Projects/Donations</h3>
+                            <p class="text-sm text-slate-500 mt-1">View all projects and their total donations</p>
                         </div>
                     </div>
                 </div>
             </a>
 
-            <a href="{{ route('admin.statistics') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="{{ route('admin.statistics') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-chart-bar text-purple-600 dark:text-purple-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-600 group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-chart-bar text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Statistics</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">View donation analytics and reports</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Statistics</h3>
+                            <p class="text-sm text-slate-500 mt-1">View donation analytics and reports</p>
                         </div>
                     </div>
                 </div>
             </a>
 
-            <a href="{{ route('admin.notifications.index') }}" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="{{ route('admin.notifications.index') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-bell text-yellow-600 dark:text-yellow-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-bell text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Notifications</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Send emails and SMS to donors</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Notifications</h3>
+                            <p class="text-sm text-slate-500 mt-1">Send emails and SMS to donors</p>
                         </div>
                     </div>
                 </div>
             </a>
 
-            <!-- <a href="/api/documentation" target="_blank" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
+            <a href="/" target="_blank" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <div class="flex items-center">
+                    <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-code text-blue-600 dark:text-blue-400 text-3xl"></i>
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-globe text-lg"></i>
+                            </div>
                         </div>
                         <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">API Documentation</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">View available API endpoints</p>
-                        </div>
-                    </div>
-                </div>
-            </a> -->
-
-            <a href="/" target="_blank" class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-                <div class="p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-home text-gray-600 dark:text-gray-400 text-3xl"></i>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Public Site</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">View the public welcome page</p>
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Public Site</h3>
+                            <p class="text-sm text-slate-500 mt-1">View the public welcome page</p>
                         </div>
                     </div>
                 </div>
             </a>
 
             <!-- User Management Card -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg">
+            <a href="{{ route('admin.users.index') }}" class="group bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
                 <div class="p-6">
-                    <a href="{{ route('admin.users.index') }}" class="block hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-4">
-                        <div class="flex items-center">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
+                                <i class="fas fa-users-cog text-lg"></i>
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-base font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">User Management</h3>
+                            <p class="text-sm text-slate-500 mt-1">Manage users and roles</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-start">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-users-cog text-3xl text-green-500"></i>
+                                <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white">
+                                    <i class="fas fa-user-edit text-lg"></i>
+                                </div>
                             </div>
                             <div class="ml-4">
-                                <p class="text-lg font-semibold text-gray-900 dark:text-white">User Management</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Manage users and roles</p>
+                                <h3 class="text-base font-bold text-slate-800">Edit Profile</h3>
+                                <p class="text-sm text-slate-500 mt-1">Update your admin profile information</p>
                             </div>
                         </div>
-                    </a>
-                </div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-200">
-                <div class="p-6">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-user-edit text-indigo-600 dark:text-indigo-400 text-3xl"></i>
-                        </div>
-                        <div class="ml-4 flex-1">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Edit Profile</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Update your admin profile information</p>
-                        </div>
-                        <div>
-                            <button onclick="Livewire.dispatch('open-profile-modal')" class="ml-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Edit</button>
-                        </div>
+                        <button onclick="Livewire.dispatch('open-profile-modal')" class="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 focus:outline-none transition-colors">Edit</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </div>
 @endsection 

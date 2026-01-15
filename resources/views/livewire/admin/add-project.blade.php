@@ -1,75 +1,94 @@
 <div>
     @if ($showModal)
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center" id="add-project-modal">
-        <div class="relative p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ $editingProjectId ? 'Edit Project' : 'Add New Project' }}</h3>
-                <div class="mt-2 px-7 py-3">
-                    <form wire:submit.prevent="saveProject">
-                        @if (session()->has('message'))
-                            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                                <span class="block sm:inline">{{ session('message') }}</span>
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto" id="add-project-modal">
+        <div class="relative w-full max-w-lg mx-4 my-6 bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">
+                    {{ $editingProjectId ? 'Edit Project' : 'Add New Project' }}
+                </h3>
+                <button wire:click="closeModal" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto">
+                <form wire:submit.prevent="saveProject">
+                    @if (session()->has('message'))
+                        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg mb-4 flex items-center" role="alert">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span class="block sm:inline">{{ session('message') }}</span>
+                        </div>
+                    @endif
+                    @if (session()->has('error'))
+                        <div class="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg mb-4 flex items-center" role="alert">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span class="block sm:inline">{{ session('error') }}</span>
+                        </div>
+                    @endif
+
+                    <div class="mb-5">
+                        <label for="projectTitle" class="block text-slate-700 text-sm font-bold mb-2">Project Title</label>
+                        <input type="text" wire:model.defer="project_title" id="projectTitle" 
+                               class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-slate-400" 
+                               placeholder="e.g., Student Scholarship Program">
+                        @error('project_title') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="target" class="block text-slate-700 text-sm font-bold mb-2">Target Amount</label>
+                        <div class="relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-slate-500 sm:text-sm font-bold">₦</span>
                             </div>
-                        @endif
-                        @if (session()->has('error'))
-                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                                <span class="block sm:inline">{{ session('error') }}</span>
+                            <input type="number" step="0.01" wire:model.defer="target" id="target" 
+                                   class="w-full pl-8 pr-12 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-slate-400" 
+                                   placeholder="0.00">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <span class="text-slate-400 sm:text-xs">NGN</span>
                             </div>
-                        @endif
-
-                        <div class="mb-4">
-                            <label for="projectTitle" class="block text-gray-700 text-sm font-bold mb-2 text-left">Project Title:</label>
-                            <input type="text" wire:model.defer="project_title" id="projectTitle" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="e.g., Student Scholarship Program">
-                            @error('project_title') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
                         </div>
+                        @error('target') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="target" class="block text-gray-700 text-sm font-bold mb-2 text-left">Target Amount (₦):</label>
-                            <div class="relative mt-1 rounded-md shadow-sm">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <span class="text-gray-500 sm:text-sm">₦</span>
-                                </div>
-                                <input type="number" step="0.01" wire:model.defer="target" id="target" class="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" placeholder="0.00">
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                    <span class="text-gray-500 sm:text-sm" id="price-currency">NGN</span>
-                                </div>
-                            </div>
-                            @error('target') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
-                        </div>
+                    <div class="mb-5">
+                        <label for="projectDescription" class="block text-slate-700 text-sm font-bold mb-2">Description</label>
+                        <textarea id="projectDescription" wire:model.defer="project_description" rows="4" 
+                                  class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-slate-400" 
+                                  placeholder="Describe the project details..."></textarea>
+                        @error('project_description') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="projectDescription" class="block text-gray-700 text-sm font-bold mb-2 text-left">Project Description:</label>
-                            <textarea id="projectDescription" wire:model.defer="project_description" rows="4" placeholder="Describe the project details..." class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
-                            @error('project_description') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
-                        </div>
+                    <div class="mb-5">
+                        <label for="iconImage" class="block text-slate-700 text-sm font-bold mb-2">Icon Image <span class="text-slate-400 font-normal">(Optional)</span></label>
+                        <input type="file" wire:model="icon_image" id="iconImage" 
+                               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200" 
+                               accept="image/*">
+                        @error('icon_image') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="iconImage" class="block text-gray-700 text-sm font-bold mb-2 text-left">Icon Image (Optional):</label>
-                            <input type="file" wire:model="icon_image" id="iconImage" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" accept="image/*">
-                            @error('icon_image') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
-                        </div>
+                    <div class="mb-6">
+                        <label for="status" class="block text-slate-700 text-sm font-bold mb-2">Status</label>
+                        <select wire:model.defer="status" id="status" 
+                                class="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 cursor-pointer">
+                            <option value="active">Active</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        @error('status') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    </div>
 
-                        <div class="mb-4">
-                            <label for="status" class="block text-gray-700 text-sm font-bold mb-2 text-left">Status:</label>
-                            <select wire:model.defer="status" id="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                <option value="active">Active</option>
-                                <option value="closed">Closed</option>
-                            </select>
-                            @error('status') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="items-center px-4 py-3">
-                            <button id="save-project-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                {{ $editingProjectId ? 'Update Project' : 'Save Project' }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <button wire:click="closeModal" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        Close
-                    </button>
-                </div>
+                    <div class="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+                        <button type="button" wire:click="closeModal" 
+                                class="w-full sm:w-auto px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200 transition-all duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit" id="save-project-btn" 
+                                class="w-full sm:w-auto flex-1 px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+                            {{ $editingProjectId ? 'Update Project' : 'Create Project' }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

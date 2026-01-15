@@ -64,7 +64,37 @@ class DonationsTable extends Component
         $this->modalPage = $page;
     }
 
-    public function render()
+    public function exportProjects()
+    {
+        $projectsWithEndowment = $this->getProjectsData();
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ProjectsOverviewExport($projectsWithEndowment), 
+            'donations_overview_' . date('Y-m-d') . '.xlsx'
+        );
+    }
+
+    public function exportModalDonations()
+    {
+        if (!$this->showDetailsModal) {
+            return;
+        }
+
+        $projectId = $this->selectedProjectId;
+        $projectName = 'Endowment Project';
+
+        if ($projectId !== null) {
+            $project = Project::find($projectId);
+            $projectName = $project ? $project->project_title : 'Unknown Project';
+        }
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ProjectDonationsExport($projectId, $projectName),
+            'donations_' . \Illuminate\Support\Str::slug($projectName) . '_' . date('Y-m-d') . '.xlsx'
+        );
+    }
+
+    private function getProjectsData()
     {
         $search = $this->search;
 
@@ -79,16 +109,26 @@ class DonationsTable extends Component
 
         // Calculate raised amount and donor count for each project
         $projectsWithRaised = $projects->map(function ($project) {
-            $raised = Donation::where('project_id', $project->id)->sum('amount');
-            $donorCount = Donation::where('project_id', $project->id)->distinct('donor_id')->count('donor_id');
+            $raised = Donation::where('project_id', $project->id)
+                ->whereIn('status', ['success', 'paid', 'completed'])
+                ->sum('amount');
+            $donorCount = Donation::where('project_id', $project->id)
+                ->whereIn('status', ['success', 'paid', 'completed'])
+                ->distinct('donor_id')
+                ->count('donor_id');
             $project->raised_amount = $raised;
             $project->donor_count = $donorCount;
             return $project;
         });
 
         // Get total raised and donor count for null project_id donations (Endowment Project)
-        $endowmentRaised = Donation::whereNull('project_id')->sum('amount');
-        $endowmentDonorCount = Donation::whereNull('project_id')->distinct('donor_id')->count('donor_id');
+        $endowmentRaised = Donation::whereNull('project_id')
+            ->whereIn('status', ['success', 'paid', 'completed'])
+            ->sum('amount');
+        $endowmentDonorCount = Donation::whereNull('project_id')
+            ->whereIn('status', ['success', 'paid', 'completed'])
+            ->distinct('donor_id')
+            ->count('donor_id');
 
         // Create a collection that includes Endowment Project if there are null donations
         $projectsWithEndowment = collect();
@@ -118,6 +158,13 @@ class DonationsTable extends Component
         foreach ($projectsWithRaised as $project) {
             $projectsWithEndowment->push($project);
         }
+
+        return $projectsWithEndowment;
+    }
+
+    public function render()
+    {
+        $projectsWithEndowment = $this->getProjectsData();
 
         // Paginate manually
         $currentPage = request()->get('page', 1);
