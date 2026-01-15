@@ -132,6 +132,7 @@
                         <a href="{{ route('admin.project-categories.index') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.project-categories.*') ? 'text-emerald-400' : '' }}">Categories</a>
                         @endif
                         <a href="{{ route('admin.projects.donations') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.projects.donations') ? 'text-emerald-400' : '' }}">Donations Overview</a>
+                        <a href="{{ route('admin.reports.index') }}" class="block py-2 px-3 rounded-lg text-sm hover:text-white hover:bg-white/5 {{ request()->routeIs('admin.reports.*') ? 'text-emerald-400' : '' }}">Report</a>
                     </div>
                 </div>
 
@@ -250,144 +251,13 @@
                 </div>
             </header>
 
-<<<<<<< HEAD
-    <!-- Sidebar Navigation -->
-    <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
-        <!-- Mobile sidebar overlay -->
-        <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-600 bg-opacity-75 lg:hidden z-40"></div>
-        
-        <!-- Sidebar -->
-        <div class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform lg:transform-none lg:static lg:inset-0 z-50 transition duration-300 ease-in-out" :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}" @click.away="sidebarOpen = false">
-            <div class="flex flex-col h-full">
-                <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                    <nav class="mt-5 flex-1 px-2 space-y-1">
-                        <!-- Dashboard -->
-                        </a>
-
-                        <!-- Donor Management -->
-                        <a href="{{ route('admin.donors.index') }}" 
-                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.donors.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-                            <i class="fas fa-users mr-3 flex-shrink-0 h-5 w-5"></i>
-                            Donors
-                        </a>
-
-                        <!-- Projects Management -->
-                        <div class="space-y-1" x-data="{ projectsOpen: {{ request()->routeIs('admin.projects*') || request()->routeIs('admin.project-categories*') ? 'true' : 'false' }} }">
-                            <div class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300">
-                                <button @click="projectsOpen = !projectsOpen" class="flex items-center w-full text-left">
-                                    <i class="fas fa-project-diagram mr-3 flex-shrink-0 h-5 w-5"></i>
-                                    <span class="flex-1">Projects</span>
-                                    <svg class="ml-3 h-5 w-5 transform transition-transform duration-150" :class="{'rotate-90': projectsOpen}" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div x-show="projectsOpen" x-transition class="ml-6 space-y-1">
-                                <a href="{{ route('admin.projects') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.projects') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-list mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    All Projects
-                                </a>
-                                @if(Route::has('admin.project-categories.index'))
-                                <a href="{{ route('admin.project-categories.index') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.project-categories.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-tags mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Categories
-                                </a>
-                                @endif
-                                <a href="{{ route('admin.projects.donations') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.projects.donations') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-heart mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Donations Overview
-                                </a>
-                                <a href="{{ route('admin.reports.index') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.reports.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-file-alt mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Report
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Statistics -->
-                        <a href="{{ route('admin.statistics') }}" 
-                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.statistics') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-                            <i class="fas fa-chart-bar mr-3 flex-shrink-0 h-5 w-5"></i>
-                            Statistics
-                        </a>
-
-                        <!-- Notifications -->
-                        <a href="{{ route('admin.notifications.index') }}" 
-                           class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.notifications.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white' }}">
-                            <i class="fas fa-bell mr-3 flex-shrink-0 h-5 w-5"></i>
-                            Notifications
-                        </a>
-
-                        <!-- Users Management -->
-                        <div class="space-y-1" x-data="{ usersOpen: {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') ? 'true' : 'false' }} }">
-                            <div class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 dark:text-gray-300">
-                                <button @click="usersOpen = !usersOpen" class="flex items-center w-full text-left">
-                                    <i class="fas fa-cog mr-3 flex-shrink-0 h-5 w-5"></i>
-                                    <span class="flex-1">Manage</span>
-                                    <svg class="ml-3 h-5 w-5 transform transition-transform duration-150" :class="{'rotate-90': usersOpen}" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div x-show="usersOpen" x-transition class="ml-6 space-y-1">
-                                @if(Route::has('admin.users.index'))
-                                <a href="{{ route('admin.users.index') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-user mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Users
-                                </a>
-                                @endif
-                                @if(Route::has('admin.roles.index'))
-                                <a href="{{ route('admin.roles.index') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.roles.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-user-shield mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Roles
-                                </a>
-                                @else
-                                <a href="#" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                                    <i class="fas fa-user-shield mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Roles
-                                </a>
-                                @endif
-                                @if(Route::has('admin.permissions.index'))
-                                <a href="{{ route('admin.permissions.index') }}" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.permissions.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
-                                    <i class="fas fa-key mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Permissions
-                                </a>
-                                @else
-                                <a href="#" 
-                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                                    <i class="fas fa-key mr-3 flex-shrink-0 h-4 w-4"></i>
-                                    Permissions
-                                </a>
-                                @endif
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1">
-            <main class="flex-1 relative focus:outline-none">
-                <div class="py-6">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        @yield('content')
-                    </div>
-                </div>
-=======
             <!-- Main Content Area -->
             <main class="flex-1 overflow-y-auto p-8">
                 @yield('content')
                 {{ $slot ?? '' }}
->>>>>>> 33e9575b334311455b926704b6fd78629e658ba3
+            </main>
+        </div>
+    </div>
             </main>
         </div>
     </div>
