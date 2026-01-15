@@ -30,10 +30,13 @@ class ProjectDonations extends Component
     public $name;
     public $phone;
     
+    public $limit = null; // Add limit property
+
     protected $listeners = ['project-payment-success' => 'verifyPayment'];
 
-    public function mount()
+    public function mount($limit = null)
     {
+        $this->limit = $limit; // Set limit from parameter
         $this->loadProjects();
         $this->checkAuth();
     }
@@ -54,7 +57,13 @@ class ProjectDonations extends Component
         }
 
         // Load projects from database
-        $this->projects = Project::with('photos')->take(4)->get();
+        $query = Project::with('photos');
+        
+        if ($this->limit) {
+            $query->take($this->limit);
+        }
+        
+        $this->projects = $query->get();
         $this->totalProjects = Project::count();
     }
 

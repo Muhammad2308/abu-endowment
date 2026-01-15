@@ -6966,7 +6966,20 @@ h6 {
 
 /* Newsletter Background - Matches Footer */
 .bg-newsletter {
-    background: #F3FCF8;
+  background: #F3FCF8;
+}
+
+
+/* Custom Green Button - Requested Override */
+.boxed-btn4.custom-green {
+  background: #227722;
+  border: 1px solid #227722;
+}
+
+.boxed-btn4.custom-green:hover {
+  background: #fff;
+  color: #227722;
+  border: 1px solid #227722;
 }
 
 /*# sourceMappingURL=style.css.map */

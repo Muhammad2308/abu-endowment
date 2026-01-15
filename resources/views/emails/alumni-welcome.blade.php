@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Welcome, {{ $donor->name }}!</h1>
-    <p>We are pleased to inform you that your alumni record has been successfully created on the ABU Endowment & Crowd Funding platform.</p>
+    <p>We are pleased to inform you that your alumni record has been successfully created on the ALUMNI FUND platform.</p>
     
     <p>An account has been created for you. You can login using the following credentials:</p>
     

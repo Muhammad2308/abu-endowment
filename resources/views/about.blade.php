@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>About Us - ABU Endowment & Crowd Funding</title>
+    <title>About Us - ALUMNI FUND</title>
     <meta name="description" content="Learn about ABU Zaria Endowment and Crowd Funding platform">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/abu_logo_white.png') }}">

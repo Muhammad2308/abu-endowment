@@ -81,6 +81,9 @@ Route::get('/about', [\App\Http\Controllers\AboutController::class, 'index'])->n
 Route::get('/projects', [\App\Http\Controllers\ProjectsController::class, 'index'])->name('projects');
 Route::get('/projects/{id}', [\App\Http\Controllers\SingleProjectController::class, 'show'])->name('project.single');
 
+// Projects page
+Route::view('/projects', 'projects')->name('projects');
+
 // Admin root route - redirect based on authentication status
 Route::get('/admin', function () {
     if (auth()->check()) {

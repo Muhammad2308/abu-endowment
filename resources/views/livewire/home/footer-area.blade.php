@@ -17,7 +17,7 @@
                                 <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                     <img src="{{ asset('abu_logo.png') }}" alt="ABU Logo" style="height: 30px; width: auto; filter: brightness(0) invert(1);">
                                 </div>
-                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">ABU Endowment Fund</span>
+                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">ALUMNI FUND</span>
                             </a>
                         </div>
                         <p style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; max-width: 400px;">
