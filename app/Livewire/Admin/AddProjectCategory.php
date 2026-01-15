@@ -42,13 +42,16 @@ class AddProjectCategory extends Component
 
     public function saveCategory()
     {
+        $this->department_id = $this->department_id ?: null;
+        $this->faculty_id = $this->faculty_id ?: null;
+
         $this->validate();
 
         ProjectCategory::create([
             'name' => $this->name,
             'description' => $this->description,
-            'department_id' => $this->department_id,
-            'faculty_id' => $this->faculty_id,
+            'department_id' => $this->department_id ?: null,
+            'faculty_id' => $this->faculty_id ?: null,
         ]);
 
         session()->flash('message', 'Category added successfully.');

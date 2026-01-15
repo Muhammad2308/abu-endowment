@@ -3,26 +3,21 @@
 namespace App\Livewire\Home;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+use App\Models\Project;
 use App\Models\Donation;
+use Illuminate\Support\Facades\Session;
 use App\Models\DonorSession;
 use App\Models\Donor;
-use App\Models\Project;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-class ProjectDonations extends Component
+class ProjectContents extends Component
 {
-    public $projects = [];
-    public $totalProjects = 0;
+    public $project;
+    public $otherProjects;
+    
+    // Donation properties
     public $showModal = false;
-    public $selectedProject = null;
-    
-    // Image gallery modal
-    public $showImageGallery = false;
-    public $galleryProject = null;
-    
-    // Donation form fields
     public $amount = 1000;
     public $customAmount;
     public $selectedAmount = 1000;
@@ -30,34 +25,25 @@ class ProjectDonations extends Component
     public $name;
     public $phone;
     
+    // Gallery properties
+    public $showImageGallery = false;
+    public $galleryProject = null;
+
     protected $listeners = ['project-payment-success' => 'verifyPayment'];
 
-    public function mount()
+    public function mount($project)
     {
-        $this->loadProjects();
+        $this->project = $project;
+        $this->loadOtherProjects();
         $this->checkAuth();
     }
-
-    public function loadProjects()
+    
+    public function loadOtherProjects()
     {
-        // Recalculate raised amount for all projects
-        $allProjects = Project::all();
-        foreach ($allProjects as $project) {
-            $totalRaised = Donation::where('project_id', $project->id)
-                                   ->whereIn('status', ['success', 'paid', 'completed'])
-                                   ->sum('amount');
-            
-            if ($project->raised != $totalRaised) {
-                $project->raised = $totalRaised;
-                $project->save();
-            }
-        }
-
-        // Load projects from database
-        $this->projects = Project::with('photos')->take(4)->get();
-        $this->totalProjects = Project::count();
+        $this->otherProjects = Project::where('id', '!=', $this->project->id)
+                                      ->take(3)
+                                      ->get();
     }
-
 
     public function checkAuth()
     {
@@ -75,30 +61,15 @@ class ProjectDonations extends Component
         }
     }
 
-    public function openDonationModal($projectId)
+    public function openDonationModal()
     {
-        $this->selectedProject = Project::find($projectId);
         $this->showModal = true;
-        $this->dispatch('open-donation-modal');
     }
 
     public function closeModal()
     {
         $this->showModal = false;
-        $this->selectedProject = null;
         $this->reset(['amount', 'customAmount', 'selectedAmount']);
-    }
-
-    public function openImageGallery($projectId)
-    {
-        $this->galleryProject = Project::with('photos')->find($projectId);
-        $this->showImageGallery = true;
-    }
-
-    public function closeImageGallery()
-    {
-        $this->showImageGallery = false;
-        $this->galleryProject = null;
     }
 
     public function updatedSelectedAmount($value)
@@ -124,11 +95,6 @@ class ProjectDonations extends Component
             'email' => 'required|email',
         ]);
 
-        if (!$this->selectedProject) {
-            session()->flash('error', 'Please select a project to donate to.');
-            return;
-        }
-
         // Create pending donation
         $reference = 'ABU_PRJ_' . time() . '_' . uniqid();
         
@@ -150,7 +116,7 @@ class ProjectDonations extends Component
 
         $donation = Donation::create([
             'donor_id' => $donorId,
-            'project_id' => $this->selectedProject->id,
+            'project_id' => $this->project->id,
             'amount' => $this->amount,
             'type' => 'project',
             'frequency' => 'onetime',
@@ -158,9 +124,6 @@ class ProjectDonations extends Component
             'status' => 'pending',
             'payment_reference' => $reference,
         ]);
-
-        // Close modal before opening Paystack
-        // $this->showModal = false; // Kept open to show progress/wait for completion
         
         // Dispatch event to frontend to open Paystack
         $this->dispatch('initiate-paystack', [
@@ -171,13 +134,13 @@ class ProjectDonations extends Component
             'currency' => 'NGN',
             'metadata' => [
                 'donation_id' => $donation->id,
-                'project_id' => $this->selectedProject->id,
-                'project_name' => $this->selectedProject->name,
+                'project_id' => $this->project->id,
+                'project_name' => $this->project->project_title,
                 'custom_fields' => [
                     [
                         'display_name' => "Project",
                         'variable_name' => "project_name",
-                        'value' => $this->selectedProject->name
+                        'value' => $this->project->project_title
                     ]
                 ]
             ]
@@ -210,16 +173,11 @@ class ProjectDonations extends Component
                             'paid_at' => now(),
                         ]);
 
-                        // Update Project Raised Amount - Recalculate total from donations table
-                        if ($donation->project_id) {
-                            $project = Project::find($donation->project_id);
-                            if ($project) {
-                                $totalRaised = Donation::where('project_id', $project->id)
-                                                       ->whereIn('status', ['success', 'paid', 'completed'])
-                                                       ->sum('amount');
-                                $project->update(['raised' => $totalRaised]);
-                            }
-                        }
+                        // Update Project Raised Amount
+                        $totalRaised = Donation::where('project_id', $this->project->id)
+                                               ->whereIn('status', ['success', 'paid', 'completed'])
+                                               ->sum('amount');
+                        $this->project->update(['raised' => $totalRaised]);
                         
                         // Close the modal
                         $this->showModal = false;
@@ -227,8 +185,8 @@ class ProjectDonations extends Component
                         // Flash success message for toast
                         session()->flash('message', 'Thank you for your donation! Your support means the world to us.');
                         
-                        // Redirect to home page
-                        return redirect()->to('/');
+                        // Refresh page to show updated raised amount
+                        return redirect()->route('project.single', ['id' => $this->project->id]);
                     }
                 } else {
                     $this->dispatch('show-toast', [
@@ -245,9 +203,22 @@ class ProjectDonations extends Component
             ]);
         }
     }
+    
+    public function openImageGallery($projectId)
+    {
+        // For other projects section
+        $this->galleryProject = Project::with('photos')->find($projectId);
+        $this->showImageGallery = true;
+    }
+
+    public function closeImageGallery()
+    {
+        $this->showImageGallery = false;
+        $this->galleryProject = null;
+    }
 
     public function render()
     {
-        return view('livewire.home.project-donations');
+        return view('livewire.home.project-contents');
     }
 }

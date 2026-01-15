@@ -31,11 +31,11 @@
                             </div>
                             <div class="d-flex align-items-center mb-3">
                                 <i class="fas fa-envelope mr-3" style="color: #10b981;"></i>
-                                <a href="mailto:contact@abu-endowment.cloud" style="color: #d1d5db; font-size: 0.95rem; text-decoration: none;">contact@abu-endowment.cloud</a>
+                                <a href="mailto:contact@abu-endowment.cloud" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none;">contact@abu-endowment.cloud</a>
                             </div>
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-phone-alt mr-3" style="color: #10b981;"></i>
-                                <a href="tel:+234800ABUFUND" style="color: #d1d5db; font-size: 0.95rem; text-decoration: none;">+234 800 ABU FUND</a>
+                                <a href="tel:+234800ABUFUND" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none;">+234 800 ABU FUND</a>
                             </div>
                         </div>
                     </div>
@@ -46,11 +46,11 @@
                     <div class="footer_widget">
                         <h4 style="color: #fff; font-size: 1rem; font-weight: 600; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Quick Links</h4>
                         <ul class="list-unstyled">
-                            <li class="mb-3"><a href="{{ url('/') }}" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Home</a></li>
-                            <li class="mb-3"><a href="{{ route('about') }}" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">About</a></li>
-                            <li class="mb-3"><a href="#" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Projects</a></li>
-                            <li class="mb-3"><a href="#make-donation" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Donate</a></li>
-                            <li class="mb-3"><a href="#" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Contact</a></li>
+                            <li class="mb-3"><a href="{{ url('/') }}" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Home</a></li>
+                            <li class="mb-3"><a href="{{ route('about') }}" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">About</a></li>
+                            <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Projects</a></li>
+                            <li class="mb-3"><a href="#make-donation" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Donate</a></li>
+                            <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Contact</a></li>
                         </ul>
                     </div>
                 </div>
@@ -60,9 +60,9 @@
                     <div class="footer_widget">
                         <h4 style="color: #fff; font-size: 1rem; font-weight: 600; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Legal</h4>
                         <ul class="list-unstyled">
-                            <li class="mb-3"><a href="#" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Privacy Policy</a></li>
-                            <li class="mb-3"><a href="#" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Terms of Service</a></li>
-                            <li class="mb-3"><a href="#" style="color: #d1d5db; text-decoration: none; transition: color 0.3s;">Cookie Policy</a></li>
+                            <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Privacy Policy</a></li>
+                            <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Terms of Service</a></li>
+                            <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Cookie Policy</a></li>
                         </ul>
                     </div>
                 </div>
@@ -106,4 +106,23 @@
             </div>
         </div>
     </div>
+
+    <style>
+        /* Footer Typography */
+        .footer h4,
+        .footer_logo span {
+            font-family: 'Merriweather', serif !important;
+        }
+
+        .footer .list-unstyled li a {
+            font-family: 'IBM Plex Mono', monospace !important;
+        }
+
+        .footer p, 
+        .contact_info span, 
+        .contact_info a,
+        .copy-right_text {
+            font-family: 'Inter', sans-serif !important;
+        }
+    </style>
 </footer>

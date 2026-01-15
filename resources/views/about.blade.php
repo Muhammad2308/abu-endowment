@@ -6,7 +6,7 @@
     <title>About Us - ABU Endowment & Crowd Funding</title>
     <meta name="description" content="Learn about ABU Zaria Endowment and Crowd Funding platform">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/favicon.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/abu_logo_white.png') }}">
     
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
@@ -25,7 +25,7 @@
 
 <body>
     <!-- Header -->
-    @livewire('home.header-section')
+    @livewire('home.header-pages')
     
     @livewire('home.auth-modal')
     

@@ -51,7 +51,7 @@ style="background: #ffffff;">
                             
                             <!-- Screen -->
                             <div style="background: #fff; border-radius: 30px; overflow: hidden; position: relative;">
-                                <img src="{{ asset('img/app-screenshot.png') }}" alt="ABU Endowment App" style="width: 100%; display: block; border-radius: 30px;">
+                                <img src="{{ asset('img/mobile-app.png') }}" alt="ABU Endowment App" style="width: 100%; display: block; border-radius: 30px;">
                             </div>
                             
                             <!-- Home Button -->

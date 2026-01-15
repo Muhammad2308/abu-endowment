@@ -1,4 +1,4 @@
-<div class="about_hero_area" style="position: relative; height: 450px; background: url('{{ asset('img/about_hero.png') }}') no-repeat center center/cover;">
+<div class="about_hero_area" style="position: relative; height: 450px; background: url('{{ asset('img/about-banner.png') }}') no-repeat center center/cover;">
     <!-- Overlay -->
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, rgba(6, 78, 59, 0.9) 0%, rgba(6, 78, 59, 0.4) 100%);"></div>
 

@@ -78,6 +78,8 @@ Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 // About page
 Route::get('/about', [\App\Http\Controllers\AboutController::class, 'index'])->name('about');
+Route::get('/projects', [\App\Http\Controllers\ProjectsController::class, 'index'])->name('projects');
+Route::get('/projects/{id}', [\App\Http\Controllers\SingleProjectController::class, 'show'])->name('project.single');
 
 // Admin root route - redirect based on authentication status
 Route::get('/admin', function () {
@@ -109,6 +111,7 @@ Route::prefix('admin')->group(function () {
         // Projects management
         Route::get('/projects', [ProjectController::class, 'index'])->name('admin.projects');
         Route::get('/projects/donations', [\App\Http\Controllers\ProjectController::class, 'donationsOverview'])->name('admin.projects.donations');
+        Route::get('/projects/{project}/details', \App\Livewire\Admin\ViewProjectDetails::class)->name('admin.project-details');
         
         // Project Categories
         Route::get('/project-categories', [\App\Http\Controllers\Admin\ProjectCategoryController::class, 'index'])->name('admin.project-categories.index');

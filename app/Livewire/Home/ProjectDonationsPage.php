@@ -10,11 +10,12 @@ use App\Models\Donation;
 use App\Models\DonorSession;
 use App\Models\Donor;
 use App\Models\Project;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 
-class ProjectDonations extends Component
+class ProjectDonationsPage extends Component
 {
     public $projects = [];
-    public $totalProjects = 0;
     public $showModal = false;
     public $selectedProject = null;
     
@@ -30,8 +31,6 @@ class ProjectDonations extends Component
     public $name;
     public $phone;
     
-    protected $listeners = ['project-payment-success' => 'verifyPayment'];
-
     public function mount()
     {
         $this->loadProjects();
@@ -54,8 +53,7 @@ class ProjectDonations extends Component
         }
 
         // Load projects from database
-        $this->projects = Project::with('photos')->take(4)->get();
-        $this->totalProjects = Project::count();
+        $this->projects = Project::with('photos')->get();
     }
 
 
@@ -184,6 +182,7 @@ class ProjectDonations extends Component
         ]);
     }
 
+    #[On('project-payment-success')]
     public function verifyPayment($data = null)
     {
         if (!$data) {
@@ -224,11 +223,14 @@ class ProjectDonations extends Component
                         // Close the modal
                         $this->showModal = false;
                         
-                        // Flash success message for toast
-                        session()->flash('message', 'Thank you for your donation! Your support means the world to us.');
+                        // Refresh projects to show updated progress
+                        $this->loadProjects();
                         
-                        // Redirect to home page
-                        return redirect()->to('/');
+                        // Flash success message for toast
+                        $this->dispatch('show-toast', [
+                            'type' => 'success',
+                            'message' => 'Thank you for your donation! Your support means the world to us.'
+                        ]);
                     }
                 } else {
                     $this->dispatch('show-toast', [
@@ -248,6 +250,6 @@ class ProjectDonations extends Component
 
     public function render()
     {
-        return view('livewire.home.project-donations');
+        return view('livewire.home.project-donations-page');
     }
 }

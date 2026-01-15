@@ -61,14 +61,18 @@ class EditProjectCategory extends Component
     {
         // Update validation rule to ignore current category
         $this->rules['name'] = 'required|string|max:255|unique:project_categories,name,' . $this->categoryId;
+        
+        $this->department_id = $this->department_id ?: null;
+        $this->faculty_id = $this->faculty_id ?: null;
+
         $this->validate();
 
         $category = ProjectCategory::findOrFail($this->categoryId);
         $category->update([
             'name' => $this->name,
             'description' => $this->description,
-            'department_id' => $this->department_id,
-            'faculty_id' => $this->faculty_id,
+            'department_id' => $this->department_id ?: null,
+            'faculty_id' => $this->faculty_id ?: null,
         ]);
 
         session()->flash('message', 'Category updated successfully.');
