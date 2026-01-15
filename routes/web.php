@@ -116,6 +116,9 @@ Route::prefix('admin')->group(function () {
         // Project Categories
         Route::get('/project-categories', [\App\Http\Controllers\Admin\ProjectCategoryController::class, 'index'])->name('admin.project-categories.index');
         
+        // Reports
+        Route::view('/reports', 'admin.reports.index')->name('admin.reports.index');
+        
         // Donor statistics
         Route::get('/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
         

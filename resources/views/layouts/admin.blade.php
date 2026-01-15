@@ -225,6 +225,11 @@
                                     <i class="fas fa-heart mr-3 flex-shrink-0 h-4 w-4"></i>
                                     Donations Overview
                                 </a>
+                                <a href="{{ route('admin.reports.index') }}" 
+                                   class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.reports.*') ? 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900 dark:text-indigo-100' : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white' }}">
+                                    <i class="fas fa-file-alt mr-3 flex-shrink-0 h-4 w-4"></i>
+                                    Report
+                                </a>
                             </div>
                         </div>
 
