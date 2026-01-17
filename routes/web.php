@@ -123,7 +123,7 @@ Route::prefix('admin')->group(function () {
         Route::view('/reports', 'admin.reports.index')->name('admin.reports.index');
         
         // Donor statistics
-        Route::get('/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
+        Route::get('/statistics', \App\Livewire\Admin\StatisticsManager::class)->name('admin.statistics');
         
         // Email/SMS management
         // Email/SMS management

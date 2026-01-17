@@ -9,6 +9,7 @@ use App\Models\Donor;
 use App\Models\Donation;
 use App\Models\Project;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class SpecificDataSeeder extends Seeder
@@ -50,6 +51,7 @@ class SpecificDataSeeder extends Seeder
         
         $faculties = Faculty::whereIn('current_name', $allowedFaculties)->with('departments')->get();
 
+        /* 
         // 3. Seed Donations per Department
         $this->command->info("Seeding donatons for " . $faculties->count() . " faculties...");
 
@@ -84,6 +86,52 @@ class SpecificDataSeeder extends Seeder
                         'type' => 'once',
                         'frequency' => 'once',
                         'endowment' => $faker->randomElement(['yes', 'no']),
+                    ]);
+                }
+            }
+        }
+        */
+
+        // 4. Seed Projects and Project Donations
+        $this->command->info("Seeding Projects and Project Donations...");
+        
+        $projects = [
+            'Student Hostel Renovation' => 'Renovation of Danfodio and ICSA halls.',
+            'Digital Library Fund' => 'Equipping the main library with 500 new computers.',
+            'Solar Power Initiative' => 'Providing 24/7 power to the senate building.',
+            'Indigent Student Scholarship' => 'Supporting 1000 students with tuition fees.',
+        ];
+
+        foreach ($projects as $title => $desc) {
+            $project = Project::firstOrCreate(
+                ['project_title' => $title],
+                [
+                    'project_description' => $desc,
+                    'target' => 50000000,
+                    'raised' => 0,
+                    'status' => 'active',
+                    'category_id' => 1, // Assuming category 1 exists or is nullable, but safer to rely on ID 1 usually being seeded or generic
+                ]
+            );
+
+            // Create 5-10 donations for this project
+            $numDonations = rand(5, 10);
+            
+            for ($i = 0; $i < $numDonations; $i++) {
+                // Get a random donor (we just seeded many)
+                $donor = Donor::inRandomOrder()->first();
+                
+                if ($donor) {
+                    Donation::create([
+                        'donor_id' => $donor->id,
+                        'project_id' => $project->id,
+                        'amount' => $faker->numberBetween(10000, 500000),
+                        'status' => 'paid', // Ensure they are counted
+                        'payment_reference' => strtoupper(uniqid('REF-PROJ-')),
+                        'created_at' => $faker->dateTimeBetween('-6 months', 'now'),
+                        'type' => 'once',
+                        'frequency' => 'once',
+                        'endowment' => 'no',
                     ]);
                 }
             }

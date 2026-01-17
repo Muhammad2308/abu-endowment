@@ -13,9 +13,7 @@ use App\Models\Donor;
 
 class MakeDonationArea extends Component
 {
-    public $amount = 1000;
-    public $customAmount;
-    public $selectedAmount = 1000;
+    public $amount;
     
     // User details
     public $email;
@@ -43,22 +41,6 @@ class MakeDonationArea extends Component
                 $this->email = $donorSession->username;
             }
         }
-    }
-
-    public function updatedSelectedAmount($value)
-    {
-        if ($value === 'custom') {
-            $this->amount = $this->customAmount;
-        } else {
-            $this->amount = $value;
-            $this->customAmount = null;
-        }
-    }
-
-    public function updatedCustomAmount($value)
-    {
-        $this->selectedAmount = 'custom';
-        $this->amount = $value;
     }
 
     public function donate()

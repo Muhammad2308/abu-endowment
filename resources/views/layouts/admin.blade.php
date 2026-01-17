@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') - ABU Endowment</title>
+    <title>@yield('title', 'Admin Dashboard') - Alumni Giving</title>
     <link rel="icon" href="{{ asset('icon/favicon-32x32.png') }}" type="image/png">
     
     <!-- Tailwind CSS -->
@@ -98,7 +98,7 @@
             <div class="flex items-center justify-center h-20 border-b border-slate-700/50">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-white font-bold text-xl tracking-wide">
                     <img src="{{ asset('icon/Header.png') }}" alt="Logo" class="h-8 w-auto">
-                    <span>ABU Endowment</span>
+                    <span>Alumni Giving</span>
                 </a>
             </div>
 
@@ -139,7 +139,7 @@
                 <!-- Statistics -->
                 <a href="{{ route('admin.statistics') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.statistics') ? 'active' : '' }}">
                     <div class="w-8 flex justify-center"><i class="fas fa-chart-pie text-lg"></i></div>
-                    <span>Statistics</span>
+                    <span>Analytics</span>
                 </a>
 
                 <!-- Notifications -->
