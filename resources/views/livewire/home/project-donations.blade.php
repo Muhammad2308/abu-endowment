@@ -187,49 +187,14 @@
                             @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
 
-                        <!-- Amount Selection -->
+                        <!-- Donation Amount -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-3" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Select Donation Amount</label>
-                            <div class="amount-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px;">
-                                
-                                <label class="amount-option" style="cursor: pointer;">
-                                    <input type="radio" wire:model.live="selectedAmount" value="1000" class="d-none">
-                                    <div class="amount-card {{ $selectedAmount == 1000 ? 'active' : '' }}">
-                                        <span class="amount-value" style="font-family: 'IBM Plex Mono', monospace;">₦1k</span>
-                                    </div>
-                                </label>
-
-                                <label class="amount-option" style="cursor: pointer;">
-                                    <input type="radio" wire:model.live="selectedAmount" value="5000" class="d-none">
-                                    <div class="amount-card {{ $selectedAmount == 5000 ? 'active' : '' }}">
-                                        <span class="amount-value" style="font-family: 'IBM Plex Mono', monospace;">₦5k</span>
-                                    </div>
-                                </label>
-
-                                <label class="amount-option" style="cursor: pointer;">
-                                    <input type="radio" wire:model.live="selectedAmount" value="10000" class="d-none">
-                                    <div class="amount-card {{ $selectedAmount == 10000 ? 'active' : '' }}">
-                                        <span class="amount-value" style="font-family: 'IBM Plex Mono', monospace;">₦10k</span>
-                                    </div>
-                                </label>
-
-                                <label class="amount-option" style="cursor: pointer;">
-                                    <input type="radio" wire:model.live="selectedAmount" value="custom" class="d-none">
-                                    <div class="amount-card {{ $selectedAmount == 'custom' ? 'active' : '' }}">
-                                        <span class="amount-value" style="font-family: 'IBM Plex Mono', monospace;">Custom</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Custom Amount Input (Conditional) -->
-                        <div class="form-group mb-4" x-data="{ show: @entangle('selectedAmount') }" x-show="show == 'custom'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Enter Custom Amount</label>
+                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Donation Amount</label>
                             <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
                                 </div>
-                                <input type="number" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="e.g. 25000" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
+                                <input type="number" wire:model="amount" class="form-control border-0 bg-transparent" placeholder="Enter amount (e.g. 5000)" required min="100" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
                             </div>
                             @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
@@ -248,36 +213,6 @@
             </div>
         </div>
         <style>
-            .amount-card {
-                background: #fff;
-                border: 2px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 15px 10px;
-                text-align: center;
-                transition: all 0.2s ease;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .amount-card:hover {
-                border-color: #227722;
-                background: #ecfdf5;
-            }
-
-            .amount-card.active {
-                background: #ecfdf5;
-                border-color: #227722;
-                color: #227722;
-                box-shadow: 0 4px 12px rgba(34, 119, 34, 0.15);
-            }
-
-            .amount-value {
-                font-weight: 700;
-                font-size: 1.1rem;
-            }
-
             .input-group:focus-within {
                 border-color: #227722 !important;
                 box-shadow: 0 0 0 3px rgba(34, 119, 34, 0.1);

@@ -1,4 +1,4 @@
-<footer class="footer" style="background-color: #022c22; color: #fff; position: relative; padding-top: 80px; font-family: 'Inter', sans-serif;">
+<footer class="footer" style="background-color: #022c22; color: #fff; position: relative; padding-top: 80px; font-weight: 500;">
     <!-- Wave Shape -->
     <div style="position: absolute; top: 0; left: 0; width: 100%; overflow: hidden; line-height: 0;">
         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: calc(100% + 1.3px); height: 60px;">
@@ -17,7 +17,7 @@
                                 <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                     <img src="{{ asset('abu_logo.png') }}" alt="ABU Logo" style="height: 30px; width: auto; filter: brightness(0) invert(1);">
                                 </div>
-                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">ALUMNI FUND</span>
+                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">Alumni Giving</span>
                             </a>
                         </div>
                         <p style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; max-width: 400px;">
@@ -35,7 +35,7 @@
                             </div>
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-phone-alt mr-3" style="color: #10b981;"></i>
-                                <a href="tel:+234800ABUFUND" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none;">+234 800 ABU FUND</a>
+                                <a href="tel:+234800ABUFUND" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none;">+234 800 Alumni Giving</a>
                             </div>
                         </div>
                     </div>
@@ -94,7 +94,7 @@
             <div class="row align-items-center">
                 <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
                     <p style="color: #9ca3af; font-size: 0.9rem; margin: 0;">
-                        &copy; <script>document.write(new Date().getFullYear());</script> ABU Endowment Fund. All rights reserved.
+                        &copy; <script>document.write(new Date().getFullYear());</script> Alumni Giving. All rights reserved.
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-right">
@@ -107,22 +107,5 @@
         </div>
     </div>
 
-    <style>
-        /* Footer Typography */
-        .footer h4,
-        .footer_logo span {
-            font-family: 'Merriweather', serif !important;
-        }
 
-        .footer .list-unstyled li a {
-            font-family: 'IBM Plex Mono', monospace !important;
-        }
-
-        .footer p, 
-        .contact_info span, 
-        .contact_info a,
-        .copy-right_text {
-            font-family: 'Inter', sans-serif !important;
-        }
-    </style>
 </footer>

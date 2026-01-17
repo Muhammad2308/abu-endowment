@@ -23,9 +23,7 @@ class ProjectDonations extends Component
     public $galleryProject = null;
     
     // Donation form fields
-    public $amount = 1000;
-    public $customAmount;
-    public $selectedAmount = 1000;
+    public $amount;
     public $email;
     public $name;
     public $phone;
@@ -95,7 +93,7 @@ class ProjectDonations extends Component
     {
         $this->showModal = false;
         $this->selectedProject = null;
-        $this->reset(['amount', 'customAmount', 'selectedAmount']);
+        $this->reset(['amount']);
     }
 
     public function openImageGallery($projectId)
@@ -108,22 +106,6 @@ class ProjectDonations extends Component
     {
         $this->showImageGallery = false;
         $this->galleryProject = null;
-    }
-
-    public function updatedSelectedAmount($value)
-    {
-        if ($value === 'custom') {
-            $this->amount = $this->customAmount;
-        } else {
-            $this->amount = $value;
-            $this->customAmount = null;
-        }
-    }
-
-    public function updatedCustomAmount($value)
-    {
-        $this->selectedAmount = 'custom';
-        $this->amount = $value;
     }
 
     public function donate()
