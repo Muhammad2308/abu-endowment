@@ -117,6 +117,12 @@
                     <span>Donors</span>
                 </a>
 
+                <!-- Reports -->
+                <a href="{{ route('admin.reports.index') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                    <div class="w-8 flex justify-center"><i class="fas fa-file-alt text-lg"></i></div>
+                    <span>Reports</span>
+                </a>
+
                 <!-- Projects Dropdown -->
                 <div x-data="{ open: {{ request()->routeIs('admin.projects*') || request()->routeIs('admin.project-categories*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" class="nav-link w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.projects*') || request()->routeIs('admin.project-categories*') ? 'text-white bg-white/5' : '' }}">
@@ -261,6 +267,7 @@
             </main>
         </div>
     </div>
+
 
     @livewireScripts
     <livewire:edit-profile-modal />

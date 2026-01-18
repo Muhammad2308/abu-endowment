@@ -17,7 +17,7 @@
                                 <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                     <img src="{{ asset('abu_logo.png') }}" alt="ABU Logo" style="height: 30px; width: auto; filter: brightness(0) invert(1);">
                                 </div>
-                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">ALUMNI FUND</span>
+                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">Alumni Giving</span>
                             </a>
                         </div>
                         <p style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; max-width: 400px;">
@@ -44,9 +44,10 @@
                 <!-- Column 2: Quick Links -->
                 <div class="col-lg-2 col-md-3 col-6 mb-4 mb-lg-0">
                     <div class="footer_widget">
-                        <h4 style="color: #fff; font-size: 1rem; font-weight: 600; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Quick Links</h4>
+                        <h4 style="color: #fff; font-size: 1rem; text-decoration: none; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Quick Links</h4>
                         <ul class="list-unstyled">
-                            <li class="mb-3"><a href="{{ url('/') }}" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Home</a></li>
+                            <li class="mb-3"><a href="{{ url('/') }}" 
+                            style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Home</a></li>
                             <li class="mb-3"><a href="{{ route('about') }}" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">About</a></li>
                             <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Projects</a></li>
                             <li class="mb-3"><a href="#make-donation" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Donate</a></li>
@@ -58,7 +59,7 @@
                 <!-- Column 3: Legal -->
                 <div class="col-lg-2 col-md-3 col-6 mb-4 mb-lg-0">
                     <div class="footer_widget">
-                        <h4 style="color: #fff; font-size: 1rem; font-weight: 600; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Legal</h4>
+                        <h4 style="color: #fff; font-size: 1rem;  text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Legal</h4>
                         <ul class="list-unstyled">
                             <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Privacy Policy</a></li>
                             <li class="mb-3"><a href="#" style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; text-decoration: none; transition: color 0.3s;">Terms of Service</a></li>
@@ -70,10 +71,10 @@
                 <!-- Column 4: Connect -->
                 <div class="col-lg-3 col-md-6">
                     <div class="footer_widget">
-                        <h4 style="color: #fff; font-size: 1rem; font-weight: 600; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Connect With Us</h4>
+                        <h4 style="color: #fff; font-size: 1rem;  text-transform: uppercase; margin-bottom: 25px; letter-spacing: 0.5px;">Connect With Us</h4>
                         <div class="social_links d-flex gap-3">
                             <a href="#" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; transition: all 0.3s; margin-right: 10px;">
-                                <i class="fab fa-google"></i>
+                                <i class="fab fa-facebook-f"></i>
                             </a>
                             <a href="#" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; transition: all 0.3s; margin-right: 10px;">
                                 <i class="fab fa-twitter"></i>
@@ -114,13 +115,12 @@
             font-family: 'Merriweather', serif !important;
         }
 
-        .footer .list-unstyled li a {
-            font-family: 'IBM Plex Mono', monospace !important;
-        }
+
 
         .footer p, 
         .contact_info span, 
         .contact_info a,
+        .footer .list-unstyled li a,
         .copy-right_text {
             font-family: 'Inter', sans-serif !important;
         }

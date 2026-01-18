@@ -272,83 +272,104 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
                 <!-- Modal Header -->
-                <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border: none; padding: 1.5rem;">
-                    <h5 class="modal-title text-white font-weight-bold">Donate to {{ $project->project_title }}</h5>
-                    <button type="button" class="close text-white" wire:click="closeModal" style="opacity: 1;">
+                <div class="modal-header" style="background: white; border-bottom: 1px solid #f0f0f0; padding: 1.5rem;">
+                    <h5 class="modal-title font-weight-bold text-dark" style="font-family: 'Merriweather', serif;">Donate to {{ $project->project_title }}</h5>
+                    <button type="button" class="close text-muted" wire:click="closeModal" style="opacity: 1;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 
                 <!-- Modal Body -->
-                <div class="modal-body" style="padding: 2rem;">
+                <div class="modal-body" style="padding: 2rem; background: #fff;">
+                    <p class="text-center text-muted mb-4" style="font-family: 'Inter', sans-serif;">Your contribution makes a difference</p>
+                    
                     <form wire:submit.prevent="donate">
                         <!-- Email Input -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-600 mb-2" style="color: #374151;">Email Address</label>
+                            <label class="font-weight-bold mb-2" style="color: #374151; font-family: 'Merriweather', serif;">Email Address</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text" style="background: #f3f4f6; border: 1px solid #d1d5db; border-right: none;">
+                                    <span class="input-group-text bg-light border-0">
                                         <i class="fa fa-envelope text-muted"></i>
                                     </span>
                                 </div>
-                                <input type="email" wire:model="email" class="form-control" placeholder="your@email.com" required
-                                       style="border-left: none; padding: 12px; border-color: #d1d5db;">
+                                <input type="email" wire:model="email" class="form-control bg-light border-0" placeholder="your@email.com" required
+                                       style="padding: 12px; border-radius: 0 10px 10px 0;">
                             </div>
                             @error('email') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                         </div>
 
                         <!-- Amount Selection -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-600 mb-3" style="color: #374151;">Select Amount</label>
-                            <div class="row no-gutters mb-3" style="gap: 0.5rem;">
+                            <label class="font-weight-bold mb-3" style="color: #374151; font-family: 'Merriweather', serif;">Select Donation Amount</label>
+                            <div class="row no-gutters" style="gap: 10px;">
                                 <div class="col">
                                     <input type="radio" id="modal_blns_1" wire:model.live="selectedAmount" value="1000" class="d-none">
-                                    <label for="modal_blns_1" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                        1k
+                                    <label for="modal_blns_1" class="btn btn-outline-success btn-block mb-0 font-weight-bold {{ $selectedAmount == 1000 ? 'active' : '' }}" 
+                                           style="padding: 12px; border-radius: 10px; border: 2px solid {{ $selectedAmount == 1000 ? '#227722' : '#e5e7eb' }}; color: {{ $selectedAmount == 1000 ? '#227722' : '#6b7280' }}; background: {{ $selectedAmount == 1000 ? '#f0fdf4' : 'transparent' }};">
+                                        ₦1k
                                     </label>
                                 </div>
                                 <div class="col">
                                     <input type="radio" id="modal_blns_2" wire:model.live="selectedAmount" value="5000" class="d-none">
-                                    <label for="modal_blns_2" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                        5k
+                                    <label for="modal_blns_2" class="btn btn-outline-success btn-block mb-0 font-weight-bold {{ $selectedAmount == 5000 ? 'active' : '' }}" 
+                                           style="padding: 12px; border-radius: 10px; border: 2px solid {{ $selectedAmount == 5000 ? '#227722' : '#e5e7eb' }}; color: {{ $selectedAmount == 5000 ? '#227722' : '#6b7280' }}; background: {{ $selectedAmount == 5000 ? '#f0fdf4' : 'transparent' }};">
+                                        ₦5k
                                     </label>
                                 </div>
                                 <div class="col">
                                     <input type="radio" id="modal_blns_3" wire:model.live="selectedAmount" value="10000" class="d-none">
-                                    <label for="modal_blns_3" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                        10k
+                                    <label for="modal_blns_3" class="btn btn-outline-success btn-block mb-0 font-weight-bold {{ $selectedAmount == 10000 ? 'active' : '' }}" 
+                                           style="padding: 12px; border-radius: 10px; border: 2px solid {{ $selectedAmount == 10000 ? '#227722' : '#e5e7eb' }}; color: {{ $selectedAmount == 10000 ? '#227722' : '#6b7280' }}; background: {{ $selectedAmount == 10000 ? '#f0fdf4' : 'transparent' }};">
+                                        ₦10k
                                     </label>
                                 </div>
-                                <div class="col">
-                                    <input type="radio" id="modal_Other" wire:model.live="selectedAmount" value="custom" class="d-none">
-                                    <label for="modal_Other" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                                        Other
-                                    </label>
-                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <input type="radio" id="modal_Other" wire:model.live="selectedAmount" value="custom" class="d-none">
+                                <label for="modal_Other" class="btn btn-outline-success btn-block mb-0 font-weight-bold {{ $selectedAmount == 'custom' ? 'active' : '' }}" 
+                                       style="padding: 12px; border-radius: 10px; border: 2px solid {{ $selectedAmount == 'custom' ? '#227722' : '#e5e7eb' }}; color: {{ $selectedAmount == 'custom' ? '#227722' : '#6b7280' }}; background: {{ $selectedAmount == 'custom' ? '#f0fdf4' : 'transparent' }};">
+                                    Custom
+                                </label>
                             </div>
                         </div>
 
                         <!-- Custom Amount Input -->
+                        @if($selectedAmount === 'custom')
                         <div class="form-group mb-4">
-                            <label class="font-weight-600 mb-2" style="color: #374151;">Custom Amount</label>
+                            <label class="font-weight-bold mb-2" style="color: #374151; font-family: 'Merriweather', serif;">Custom Amount</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text" style="background: #f3f4f6; border: 1px solid #d1d5db; border-right: none; font-weight: 600;">
+                                    <span class="input-group-text bg-light border-0 font-weight-bold">
                                         ₦
                                     </span>
                                 </div>
-                                <input type="number" wire:model.live="customAmount" class="form-control" placeholder="Enter custom amount"
-                                       style="border-left: none; padding: 12px; border-color: #d1d5db;">
+                                <input type="number" wire:model.live="customAmount" class="form-control bg-light border-0" placeholder="Enter amount"
+                                       style="padding: 12px; border-radius: 0 10px 10px 0;">
                             </div>
                             @error('amount') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                         </div>
+                        @endif
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-block btn-lg" 
-                                style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
-                            Donate ₦{{ number_format($amount, 2) }}
-                            <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                        </button>
+                        <div class="mt-5">
+                            @if($paymentReference)
+                                <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
+                                    Verify Payment <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
+                                </button>
+                                <p class="text-center mt-2 text-muted small">
+                                    Click this if the payment window closed but this modal didn't.
+                                </p>
+                            @else
+                                <button type="submit" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #227722 0%, #1a5c1a 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(34, 119, 34, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
+                                    Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
+                                </button>
+                                <p class="text-center mt-3 text-muted small" style="font-family: 'Inter', sans-serif;">
+                                    <i class="fa fa-lock mr-1"></i> Secure payment powered by Paystack
+                                </p>
+                            @endif
+                        </div>
                     </form>
                 </div>
             </div>
@@ -382,11 +403,34 @@
                         console.log('Payment window closed.');
                     },
                     callback: function(response){
-                        Livewire.dispatch('project-payment-success', { reference: response.reference });
+                        alert('Payment successful! Verifying transaction ' + response.reference);
+                        console.log('Paystack success, calling verifyPayment with reference:', response.reference);
+                        // Try direct component call using ID
+                        let component = Livewire.find('{{ $this->getId() }}');
+                        if (component) {
+                            component.call('verifyPayment', response.reference);
+                        } else {
+                            console.error('Livewire component not found');
+                            // Fallback to dispatch
+                            Livewire.dispatch('project-payment-success', { reference: response.reference });
+                        }
                     }
                 });
                 
                 handler.openIframe();
+            });
+
+            Livewire.on('close-donation-modal', () => {
+                const modal = document.getElementById('donationModal');
+                if (modal) {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    const backdrops = document.getElementsByClassName('modal-backdrop');
+                    while(backdrops.length > 0){
+                        backdrops[0].parentNode.removeChild(backdrops[0]);
+                    }
+                }
             });
         });
     </script>

@@ -33,16 +33,17 @@
         </div>
 
         <!-- Main Header -->
-        <div id="sticky-header" class="main-header-area" style="background: #022c22; padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div id="sticky-header" class="main-header-area" style="background: #227722; padding: 15px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
             <div class="container-fluid">
                 <div class="row align-items-center">
                     <!-- Logo Section -->
                     <div class="col-6 col-lg-3">
                         <div class="logo">
                             <a href="{{ url('/') }}" class="d-flex align-items-center" style="text-decoration: none;">
-                                <img src="{{ asset('abu_logo.png') }}" alt="ABU Endowment" style="height: 50px; width: auto; margin-right: 15px; filter: brightness(0) invert(1);">
+                                <img src="{{ asset('abu_logo.png') }}" alt="ALUMNI FUND" style="height: 50px; width: auto; margin-right: 15px; filter: brightness(0) invert(1);">
                                 <div class="logo-text" style="display: flex; flex-direction: column; line-height: 1.2;">
-                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">Alumni Giving</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">ABU Alumni Giving</span>
+                                    <!-- <span style="font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.9); letter-spacing: 0.5px;">& Crowd Funding</span> -->
                                 </div>
                             </a>
                         </div>
@@ -147,7 +148,7 @@
         }
         .slicknav_nav a:hover {
             background: #f9fafb;
-            color: #022c22 !important;
+            color: #227722 !important;
         }
         
         /* Hamburger Menu Alignment */
@@ -188,12 +189,12 @@
         }
         .header-btn-outline:hover {
             background: #fff;
-            color: #022c22;
+            color: #227722;
         }
         
         .header-btn-fill {
             background-color: #fff;
-            color: #022c22;
+            color: #227722;
             border: none;
             padding: 10px 30px;
             font-weight: 600;

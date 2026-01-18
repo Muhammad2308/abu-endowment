@@ -17,10 +17,15 @@
                     <!-- Left Side - Branding -->
                     <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-center p-0 text-white position-relative overflow-hidden">
                         <!-- Background Image with Overlay -->
+                        <!-- Background Image -->
                         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-                                    background: linear-gradient(to bottom right, rgba(6, 78, 59, 0.9), rgba(16, 185, 129, 0.8)), url('{{ asset('img/ABU SKY IMAGE.jpg') }}') center/cover no-repeat;
-                                    mix-blend-mode: multiply;
-                                    transform: scale(1.05);">
+                                    background: url('{{ asset('img/ABU SKY IMAGE.jpg') }}') center/cover no-repeat;">
+                        </div>
+
+                        <!-- Overlay -->
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+                                    background: linear-gradient(to bottom right, rgba(6, 78, 59, 0.9), rgba(16, 185, 129, 0.8));
+                                    mix-blend-mode: multiply;">
                         </div>
 
                         <!-- Slanted Divider (CSS Shape) -->

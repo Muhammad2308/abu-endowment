@@ -24,12 +24,13 @@ class ProjectContents extends Component
     public $email;
     public $name;
     public $phone;
+    public $paymentReference; // Store reference for manual verification
     
     // Gallery properties
     public $showImageGallery = false;
     public $galleryProject = null;
 
-    protected $listeners = ['project-payment-success' => 'verifyPayment'];
+    // protected $listeners = ['project-payment-success' => 'verifyPayment']; // Removed in favor of attribute
 
     public function mount($project)
     {
@@ -97,6 +98,7 @@ class ProjectContents extends Component
 
         // Create pending donation
         $reference = 'ABU_PRJ_' . time() . '_' . uniqid();
+        $this->paymentReference = $reference; // Store for manual verification
         
         // Find or create donor
         $donorId = null;
@@ -147,18 +149,25 @@ class ProjectContents extends Component
         ]);
     }
 
+    #[\Livewire\Attributes\On('project-payment-success')]
     public function verifyPayment($data = null)
     {
+        Log::info('verifyPayment called in ProjectContents', ['data' => $data]);
+
         if (!$data) {
+            Log::warning('verifyPayment called with no data');
             return;
         }
 
         $reference = is_array($data) ? $data['reference'] : $data;
+        Log::info('Verifying payment reference: ' . $reference);
         
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . config('services.paystack.secret_key'),
             ])->get("https://api.paystack.co/transaction/verify/{$reference}");
+
+            Log::info('Paystack API response status: ' . $response->status());
 
             if ($response->successful()) {
                 $paymentData = $response->json()['data'];
@@ -166,37 +175,63 @@ class ProjectContents extends Component
                 if ($paymentData['status'] === 'success') {
                     $donation = Donation::where('payment_reference', $reference)->first();
                     
-                    if ($donation && $donation->status !== 'completed') {
-                        $donation->update([
-                            'status' => 'completed',
-                            'verified_at' => now(),
-                            'paid_at' => now(),
-                        ]);
+                    if ($donation) {
+                        Log::info('Donation found: ' . $donation->id . ', Current Status: ' . $donation->status);
+                        
+                        if ($donation->status !== 'completed') {
+                            $donation->update([
+                                'status' => 'completed',
+                                'verified_at' => now(),
+                                'paid_at' => now(),
+                            ]);
+                            Log::info('Donation updated to completed');
 
-                        // Update Project Raised Amount
-                        $totalRaised = Donation::where('project_id', $this->project->id)
-                                               ->whereIn('status', ['success', 'paid', 'completed'])
-                                               ->sum('amount');
-                        $this->project->update(['raised' => $totalRaised]);
-                        
-                        // Close the modal
-                        $this->showModal = false;
-                        
-                        // Flash success message for toast
-                        session()->flash('message', 'Thank you for your donation! Your support means the world to us.');
-                        
-                        // Refresh page to show updated raised amount
-                        return redirect()->route('project.single', ['id' => $this->project->id]);
+                            // Update Project Raised Amount
+                            $totalRaised = Donation::where('project_id', $this->project->id)
+                                                   ->whereIn('status', ['success', 'paid', 'completed', 'Success', 'Paid', 'Completed'])
+                                                   ->sum('amount');
+                            $this->project->update(['raised' => $totalRaised]);
+                            Log::info('Project raised amount updated to: ' . $totalRaised);
+                            
+                            $this->showModal = false;
+                            $this->dispatch('close-donation-modal');
+                            
+                            $this->dispatch('show-toast', [
+                                'type' => 'success',
+                                'message' => 'Thank you for your donation! Your support means the world to us.'
+                            ]);
+                            
+                            // Reset form fields
+                            $this->reset(['amount', 'customAmount', 'selectedAmount', 'paymentReference']);
+                            
+                            // Refresh page to show updated raised amount
+                            // return redirect()->route('project.single', ['id' => $this->project->id]); // Removed redirect to keep modal/toast flow consistent
+                        } else {
+                            Log::info('Donation was already completed');
+                        }
+                    } else {
+                        Log::error('Donation not found for reference: ' . $reference);
+                        $this->dispatch('show-toast', [
+                            'type' => 'error',
+                            'message' => 'Donation record not found.'
+                        ]);
                     }
                 } else {
+                    Log::error('Paystack payment status is not success: ' . $paymentData['status']);
                     $this->dispatch('show-toast', [
                         'type' => 'error',
-                        'message' => 'Payment verification failed. Please contact support.'
+                        'message' => 'Payment verification failed: ' . $paymentData['status']
                     ]);
                 }
+            } else {
+                Log::error('Paystack API request failed');
+                $this->dispatch('show-toast', [
+                    'type' => 'error',
+                    'message' => 'Unable to verify payment with payment provider.'
+                ]);
             }
         } catch (\Exception $e) {
-            Log::error('Payment verification error: ' . $e->getMessage());
+            Log::error('Payment verification exception: ' . $e->getMessage());
             $this->dispatch('show-toast', [
                 'type' => 'error',
                 'message' => 'An error occurred during verification.'

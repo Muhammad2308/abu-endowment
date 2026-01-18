@@ -7,7 +7,7 @@
         <!-- Header Section -->
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Donation Statistics</h1>
+                <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Donation Analytics</h1>
                 <p class="mt-2 text-slate-500 dark:text-slate-400">Real-time insights into donation patterns and donor engagement.</p>
             </div>
             <div class="flex gap-3">
@@ -201,6 +201,7 @@
                         <h3 class="text-lg font-bold text-slate-800 dark:text-white">Local Impact</h3>
                         <p class="text-sm text-slate-500 dark:text-slate-400">Breakdown by Local Government Area</p>
                     </div>
+            
                     <div class="bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 px-3 py-1 rounded-full text-xs font-medium print:hidden">
                         Bar Chart
                     </div>
@@ -234,11 +235,6 @@
 
     <style>
         @media print {
-            /* Hide everything by default */
-            body * {
-                visibility: hidden;
-            }
-            
             /* Show only the statistics container and its children */
             #statistics-container, #statistics-container * {
                 visibility: visible;

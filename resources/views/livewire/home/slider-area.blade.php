@@ -1,7 +1,10 @@
 <div class="slider_area" style="position: relative; overflow: hidden;">
-    <div class="single_slider d-flex align-items-center" style="height: 850px; background-image: url('{{ asset('img/banner/ABU COMMUNITY LEGACY IMAGE.png') }}'); background-size: cover; background-position: center; position: relative;">
-        <!-- Dark Overlay -->
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);"></div>
+    <div class="single_slider d-flex align-items-center" style="height: 850px; position: relative; overflow: hidden;">
+        <!-- Background Image -->
+        <div style="position: absolute; inset: 0; background-image: url('{{ asset('img/banner/ABU COMMUNITY LEGACY IMAGE.png') }}'); background-size: cover; background-position: center;"></div>
+        
+        <!-- Overlay -->
+        <div style="position: absolute; inset: 0; background: linear-gradient(to bottom right, rgba(6, 78, 59, 0.9), rgba(16, 185, 129, 0.8)); mix-blend-mode: multiply;"></div>
         
         <div class="container" style="position: relative; z-index: 2;">
             <div class="row">

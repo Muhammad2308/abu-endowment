@@ -3,12 +3,13 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="text-center mb-5">
-                    <span style="background: #dcfce7; color: #227722; padding: 8px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 15px;">
+                    <!-- <span style="background: #dcfce7; color: #227722; padding: 8px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: inline-block; margin-bottom: 15px;">
                         Support Our Mission
-                    </span>
-                    <h3 style="font-size: 2.5rem; font-weight: 800; color: #227722; margin-bottom: 1rem; letter-spacing: -0.5px;">
-                        Make a Donation
+                    </span> -->
+                    <h3 style="color: #064e3b; font-size: 36px; font-weight: 700; margin-bottom: 20px; font-family: 'Playfair Display', serif;">
+                        Support Our Mission
                     </h3>
+                   
                     <p class="text-muted" style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">
                         Your generous contribution helps us continue our work and make a lasting impact in the community.
                     </p>
@@ -57,7 +58,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
                                 </div>
-                                <input type="number" wire:model="amount" class="form-control border-0 bg-transparent" placeholder="Enter amount (e.g. 5000)" required min="100" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem;">
+                                <input type="number" min="100" step="500" wire:model="amount" class="form-control border-0 bg-transparent" placeholder="Enter amount (e.g. 5000)" required min="100" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem;">
                             </div>
                             @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>

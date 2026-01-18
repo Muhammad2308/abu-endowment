@@ -42,7 +42,8 @@
                             <a href="{{ url('/') }}" class="d-flex align-items-center" style="text-decoration: none;">
                                 <img src="{{ asset('abu_logo.png') }}" alt="ALUMNI FUND" style="height: 50px; width: auto; margin-right: 15px; filter: brightness(0) invert(1);">
                                 <div class="logo-text" style="display: flex; flex-direction: column; line-height: 1.2;">
-                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">Alumni Giving</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">ABU Alumni Giving</span>
+                                    <!-- <span style="font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.9); letter-spacing: 0.5px;">& Crowd Funding</span> -->
                                 </div>
                             </a>
                         </div>
@@ -116,37 +117,21 @@
     </div>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Merriweather:wght@400;700;900&family=Playfair+Display:wght@400;500;600;700&display=swap');
-
-        /* Top Bar */
-        .header-top-bar {
-            font-family: 'Inter', sans-serif;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
 
         /* Desktop Menu Links */
         #navigation li a {
-            color: #d1d5db;
+            color: #fff;
             font-weight: 500;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            font-family: 'IBM Plex Mono', monospace;
+            font-size: 15px;
         }
         
         /* Typography Updates */
-        .logo-text span:first-child {
-            font-family: 'Times New Roman', Times, serif !important;
-            font-weight: 400 !important;
-        }
-        
+        .logo-text span:first-child,
         .header-btn-outline,
         .header-btn-fill,
-        .dropdown-item.text-danger,
-        .dropdown-item {
-            font-family: 'Merriweather', serif !important;
-        }
-
-        .logo-text span {
-            font-family: 'Inter', sans-serif !important;
+        .dropdown-item.text-danger {
+            font-family: 'Playfair Display', serif !important;
         }
 
         /* Mobile Menu Fixes */
@@ -154,7 +139,6 @@
             background: #fff;
             margin-top: 15px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            font-family: 'IBM Plex Mono', monospace;
         }
         .slicknav_nav a {
             color: #333 !important; /* Force dark color for mobile menu links */
