@@ -14,7 +14,7 @@ class ViewProjectDetails extends Component
 
     public function mount(Project $project)
     {
-        $this->project = $project;
+        $this->project = $project->load('details');
         
         // Initialize photos array
         $this->photos = [];
