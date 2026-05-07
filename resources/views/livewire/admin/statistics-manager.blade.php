@@ -249,7 +249,7 @@
             };
 
             // Chart Configuration Factory
-            function createChartConfig(type, data, options = {}) {
+            function createChartConfig(type, data, chartTypeLabel) {
                 return {
                     type: type,
                     data: {
@@ -265,17 +265,45 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        onClick: (e, activeEls, chart) => {
+                            if (activeEls.length > 0) {
+                                const index = activeEls[0].index;
+                                const metaData = data.meta ? data.meta[index] : data.labels[index];
+                                const label = encodeURIComponent(metaData);
+                                
+                                // Map chart type to route parameter
+                                let routeType = 'general';
+                                if (chartTypeLabel === 'faculties') routeType = 'faculty';
+                                if (chartTypeLabel === 'departments') routeType = 'department';
+                                if (chartTypeLabel === 'projects') routeType = 'project';
+                                if (chartTypeLabel === 'states') routeType = 'state';
+                                if (chartTypeLabel === 'lgas') routeType = 'lga';
+                                if (chartTypeLabel === 'gender') routeType = 'gender';
+
+                                if (routeType !== 'general') {
+                                    window.location.href = `/admin/analytics/details/${routeType}/${label}`;
+                                }
+                            }
+                        },
                         plugins: {
                             legend: {
                                 position: type === 'pie' ? 'right' : 'top',
                                 labels: { color: theme.colors.text }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        // Use full name in tooltip if available
+                                        const index = context[0].dataIndex;
+                                        return data.meta ? data.meta[index] : data.labels[index];
+                                    }
+                                }
                             }
                         },
                         scales: type === 'bar' ? {
                             x: { ticks: { color: theme.colors.text }, grid: { display: false } },
                             y: { ticks: { color: theme.colors.text }, grid: { color: theme.colors.grid, borderDash: [4, 4] } }
-                        } : undefined,
-                        ...options
+                        } : undefined
                     }
                 };
             }
@@ -283,19 +311,19 @@
             const chartData = @json($chartData);
             
             // Render Charts
-            if(chartData.donors) new Chart(document.getElementById('donorNameChart'), createChartConfig('bar', chartData.donors));
-            if(chartData.faculties) new Chart(document.getElementById('facultyChart'), createChartConfig('pie', chartData.faculties));
+            if(chartData.donors) new Chart(document.getElementById('donorNameChart'), createChartConfig('bar', chartData.donors, 'donors'));
+            if(chartData.faculties) new Chart(document.getElementById('facultyChart'), createChartConfig('pie', chartData.faculties, 'faculties'));
             if(chartData.departments) {
-                new Chart(document.getElementById('departmentChart'), createChartConfig('pie', chartData.departments));
-                new Chart(document.getElementById('departmentBarChart'), createChartConfig('bar', chartData.departments));
+                new Chart(document.getElementById('departmentChart'), createChartConfig('pie', chartData.departments, 'departments'));
+                new Chart(document.getElementById('departmentBarChart'), createChartConfig('bar', chartData.departments, 'departments'));
             }
             if(chartData.projects) {
-                new Chart(document.getElementById('projectChart'), createChartConfig('pie', chartData.projects));
-                new Chart(document.getElementById('projectBarChart'), createChartConfig('bar', chartData.projects));
+                new Chart(document.getElementById('projectChart'), createChartConfig('pie', chartData.projects, 'projects'));
+                new Chart(document.getElementById('projectBarChart'), createChartConfig('bar', chartData.projects, 'projects'));
             }
-            if(chartData.states) new Chart(document.getElementById('stateChart'), createChartConfig('pie', chartData.states));
-            if(chartData.lgas) new Chart(document.getElementById('lgaChart'), createChartConfig('bar', chartData.lgas));
-            if(chartData.gender) new Chart(document.getElementById('genderChart'), createChartConfig('pie', chartData.gender));
+            if(chartData.states) new Chart(document.getElementById('stateChart'), createChartConfig('pie', chartData.states, 'states'));
+            if(chartData.lgas) new Chart(document.getElementById('lgaChart'), createChartConfig('bar', chartData.lgas, 'lgas'));
+            if(chartData.gender) new Chart(document.getElementById('genderChart'), createChartConfig('pie', chartData.gender, 'gender'));
         });
     </script>
 </div>

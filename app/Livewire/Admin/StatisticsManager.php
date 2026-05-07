@@ -75,7 +75,8 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => $row->donor->full_name ?? 'Unknown',
-                    'value' => $row->total
+                    'value' => $row->total,
+                    'meta' => $row->donor->full_name ?? 'Unknown'
                 ];
             });
 
@@ -92,7 +93,8 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => $row->name,
-                    'value' => $row->total
+                    'value' => $row->total,
+                    'meta' => $row->name
                 ];
             });
 
@@ -109,7 +111,8 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => $row->name,
-                    'value' => $row->total
+                    'value' => $row->total,
+                    'meta' => $row->name
                 ];
             });
 
@@ -125,7 +128,8 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => \Illuminate\Support\Str::limit($row->name, 20), // Truncate long titles
-                    'value' => $row->total
+                    'value' => $row->total,
+                    'meta' => $row->name // Full name for linking
                 ];
             });
 
@@ -141,7 +145,8 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => $row->state,
-                    'value' => $row->total
+                    'value' => $row->total,
+                    'meta' => $row->state
                 ];
             });
 
@@ -155,7 +160,8 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => $row->lga,
-                    'value' => $row->count
+                    'value' => $row->count,
+                    'meta' => $row->lga
                 ];
             });
 
@@ -167,13 +173,14 @@ class StatisticsManager extends Component
             ->map(function ($row) {
                 return [
                     'label' => ucfirst($row->gender),
-                    'value' => $row->count
+                    'value' => $row->count,
+                    'meta' => $row->gender
                 ];
             });
 
         $this->chartData = [
             'donors' => $this->formatChartData($topDonors),
-            'faculties' => $this->formatChartData($faculties), // Replaced donorTypes
+            'faculties' => $this->formatChartData($faculties),
             'departments' => $this->formatChartData($departments),
             'projects' => $this->formatChartData($projects),
             'states' => $this->formatChartData($states, true),
@@ -190,7 +197,9 @@ class StatisticsManager extends Component
                 [
                     'data' => $collection->pluck('value'),
                 ]
-            ]
+            ],
+            // Add meta data for linking (IDs or full names)
+            'meta' => $collection->pluck('meta')->isEmpty() ? $collection->pluck('label') : $collection->pluck('meta')
         ];
     }
 
