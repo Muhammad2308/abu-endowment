@@ -4,6 +4,7 @@ namespace App\Livewire\Home;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Session;
 
@@ -114,28 +115,30 @@ class RegistrationModal extends Component
                 $donorData['graduation_year'] = $this->graduationYear ? (int)$this->graduationYear : null;
             }
 
-            $donorResponse = Http::withHeaders([
-                'X-Requested-With' => 'XMLHttpRequest',
-            ])->post(url('/api/donors'), $donorData);
+            $donorRequest = Request::create('/api/donors', 'POST', $donorData);
+            $donorRequest->headers->set('X-Requested-With', 'XMLHttpRequest');
 
-            $donorResult = $donorResponse->json();
+            $donorController = app(\App\Http\Controllers\DonorController::class);
+            $donorResponse = $donorController->store($donorRequest);
+            $donorResult = json_decode($donorResponse->getContent(), true);
 
-            if (!$donorResponse->successful()) {
+            if (!$donorResponse->isSuccessful()) {
                 throw new \Exception($donorResult['message'] ?? json_encode($donorResult['errors'] ?? []) ?? 'Registration failed');
             }
 
             // Step 2: Create donor session
-            $sessionResponse = Http::withHeaders([
-                'X-Requested-With' => 'XMLHttpRequest',
-            ])->post(url('/api/donor-sessions/register'), [
+            $sessionRequest = Request::create('/api/donor-sessions/register', 'POST', [
                 'username' => $this->username,
                 'password' => $this->password,
-                'donor_id' => $donorResult['data']['id'],
+                'donor_id' => $donorResult['data']['donor']['id'] ?? $donorResult['data']['id'],
             ]);
+            $sessionRequest->headers->set('X-Requested-With', 'XMLHttpRequest');
 
-            $sessionResult = $sessionResponse->json();
+            $sessionController = app(\App\Http\Controllers\Api\DonorSessionController::class);
+            $sessionResponse = $sessionController->register($sessionRequest);
+            $sessionResult = json_decode($sessionResponse->getContent(), true);
 
-            if (!$sessionResponse->successful()) {
+            if (!$sessionResponse->isSuccessful()) {
                 throw new \Exception($sessionResult['message'] ?? 'Failed to create session');
             }
 

@@ -104,6 +104,106 @@
                             </div>
                         </div>
                     </div>
+
+                    @if($project->details)
+                        <style>
+                            .rich-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+                            .rich-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; color: #475569; }
+                            .rich-content p { margin-bottom: 1rem; color: #64748b; line-height: 1.7; }
+                            .rich-content p:last-child { margin-bottom: 0; }
+                            .rich-content strong { color: #1e293b; font-weight: 600; }
+                        </style>
+
+                        <!-- Project Comprehensive Details -->
+                        <div class="space-y-6">
+                            @if(!empty(strip_tags($project->details->background)))
+                                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                                            <i class="fas fa-history text-blue-500 mr-3"></i> Background
+                                        </h3>
+                                        <div class="rich-content bg-slate-50/50 p-5 rounded-xl border border-slate-100 italic">
+                                            {!! $project->details->background !!}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(!empty(strip_tags($project->details->challenges)))
+                                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                                            <i class="fas fa-exclamation-triangle text-amber-500 mr-3"></i> Key Challenges
+                                        </h3>
+                                        <div class="rich-content">
+                                            {!! $project->details->challenges !!}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if(!empty(strip_tags($project->details->proposed_interventions)))
+                                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                                            <i class="fas fa-tools text-indigo-500 mr-3"></i> Proposed Interventions
+                                        </h3>
+                                        <div class="rich-content">
+                                            {!! $project->details->proposed_interventions !!}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            @php
+                                $hasBeneficiaries = !empty(strip_tags($project->details->beneficiaries));
+                                $hasBudget = !empty(strip_tags($project->details->budget_estimates));
+                            @endphp
+
+                            @if($hasBeneficiaries || $hasBudget)
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    @if($hasBeneficiaries)
+                                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden border-t-4 border-t-blue-500">
+                                            <div class="p-6">
+                                                <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center">
+                                                    <i class="fas fa-users text-blue-500 mr-2"></i> Beneficiaries
+                                                </h3>
+                                                <div class="rich-content text-sm">
+                                                    {!! $project->details->beneficiaries !!}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if($hasBudget)
+                                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden border-t-4 border-t-emerald-500">
+                                            <div class="p-6">
+                                                <h3 class="text-base font-bold text-slate-800 mb-3 flex items-center">
+                                                    <i class="fas fa-coins text-emerald-500 mr-2"></i> Budget Estimates
+                                                </h3>
+                                                <div class="rich-content text-sm">
+                                                    {!! $project->details->budget_estimates !!}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty(strip_tags($project->details->expected_outcomes)))
+                                <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 overflow-hidden bg-emerald-50/20">
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                                            <i class="fas fa-chart-line text-emerald-600 mr-3"></i> Expected Outcomes
+                                        </h3>
+                                        <div class="rich-content">
+                                            {!! $project->details->expected_outcomes !!}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Right Column: Sidebar -->

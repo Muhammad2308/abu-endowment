@@ -239,7 +239,7 @@ class DonorSessionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Login successful',
-                'token' => $deviceSession ? $deviceSession->session_token : null,
+                'token' => $deviceSession ? $deviceSession->session_token : $donorSession->id,
                 'data' => [
                     'session_id' => $donorSession->id,
                     'username' => $donorSession->username,

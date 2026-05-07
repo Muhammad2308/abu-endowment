@@ -4,6 +4,7 @@ namespace App\Livewire\Home;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Session;
 
@@ -46,16 +47,17 @@ class LoginModal extends Component
         ]);
 
         try {
-            $response = Http::withHeaders([
-                'X-Requested-With' => 'XMLHttpRequest',
-            ])->post(url('/api/donor-sessions/login'), [
+            $request = Request::create('/api/donor-sessions/login', 'POST', [
                 'username' => $this->username,
                 'password' => $this->password,
             ]);
+            $request->headers->set('X-Requested-With', 'XMLHttpRequest');
 
-            $data = $response->json();
+            $controller = app(\App\Http\Controllers\Api\DonorSessionController::class);
+            $response = $controller->login($request);
+            $data = json_decode($response->getContent(), true);
 
-            if (!$response->successful()) {
+            if (!$response->isSuccessful()) {
                 throw new \Exception($data['message'] ?? 'Login failed');
             }
 
