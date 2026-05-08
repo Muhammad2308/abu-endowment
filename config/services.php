@@ -50,6 +50,11 @@ return [
         'enabled' => env('SMS_VERIFICATION_ENABLED', true),
     ],
 
+    'kudi' => [
+        'token' => env('KUDI_SMS_KEY', 'iC4HrtdX0zlSMRJmIkNu9ZfL61pYVFTvQgs7GhOEjnAWPe3UDbxwycB2q8oaK5'),
+        'url' => env('KUDI_SMS_URL', 'https://my.kudisms.net/api/intcomposesms'),
+    ],
+
     // Paystack Configuration
     'paystack' => [
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),

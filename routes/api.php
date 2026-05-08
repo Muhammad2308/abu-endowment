@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DonorController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SquadPaymentController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\VerificationController;
 use App\Http\Controllers\Auth\AuthController;
@@ -289,6 +290,7 @@ Route::get('/device/donor-info', [DeviceController::class, 'getDonorInfo']); // 
 Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
 Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
 Route::get('/payments/test', [PaymentController::class, 'test']); // Test configuration
+Route::post('/squad/pay', [SquadPaymentController::class, 'initiate'])->name('api.squad.pay');
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);

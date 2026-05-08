@@ -4,17 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Twilio\Rest\Client;
+use App\Services\KudiSmsService;
 use Illuminate\Support\Facades\Validator;
 
 class SmsController extends Controller
 {
     public function sendSms(Request $request)
     {
-        // Validate input
         $validator = Validator::make($request->all(), [
-            'to' => ['required', 'regex:/^\+\d{10,15}$/'],
-            'message' => ['required', 'string', 'max:1600'],
+            'to' => ['required', 'string', 'max:30'],
+            'message' => ['required', 'string', 'max:918'],
         ]);
 
         if ($validator->fails()) {
@@ -27,41 +26,22 @@ class SmsController extends Controller
         $to = $request->input('to');
         $message = $request->input('message');
 
-        $sid = env('TWILIO_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $from = env('TWILIO_PHONE_NUMBER');
-        $messagingServiceSid = env('TWILIO_MESSAGING_SERVICE_SID');
+        $smsService = new KudiSmsService();
+        $result = $smsService->sendSms($to, $message, 'ABU');
 
-        try {
-            $twilio = new Client($sid, $token);
-
-            $messageData = [
-                'body' => $message,
-            ];
-            if ($messagingServiceSid) {
-                $messageData['messagingServiceSid'] = $messagingServiceSid;
-            } elseif ($from) {
-                $messageData['from'] = $from;
-            }
-
-            $sms = $twilio->messages->create($to, $messageData);
-
+        if ($result['success']) {
             return response()->json([
                 'success' => true,
-                'sid' => $sms->sid,
-                'message' => 'Message sent',
+                'message' => $result['message'] ?? 'Message sent',
+                'response' => $result['response'] ?? null,
             ]);
-        } catch (\Twilio\Exceptions\RestException $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 400);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        return response()->json([
+            'success' => false,
+            'error' => $result['error'] ?? 'Failed to send SMS.',
+            'response' => $result['response'] ?? null,
+        ], 500);
     }
 
     public function getMessages()

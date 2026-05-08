@@ -99,9 +99,14 @@ Route::prefix('admin')->group(function () {
     Route::post('/login', [AdminController::class, 'login'])->name('admin.login.post');
     
     // Protected admin routes
-    Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
+        
+        // Transactions page
+        Route::get('/transactions', function () {
+            return view('admin.transactions');
+        })->name('admin.transactions');
         
         // The alumni upload is now a Livewire component on the dashboard
         
@@ -134,6 +139,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/templates/create', [\App\Http\Controllers\Admin\NotificationController::class, 'createTemplate'])->name('templates.create');
             Route::get('/templates/{id}/edit', [\App\Http\Controllers\Admin\NotificationController::class, 'editTemplate'])->name('templates.edit');
             Route::get('/send', [\App\Http\Controllers\Admin\NotificationController::class, 'send'])->name('send');
+            Route::get('/send-sms', [\App\Http\Controllers\Admin\NotificationController::class, 'sendSmsPage'])->name('send.sms');
             Route::get('/logs', [\App\Http\Controllers\Admin\NotificationController::class, 'logs'])->name('logs');
         });
         
