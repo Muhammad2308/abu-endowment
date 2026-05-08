@@ -142,6 +142,12 @@
                     <span>Analytics</span>
                 </a>
 
+                <!-- Transactions -->
+                <a href="{{ route('admin.transactions') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.transactions') ? 'active' : '' }}">
+                    <div class="w-8 flex justify-center"><i class="fas fa-credit-card text-lg"></i></div>
+                    <span>Transactions</span>
+                </a>
+
                 <!-- Notifications -->
                 <a href="{{ route('admin.notifications.index') }}" class="nav-link flex items-center px-4 py-3 rounded-xl text-sm font-medium mb-2 {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
                     <div class="w-8 flex justify-center"><i class="fas fa-bell text-lg"></i></div>

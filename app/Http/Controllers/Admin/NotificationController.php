@@ -32,6 +32,11 @@ class NotificationController extends Controller
         return view('admin.notifications.send');
     }
 
+    public function sendSmsPage()
+    {
+        return view('admin.notifications.send-sms');
+    }
+
     public function logs()
     {
         return view('admin.notifications.logs');

@@ -12,6 +12,7 @@ use App\Models\Donation;
 use App\Models\Donor;
 use App\Models\DeviceSession;
 use App\Models\Project;
+use App\Models\PaymentTransaction;
 
 class PaymentController extends Controller
 {
@@ -496,6 +497,25 @@ class PaymentController extends Controller
             'paid_at' => $data['paid_at'] ?? now()
         ]);
 
+        // Create payment transaction record
+        PaymentTransaction::create([
+            'donation_id' => $donation->id,
+            'donor_id' => $donation->donor_id,
+            'project_id' => $donation->project_id,
+            'payment_gateway' => 'paystack',
+            'category' => $donation->project_id ? 'project' : 'general',
+            'event_type' => 'charge.success',
+            'payment_reference' => $reference,
+            'gateway_reference' => $data['id'] ?? null,
+            'amount' => ($data['amount'] ?? 0) / 100,
+            'currency' => 'NGN',
+            'status' => 'completed',
+            'gateway_status' => $data['status'] ?? 'success',
+            'channel' => $data['channel'] ?? null,
+            'fee' => ($data['fees'] ?? 0) / 100,
+            'response_payload' => json_encode($data),
+        ]);
+
         // Update project raised amount if donation has project_id
         if ($donation->project_id) {
             $this->updateProjectRaised($donation->project_id, $donation->id);
@@ -537,6 +557,25 @@ class PaymentController extends Controller
         $donation->update([
             'status' => 'failed',
             'verified_at' => now()
+        ]);
+
+        // Create payment transaction record for failed payment
+        PaymentTransaction::create([
+            'donation_id' => $donation->id,
+            'donor_id' => $donation->donor_id,
+            'project_id' => $donation->project_id,
+            'payment_gateway' => 'paystack',
+            'category' => $donation->project_id ? 'project' : 'general',
+            'event_type' => 'charge.failed',
+            'payment_reference' => $reference,
+            'gateway_reference' => $data['id'] ?? null,
+            'amount' => ($data['amount'] ?? 0) / 100,
+            'currency' => 'NGN',
+            'status' => 'failed',
+            'gateway_status' => $data['status'] ?? 'failed',
+            'channel' => $data['channel'] ?? null,
+            'fee' => ($data['fees'] ?? 0) / 100,
+            'response_payload' => json_encode($data),
         ]);
 
         Log::info('Paystack webhook: Payment marked as failed', [
