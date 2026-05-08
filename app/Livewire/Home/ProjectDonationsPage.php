@@ -30,21 +30,20 @@ class ProjectDonationsPage extends Component
     public $email;
     public $name;
     public $phone;
-    public $paymentReference; // Store reference for manual verification
     
     public function mount()
     {
         $this->loadProjects();
         $this->checkAuth();
     }
-    
+
     public function loadProjects()
     {
         // Recalculate raised amount for all projects
         $allProjects = Project::all();
         foreach ($allProjects as $project) {
             $totalRaised = Donation::where('project_id', $project->id)
-                                   ->whereIn('status', ['success', 'paid', 'completed', 'Success', 'Paid', 'Completed'])
+                                   ->whereIn('status', ['success', 'paid', 'completed'])
                                    ->sum('amount');
             
             if ($project->raised != $totalRaised) {
@@ -54,8 +53,9 @@ class ProjectDonationsPage extends Component
         }
 
         // Load projects from database
-        $this->projects = Project::with('photos')->orderBy('created_at', 'desc')->get();
+        $this->projects = Project::with('photos')->get();
     }
+
 
     public function checkAuth()
     {
@@ -77,7 +77,7 @@ class ProjectDonationsPage extends Component
     {
         $this->selectedProject = Project::find($projectId);
         $this->showModal = true;
-        // $this->dispatch('open-donation-modal'); // If needed
+        $this->dispatch('open-donation-modal');
     }
 
     public function closeModal()
@@ -129,7 +129,6 @@ class ProjectDonationsPage extends Component
 
         // Create pending donation
         $reference = 'ABU_PRJ_' . time() . '_' . uniqid();
-        $this->paymentReference = $reference; // Store for manual verification
         
         // Find or create donor
         $donorId = null;
@@ -215,7 +214,7 @@ class ProjectDonationsPage extends Component
                             $project = Project::find($donation->project_id);
                             if ($project) {
                                 $totalRaised = Donation::where('project_id', $project->id)
-                                                       ->whereIn('status', ['success', 'paid', 'completed', 'Success', 'Paid', 'Completed'])
+                                                       ->whereIn('status', ['success', 'paid', 'completed'])
                                                        ->sum('amount');
                                 $project->update(['raised' => $totalRaised]);
                             }
@@ -226,9 +225,6 @@ class ProjectDonationsPage extends Component
                         
                         // Refresh projects to show updated progress
                         $this->loadProjects();
-                        
-                        // Dispatch event to close modal on frontend
-                        $this->dispatch('close-donation-modal');
                         
                         // Flash success message for toast
                         $this->dispatch('show-toast', [

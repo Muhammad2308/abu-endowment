@@ -72,9 +72,4 @@ class Project extends Model
     {
         return $this->belongsTo(ProjectCategory::class);
     }
-
-    public function details()
-    {
-        return $this->hasOne(ProjectDetail::class);
-    }
 }

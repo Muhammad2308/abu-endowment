@@ -7,7 +7,7 @@ style="background: #ffffff;">
                     <div class="section_title mb-4">
                         <h3><span>Download Our</span><br>Mobile App</h3>
                     </div>
-                    <p class="mb-4">Stay connected with ABU Endowment & Crowd Funding on the go. Track your donations, discover new projects, and support your alma mater anytime, anywhere.</p>
+                    <p class="mb-4">Stay connected with ALUMNI FUND on the go. Track your donations, discover new projects, and support your alma mater anytime, anywhere.</p>
                     
                     <div class="app_features mb-4">
                         <ul style="list-style: none; padding: 0;">
@@ -51,7 +51,7 @@ style="background: #ffffff;">
                             
                             <!-- Screen -->
                             <div style="background: #fff; border-radius: 30px; overflow: hidden; position: relative;">
-                                <img src="{{ asset('img/mobile-app.png') }}" alt="ABU Endowment App" style="width: 100%; display: block; border-radius: 30px;">
+                                <img src="{{ asset('img/app-screenshot.png') }}" alt="ABU Endowment App" style="width: 100%; display: block; border-radius: 30px;">
                             </div>
                             
                             <!-- Home Button -->

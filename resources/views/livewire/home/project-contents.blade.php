@@ -39,92 +39,6 @@
         <div class="row">
             <!-- Main Content -->
             <div class="col-lg-8">
-
-                <!-- Project Comprehensive Details -->
-                @if($project->details)
-                <style>
-                    .rich-text-content ul { list-style-type: disc; padding-left: 20px; margin-bottom: 1rem; }
-                    .rich-text-content ol { list-style-type: decimal; padding-left: 20px; margin-bottom: 1rem; }
-                    .rich-text-content p:last-child { margin-bottom: 0; }
-                </style>
-                <div class="project-comprehensive-details mb-5">
-                    
-                    @if(!empty(strip_tags($project->details->background)))
-                    <div class="mb-5">
-                        <h3 class="font-weight-bold mb-3 d-flex align-items-center" style="color: #1f2937;">
-                            <i class="fa fa-bookmark text-success mr-2" style="font-size: 1.2rem;"></i> Background
-                        </h3>
-                        <div class="text-muted p-4 rounded rich-text-content" style="font-size: 1.05rem; line-height: 1.8; background: #f9fafb; border-left: 4px solid #064e3b;">
-                            {!! $project->details->background !!}
-                        </div>
-                    </div>
-                    @endif
-
-                    @if(!empty(strip_tags($project->details->challenges)))
-                    <div class="mb-5">
-                        <h3 class="font-weight-bold mb-3 d-flex align-items-center" style="color: #1f2937;">
-                            <i class="fa fa-exclamation-circle text-warning mr-2" style="font-size: 1.2rem;"></i> Key Challenges
-                        </h3>
-                        <div class="text-muted rich-text-content" style="font-size: 1.05rem; line-height: 1.8;">
-                            {!! $project->details->challenges !!}
-                        </div>
-                    </div>
-                    @endif
-
-                    @if(!empty(strip_tags($project->details->proposed_interventions)))
-                    <div class="mb-5 p-4 rounded shadow-sm" style="background-color: white; border: 1px solid #e5e7eb;">
-                        <h3 class="font-weight-bold mb-3" style="color: #064e3b;">
-                            <i class="fa fa-cogs mr-2"></i> Proposed Interventions
-                        </h3>
-                        <div class="text-muted rich-text-content" style="font-size: 1.05rem; line-height: 1.8;">
-                            {!! $project->details->proposed_interventions !!}
-                        </div>
-                    </div>
-                    @endif
-
-                    @if(!empty(strip_tags($project->details->expected_outcomes)))
-                    <div class="mb-5">
-                        <h3 class="font-weight-bold mb-3 d-flex align-items-center" style="color: #1f2937;">
-                            <i class="fa fa-line-chart text-primary mr-2" style="font-size: 1.2rem;"></i> Expected Outcomes
-                        </h3>
-                        <div class="text-muted p-4 rounded rich-text-content" style="font-size: 1.05rem; line-height: 1.8; background: #f0fdf4; border: 1px solid #dcfce7;">
-                            {!! $project->details->expected_outcomes !!}
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="row">
-                        @if(!empty(strip_tags($project->details->beneficiaries)))
-                        <div class="col-md-6 mb-4">
-                            <div class="h-100 p-4 rounded shadow-sm" style="background: white; border: 1px solid #e5e7eb; border-top: 4px solid #3b82f6;">
-                                <h4 class="font-weight-bold mb-3" style="color: #1f2937;">
-                                    <i class="fa fa-users text-primary mr-2"></i> Target Beneficiaries
-                                </h4>
-                                <div class="text-muted rich-text-content" style="font-size: 0.95rem; line-height: 1.7;">
-                                    {!! $project->details->beneficiaries !!}
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if(!empty(strip_tags($project->details->budget_estimates)))
-                        <div class="col-md-6 mb-4">
-                            <div class="h-100 p-4 rounded shadow-sm" style="background: white; border: 1px solid #e5e7eb; border-top: 4px solid #10b981;">
-                                <h4 class="font-weight-bold mb-3" style="color: #1f2937;">
-                                    <i class="fa fa-money text-success mr-2"></i> Budget Estimates
-                                </h4>
-                                <div class="text-muted rich-text-content" style="font-size: 0.95rem; line-height: 1.7;">
-                                    {!! $project->details->budget_estimates !!}
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                    
-                    <hr class="my-5" style="border-top: 2px dashed #e5e7eb;">
-                </div>
-                @endif
-
                 <!-- The Challenge / Description -->
                 <div class="mb-5">
                     <h3 class="font-weight-bold mb-3" style="color: #1f2937;">The Challenge</h3>
@@ -354,95 +268,91 @@
 
     <!-- Donation Modal -->
     @if($showModal)
-    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content" style="border-radius: 24px; border: none; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative;">
+            <div class="modal-content" style="border-radius: 20px; border: none; overflow: hidden;">
+                <!-- Modal Header -->
+                <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); border: none; padding: 1.5rem;">
+                    <h5 class="modal-title text-white font-weight-bold">Donate to {{ $project->project_title }}</h5>
+                    <button type="button" class="close text-white" wire:click="closeModal" style="opacity: 1;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 
-                <!-- Decorative Top Border -->
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #227722, #1a5c1a);"></div>
-
-                <!-- Close Button -->
-                <button type="button" class="close" wire:click="closeModal" style="position: absolute; top: 15px; right: 20px; opacity: 0.7; z-index: 10; font-size: 2.5rem; font-weight: 900; transition: opacity 0.2s; background: none; border: none; line-height: 1; color: #333;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-
                 <!-- Modal Body -->
-                <div class="modal-body px-5 pb-5 pt-5">
-                    <div class="text-center mb-4">
-                        <h5 class="modal-title font-weight-bold" style="color: #111827; font-size: 1.5rem; font-family: 'Merriweather', serif;">Donate to {{ $project->project_title }}</h5>
-                        <p class="text-muted small mt-1" style="font-family: 'Inter', sans-serif;">Your contribution makes a difference</p>
-                    </div>
-
+                <div class="modal-body" style="padding: 2rem;">
                     <form wire:submit.prevent="donate">
                         <!-- Email Input -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Email Address</label>
-                            <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
+                            <label class="font-weight-600 mb-2" style="color: #374151;">Email Address</label>
+                            <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent pl-3">
-                                        <i class="fa fa-envelope" style="color: #9ca3af;"></i>
+                                    <span class="input-group-text" style="background: #f3f4f6; border: 1px solid #d1d5db; border-right: none;">
+                                        <i class="fa fa-envelope text-muted"></i>
                                     </span>
                                 </div>
-                                <input type="email" wire:model="email" class="form-control border-0 bg-transparent" placeholder="Enter your email address" required style="height: 50px; padding-left: 10px; color: #1f2937; font-weight: 500; font-family: 'Inter', sans-serif;">
+                                <input type="email" wire:model="email" class="form-control" placeholder="your@email.com" required
+                                       style="border-left: none; padding: 12px; border-color: #d1d5db;">
                             </div>
-                            @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                            @error('email') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
+                        </div>
+
+                        <!-- Amount Selection -->
+                        <div class="form-group mb-4">
+                            <label class="font-weight-600 mb-3" style="color: #374151;">Select Amount</label>
+                            <div class="row no-gutters mb-3" style="gap: 0.5rem;">
+                                <div class="col">
+                                    <input type="radio" id="modal_blns_1" wire:model.live="selectedAmount" value="1000" class="d-none">
+                                    <label for="modal_blns_1" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        1k
+                                    </label>
+                                </div>
+                                <div class="col">
+                                    <input type="radio" id="modal_blns_2" wire:model.live="selectedAmount" value="5000" class="d-none">
+                                    <label for="modal_blns_2" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        5k
+                                    </label>
+                                </div>
+                                <div class="col">
+                                    <input type="radio" id="modal_blns_3" wire:model.live="selectedAmount" value="10000" class="d-none">
+                                    <label for="modal_blns_3" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        10k
+                                    </label>
+                                </div>
+                                <div class="col">
+                                    <input type="radio" id="modal_Other" wire:model.live="selectedAmount" value="custom" class="d-none">
+                                    <label for="modal_Other" class="btn btn-outline-success btn-block mb-0" style="padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                        Other
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Custom Amount Input -->
                         <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Donation Amount</label>
-                            <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
+                            <label class="font-weight-600 mb-2" style="color: #374151;">Custom Amount</label>
+                            <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
+                                    <span class="input-group-text" style="background: #f3f4f6; border: 1px solid #d1d5db; border-right: none; font-weight: 600;">
+                                        ₦
+                                    </span>
                                 </div>
-                                <input type="number" min="100" step="500" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="Enter amount" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
+                                <input type="number" wire:model.live="customAmount" class="form-control" placeholder="Enter custom amount"
+                                       style="border-left: none; padding: 12px; border-color: #d1d5db;">
                             </div>
-                            @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                            @error('amount') <small class="text-danger d-block mt-1">{{ $message }}</small> @enderror
                         </div>
-                        
+
                         <!-- Submit Button -->
-                        <div class="mt-5">
-                            @if($paymentReference)
-                                <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Verify Payment <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                                </button>
-                                <p class="text-center mt-2 text-muted small">
-                                    Click this if the payment window closed but this modal didn't.
-                                </p>
-                            @else
-                                <button type="submit" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #227722 0%, #1a5c1a 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(34, 119, 34, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                                </button>
-                                <p class="text-center mt-3 text-muted small" style="font-family: 'Inter', sans-serif;">
-                                    <i class="fa fa-lock mr-1"></i> Secure payment powered by Paystack
-                                </p>
-                            @endif
-                        </div>
+                        <button type="submit" class="btn btn-block btn-lg" 
+                                style="background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); color: white; font-weight: 700; padding: 14px; border-radius: 12px; border: none; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">
+                            Donate ₦{{ number_format($amount, 2) }}
+                            <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
-        <style>
-            .input-group:focus-within {
-                border-color: #227722 !important;
-                box-shadow: 0 0 0 3px rgba(34, 119, 34, 0.1);
-                background: #fff !important;
-            }
-
-            .donate-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 15px 30px rgba(34, 119, 34, 0.35) !important;
-            }
-
-            .donate-btn:active {
-                transform: translateY(0);
-            }
-            
-            .close:hover {
-                opacity: 1 !important;
-                color: #111827 !important;
-            }
-        </style>
     </div>
     @endif
 
@@ -472,34 +382,11 @@
                         console.log('Payment window closed.');
                     },
                     callback: function(response){
-                        alert('Payment successful! Verifying transaction ' + response.reference);
-                        console.log('Paystack success, calling verifyPayment with reference:', response.reference);
-                        // Try direct component call using ID
-                        let component = Livewire.find('{{ $this->getId() }}');
-                        if (component) {
-                            component.call('verifyPayment', response.reference);
-                        } else {
-                            console.error('Livewire component not found');
-                            // Fallback to dispatch
-                            Livewire.dispatch('project-payment-success', { reference: response.reference });
-                        }
+                        Livewire.dispatch('project-payment-success', { reference: response.reference });
                     }
                 });
                 
                 handler.openIframe();
-            });
-
-            Livewire.on('close-donation-modal', () => {
-                const modal = document.getElementById('donationModal');
-                if (modal) {
-                    modal.classList.remove('show');
-                    modal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                    const backdrops = document.getElementsByClassName('modal-backdrop');
-                    while(backdrops.length > 0){
-                        backdrops[0].parentNode.removeChild(backdrops[0]);
-                    }
-                }
             });
         });
     </script>

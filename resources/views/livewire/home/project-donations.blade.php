@@ -161,7 +161,7 @@
                 <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #227722, #1a5c1a);"></div>
 
                 <!-- Close Button -->
-                <button type="button" class="close" wire:click="closeModal" style="position: absolute; top: 15px; right: 20px; opacity: 0.7; z-index: 10; font-size: 2.5rem; font-weight: 900; transition: opacity 0.2s; background: none; border: none; line-height: 1; color: #333;">
+                <button type="button" class="close" wire:click="closeModal" style="position: absolute; top: 20px; right: 20px; opacity: 0.5; z-index: 10; font-size: 1.5rem; transition: opacity 0.2s;">
                     <span aria-hidden="true">&times;</span>
                 </button>
 
@@ -187,73 +187,32 @@
                             @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
 
-
-
-                        <!-- Custom Amount Input -->
+                        <!-- Donation Amount -->
                         <div class="form-group mb-4">
                             <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Donation Amount</label>
                             <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
                                 </div>
-                                <input type="number" min="100" step="500" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="Enter amount" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
+                                <input type="number" wire:model="amount" class="form-control border-0 bg-transparent" placeholder="Enter amount (e.g. 5000)" required min="100" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
                             </div>
                             @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
                         
                         <!-- Submit Button -->
                         <div class="mt-5">
-                            @if($paymentReference)
-                                <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Verify Payment <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                                </button>
-                                <p class="text-center mt-2 text-muted small">
-                                    Click this if the payment window closed but this modal didn't.
-                                </p>
-                            @else
-                                <button type="submit" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #227722 0%, #1a5c1a 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(34, 119, 34, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                                </button>
-                                <p class="text-center mt-3 text-muted small" style="font-family: 'Inter', sans-serif;">
-                                    <i class="fa fa-lock mr-1"></i> Secure payment powered by Paystack
-                                </p>
-                            @endif
+                            <button type="submit" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #227722 0%, #1a5c1a 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(34, 119, 34, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
+                                Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
+                            </button>
+                            <p class="text-center mt-3 text-muted small" style="font-family: 'Inter', sans-serif;">
+                                <i class="fa fa-lock mr-1"></i> Secure payment powered by Paystack
+                            </p>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
         <style>
-            .amount-card {
-                background: #fff;
-                border: 2px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 15px 10px;
-                text-align: center;
-                transition: all 0.2s ease;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .amount-card:hover {
-                border-color: #227722;
-                background: #ecfdf5;
-            }
-
-            .amount-card.active {
-                background: #ecfdf5;
-                border-color: #227722;
-                color: #227722;
-                box-shadow: 0 4px 12px rgba(34, 119, 34, 0.15);
-            }
-
-            .amount-value {
-                font-weight: 700;
-                font-size: 1.1rem;
-            }
-
             .input-group:focus-within {
                 border-color: #227722 !important;
                 box-shadow: 0 0 0 3px rgba(34, 119, 34, 0.1);
@@ -747,34 +706,11 @@
                         console.log('Payment window closed.');
                     },
                     callback: function(response){
-                        alert('Payment successful! Verifying transaction ' + response.reference);
-                        console.log('Paystack success, calling verifyPayment with reference:', response.reference);
-                        // Try direct component call using ID
-                        let component = Livewire.find('{{ $this->getId() }}');
-                        if (component) {
-                            component.call('verifyPayment', response.reference);
-                        } else {
-                            console.error('Livewire component not found');
-                            // Fallback to dispatch
-                            Livewire.dispatch('project-payment-success', { reference: response.reference });
-                        }
+                        Livewire.dispatch('project-payment-success', { reference: response.reference });
                     }
                 });
                 
                 handler.openIframe();
-            });
-
-            Livewire.on('close-donation-modal', () => {
-                const modal = document.getElementById('donationModal');
-                if (modal) {
-                    modal.classList.remove('show');
-                    modal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                    const backdrops = document.getElementsByClassName('modal-backdrop');
-                    while(backdrops.length > 0){
-                        backdrops[0].parentNode.removeChild(backdrops[0]);
-                    }
-                }
             });
 
             // Toast notification handler

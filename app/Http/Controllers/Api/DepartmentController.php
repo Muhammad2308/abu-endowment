@@ -15,7 +15,7 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-        $departments = Department::select('id', 'current_name as name')->orderBy('current_name')->get();
+        $departments = Department::select('id', 'name')->orderBy('name')->get();
 
         return response()->json([
             'success' => true,

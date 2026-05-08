@@ -10,7 +10,6 @@ use App\Models\Donation;
 use App\Models\DonorSession;
 use App\Models\Donor;
 use App\Models\Project;
-use Livewire\Attributes\On;
 
 class ProjectDonations extends Component
 {
@@ -24,15 +23,14 @@ class ProjectDonations extends Component
     public $galleryProject = null;
     
     // Donation form fields
-    public $amount = 1000;
-    public $customAmount;
-    public $selectedAmount = 1000;
+    public $amount;
     public $email;
     public $name;
     public $phone;
-    public $paymentReference; // Store reference for manual verification
     
     public $limit = null; // Add limit property
+
+    protected $listeners = ['project-payment-success' => 'verifyPayment'];
 
     public function mount($limit = null)
     {
@@ -40,14 +38,14 @@ class ProjectDonations extends Component
         $this->loadProjects();
         $this->checkAuth();
     }
-    
+
     public function loadProjects()
     {
         // Recalculate raised amount for all projects
         $allProjects = Project::all();
         foreach ($allProjects as $project) {
             $totalRaised = Donation::where('project_id', $project->id)
-                                   ->whereIn('status', ['success', 'paid', 'completed', 'Success', 'Paid', 'Completed'])
+                                   ->whereIn('status', ['success', 'paid', 'completed'])
                                    ->sum('amount');
             
             if ($project->raised != $totalRaised) {
@@ -57,7 +55,7 @@ class ProjectDonations extends Component
         }
 
         // Load projects from database
-        $query = Project::with('photos')->orderBy('created_at', 'desc');
+        $query = Project::with('photos');
         
         if ($this->limit) {
             $query->take($this->limit);
@@ -66,6 +64,7 @@ class ProjectDonations extends Component
         $this->projects = $query->get();
         $this->totalProjects = Project::count();
     }
+
 
     public function checkAuth()
     {
@@ -94,7 +93,7 @@ class ProjectDonations extends Component
     {
         $this->showModal = false;
         $this->selectedProject = null;
-        $this->reset(['amount', 'customAmount', 'selectedAmount']);
+        $this->reset(['amount']);
     }
 
     public function openImageGallery($projectId)
@@ -107,22 +106,6 @@ class ProjectDonations extends Component
     {
         $this->showImageGallery = false;
         $this->galleryProject = null;
-    }
-
-    public function updatedSelectedAmount($value)
-    {
-        if ($value === 'custom') {
-            $this->amount = $this->customAmount;
-        } else {
-            $this->amount = $value;
-            $this->customAmount = null;
-        }
-    }
-
-    public function updatedCustomAmount($value)
-    {
-        $this->selectedAmount = 'custom';
-        $this->amount = $value;
     }
 
     public function donate()
@@ -139,7 +122,6 @@ class ProjectDonations extends Component
 
         // Create pending donation
         $reference = 'ABU_PRJ_' . time() . '_' . uniqid();
-        $this->paymentReference = $reference; // Store for manual verification
         
         // Find or create donor
         $donorId = null;
@@ -193,26 +175,18 @@ class ProjectDonations extends Component
         ]);
     }
 
-    #[On('project-payment-success')]
     public function verifyPayment($data = null)
     {
-        Log::info('verifyPayment called in ProjectDonations', ['data' => $data]);
-
         if (!$data) {
-            Log::warning('verifyPayment called with no data');
             return;
         }
 
         $reference = is_array($data) ? $data['reference'] : $data;
-        Log::info('Verifying payment reference: ' . $reference);
         
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . config('services.paystack.secret_key'),
             ])->get("https://api.paystack.co/transaction/verify/{$reference}");
-
-            Log::info('Paystack API response status: ' . $response->status());
-            Log::info('Paystack API response body: ' . $response->body());
 
             if ($response->successful()) {
                 $paymentData = $response->json()['data'];
@@ -220,63 +194,42 @@ class ProjectDonations extends Component
                 if ($paymentData['status'] === 'success') {
                     $donation = Donation::where('payment_reference', $reference)->first();
                     
-                    if ($donation) {
-                        Log::info('Donation found: ' . $donation->id . ', Current Status: ' . $donation->status);
-                        
-                        if ($donation->status !== 'completed') {
-                            $donation->update([
-                                'status' => 'completed',
-                                'verified_at' => now(),
-                                'paid_at' => now(),
-                            ]);
-                            Log::info('Donation updated to completed');
-
-                            // Update Project Raised Amount
-                            if ($donation->project_id) {
-                                $project = Project::find($donation->project_id);
-                                if ($project) {
-                                    $totalRaised = Donation::where('project_id', $project->id)
-                                                           ->whereIn('status', ['success', 'paid', 'completed', 'Success', 'Paid', 'Completed'])
-                                                           ->sum('amount');
-                                    $project->update(['raised' => $totalRaised]);
-                                    Log::info('Project raised amount updated to: ' . $totalRaised);
-                                }
-                            }
-                            
-                            $this->showModal = false;
-                            $this->loadProjects();
-                            $this->dispatch('close-donation-modal');
-                            
-                            $this->dispatch('show-toast', [
-                                'type' => 'success',
-                                'message' => 'Thank you for your donation! Your support means the world to us.'
-                            ]);
-                        } else {
-                            Log::info('Donation was already completed');
-                        }
-                    } else {
-                        Log::error('Donation not found for reference: ' . $reference);
-                        $this->dispatch('show-toast', [
-                            'type' => 'error',
-                            'message' => 'Donation record not found.'
+                    if ($donation && $donation->status !== 'completed') {
+                        $donation->update([
+                            'status' => 'completed',
+                            'verified_at' => now(),
+                            'paid_at' => now(),
                         ]);
+
+                        // Update Project Raised Amount - Recalculate total from donations table
+                        if ($donation->project_id) {
+                            $project = Project::find($donation->project_id);
+                            if ($project) {
+                                $totalRaised = Donation::where('project_id', $project->id)
+                                                       ->whereIn('status', ['success', 'paid', 'completed'])
+                                                       ->sum('amount');
+                                $project->update(['raised' => $totalRaised]);
+                            }
+                        }
+                        
+                        // Close the modal
+                        $this->showModal = false;
+                        
+                        // Flash success message for toast
+                        session()->flash('message', 'Thank you for your donation! Your support means the world to us.');
+                        
+                        // Redirect to home page
+                        return redirect()->to('/');
                     }
                 } else {
-                    Log::error('Paystack payment status is not success: ' . $paymentData['status']);
                     $this->dispatch('show-toast', [
                         'type' => 'error',
-                        'message' => 'Payment verification failed: ' . $paymentData['status']
+                        'message' => 'Payment verification failed. Please contact support.'
                     ]);
                 }
-            } else {
-                Log::error('Paystack API request failed');
-                $this->dispatch('show-toast', [
-                    'type' => 'error',
-                    'message' => 'Unable to verify payment with payment provider.'
-                ]);
             }
         } catch (\Exception $e) {
-            Log::error('Payment verification exception: ' . $e->getMessage());
+            Log::error('Payment verification error: ' . $e->getMessage());
             $this->dispatch('show-toast', [
                 'type' => 'error',
                 'message' => 'An error occurred during verification.'

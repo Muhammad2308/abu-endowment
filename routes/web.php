@@ -106,7 +106,6 @@ Route::prefix('admin')->group(function () {
         // The alumni upload is now a Livewire component on the dashboard
         
         // Faculty Management
-        Route::get('/faculties', [\App\Http\Controllers\Admin\FacultyController::class, 'index'])->name('admin.faculty.index');
 
         
         // Department Management
@@ -125,6 +124,7 @@ Route::prefix('admin')->group(function () {
         
         // Donor statistics
         Route::get('/statistics', \App\Livewire\Admin\StatisticsManager::class)->name('admin.statistics');
+        Route::get('/analytics/details/{type}/{value}', \App\Livewire\Admin\AnalyticsDrillDown::class)->name('admin.analytics.details');
         
         // Email/SMS management
         // Email/SMS management

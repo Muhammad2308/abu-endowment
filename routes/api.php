@@ -19,15 +19,14 @@ use App\Http\Controllers\Api\DonorsController;
 use App\Http\Controllers\Api\DonorSessionController;
 
 // Public routes (no authentication required) - like search endpoints
-Route::post('/donors', [\App\Http\Controllers\Api\DonorsController::class, 'store']); // NEW REFACTORED CONTROLLER
+Route::post('/donors', [DonorController::class, 'store']); // Create donor account
 Route::get('/donors/search/{reg_number}', [DonorController::class, 'searchByRegNumber'])
     ->where('reg_number', '.*');
 Route::get('/donors/search/phone/{phone}', [DonorController::class, 'searchByPhone'])
     ->where('phone', '.*');
 Route::get('/donors/search/email/{email}', [DonorController::class, 'searchByEmail'])
     ->where('email', '.*');
-Route::put('/donors/{id}', [\App\Http\Controllers\Api\DonorsController::class, 'update']); 
-
+Route::put('/donors/{id}', [DonorController::class, 'update']); // Make this public like search
 // Route::get('/donors', [DonorController::class, 'index']); // Moved to messaging section for consistency
 
 // Session routes (public)
@@ -45,11 +44,6 @@ Route::post('/verification/verify-email', [VerificationController::class, 'verif
 
 // Projects (public)
 Route::get('/projects', [ProjectController::class, 'index']);
-
-// Public Faculty/Department data
-Route::get('/departments', [\App\Http\Controllers\Api\DepartmentController::class, 'index']);
-Route::get('/faculties', [\App\Http\Controllers\Api\FacultyController::class, 'index']);
-
 
 // Donations (public - no authentication required)
 Route::post('/donations', [DonorController::class, 'makeDonation']);
@@ -94,36 +88,25 @@ Route::get('/faculty-vision', function (Request $request) {
     $entryYear = $request->query('entry_year');
     $graduationYear = $request->query('graduation_year');
     
-    $query = \App\Models\FacultyVision::query();
-    
-    if ($entryYear && $graduationYear) {
-        // Handle date comparison (assuming date columns are YYYY-MM-DD)
-        $query->whereYear('start_year', '<=', $entryYear)
-              ->whereYear('end_year', '>=', $graduationYear);
-    }
-    
-    $visions = $query->get();
-
-    // FALLBACK: If no visions found, return all faculties
-    if ($visions->isEmpty()) {
-        $faculties = \App\Models\Faculty::orderBy('current_name')->get();
+    if (!$entryYear || !$graduationYear) {
         return response()->json([
-            'success' => true,
-            'fallback' => true,
-            'data' => $faculties->map(function ($f) {
-                return ['id' => $f->id, 'name' => $f->current_name];
-            })
-        ]);
+            'success' => false,
+            'message' => 'Entry year and graduation year are required'
+        ], 400);
     }
+    
+    $faculties = \App\Models\FacultyVision::where('start_year', '<=', $entryYear)
+                                         ->where('end_year', '>=', $graduationYear)
+                                         ->get();
     
     return response()->json([
         'success' => true,
-        'data' => $visions->map(function ($vision) {
+        'data' => $faculties->map(function ($faculty) {
             return [
-                'id' => $vision->id,
-                'name' => $vision->name,
-                'start_year' => $vision->start_year,
-                'end_year' => $vision->end_year
+                'id' => $faculty->id,
+                'name' => $faculty->name,
+                'start_year' => $faculty->start_year,
+                'end_year' => $faculty->end_year
             ];
         })
     ]);
@@ -134,44 +117,26 @@ Route::get('/department-vision', function (Request $request) {
     $entryYear = $request->query('entry_year');
     $graduationYear = $request->query('graduation_year');
     
-    $query = \App\Models\DepartmentVision::query();
-    
-    if ($facultyId) {
-        $query->where('faculty_id', $facultyId);
-    }
-    
-    if ($entryYear && $graduationYear) {
-        $query->whereYear('start_year', '<=', $entryYear)
-              ->whereYear('end_year', '>=', $graduationYear);
-    }
-    
-    $visions = $query->get();
-    
-    // FALLBACK: If no visions found, return departments for the faculty
-    if ($visions->isEmpty()) {
-        $deptQuery = \App\Models\Department::orderBy('current_name');
-        if ($facultyId) {
-            $deptQuery->where('faculty_id', $facultyId);
-        }
-        $departments = $deptQuery->get();
-        
+    if (!$facultyId || !$entryYear || !$graduationYear) {
         return response()->json([
-            'success' => true,
-            'fallback' => true,
-            'data' => $departments->map(function ($d) {
-                return ['id' => $d->id, 'name' => $d->current_name];
-            })
-        ]);
+            'success' => false,
+            'message' => 'Faculty ID, entry year, and graduation year are required'
+        ], 400);
     }
+    
+    $departments = \App\Models\DepartmentVision::where('faculty_id', $facultyId)
+                                              ->where('start_year', '<=', $entryYear)
+                                              ->where('end_year', '>=', $graduationYear)
+                                              ->get();
     
     return response()->json([
         'success' => true,
-        'data' => $visions->map(function ($vision) {
+        'data' => $departments->map(function ($department) {
             return [
-                'id' => $vision->id,
-                'name' => $vision->name,
-                'start_year' => $vision->start_year,
-                'end_year' => $vision->end_year
+                'id' => $department->id,
+                'name' => $department->name,
+                'start_year' => $department->start_year,
+                'end_year' => $department->end_year
             ];
         })
     ]);
@@ -194,7 +159,9 @@ Route::get('/test', function () {
     ]);
 });
 
-
+// Public Faculty/Department data (no authentication required)
+Route::get('/departments', [\App\Http\Controllers\Api\DepartmentController::class, 'index']);
+Route::get('/faculties', [\App\Http\Controllers\Api\FacultyController::class, 'index']);
 
 // Statistics routes (public for admin dashboard)
 Route::prefix('statistics')->group(function () {
@@ -239,8 +206,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Protected Faculty and Department data (authenticated users)
     // These are duplicates but with authentication - kept for backward compatibility
     
-    Route::get('/faculties/{faculty}/visions', function (\App\Models\Faculty $faculty) {
-        return $faculty->visions;
+    Route::get('/departments', function () {
+        return \App\Models\Department::with('visions')->get();
     });
     
     Route::get('/faculties/{faculty}/visions', function (\App\Models\Faculty $faculty) {

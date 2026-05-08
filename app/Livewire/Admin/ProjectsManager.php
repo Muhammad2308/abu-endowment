@@ -11,7 +11,7 @@ class ProjectsManager extends Component
     use WithPagination;
 
     public $search = '';
-    public $perPage = 9;
+    public $perPage = 10;
     public $statusFilter = 'active';
     public $showDonationsModal = false;
     public $showAddProjectModal = false;
@@ -62,11 +62,6 @@ class ProjectsManager extends Component
     public function closeAddProjectModal()
     {
         $this->showAddProjectModal = false;
-    }
-
-    public function loadMore()
-    {
-        $this->perPage += 9;
     }
 
 

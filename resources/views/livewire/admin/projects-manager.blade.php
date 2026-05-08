@@ -45,7 +45,7 @@
     </div>
 
     <!-- Projects Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
         @foreach($projects as $project)
             <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 overflow-hidden group flex flex-col">
                 <!-- Card Image/Icon -->
@@ -120,21 +120,16 @@
 
                     <!-- Actions -->
                     <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div class="flex items-center gap-1">
+                        <div class="flex space-x-2">
                              <a href="{{ route('admin.project-details', $project->id) }}" 
-                                class="inline-flex items-center px-2 py-1.5 border border-slate-200 text-xs font-semibold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200" 
+                                class="inline-flex items-center px-3 py-1.5 border border-slate-200 text-xs font-semibold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200" 
                                 title="View Details">
-                                 <i class="fas fa-eye mr-1"></i> View
+                                 <i class="fas fa-eye mr-1.5"></i> View
                              </a>
                              @livewire('admin.add-project-photos', ['project' => $project], key('card-photos-' . $project->id))
-                             <button wire:click="$dispatch('manage-project-details', { projectId: {{ $project->id }} })" 
-                                     class="inline-flex items-center px-2 py-1.5 border border-slate-200 text-xs font-semibold rounded-lg text-slate-600 bg-white hover:bg-slate-50 hover:text-purple-600 hover:border-purple-200 transition-all duration-200" 
-                                     title="Manage Details">
-                                 <i class="fas fa-file-alt mr-1"></i> Details
-                             </button>
                         </div>
                         <button wire:click="editProject({{ $project->id }})" 
-                                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all duration-200 ml-auto"
+                                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all duration-200"
                                 title="Edit Project">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -143,16 +138,6 @@
             </div>
         @endforeach
     </div>
-
-    @if($projects->hasMorePages())
-        <div class="flex justify-center mb-10">
-            <button wire:click="loadMore" 
-                    class="px-6 py-2.5 bg-white border border-slate-200 text-slate-600 font-semibold rounded-xl shadow-sm hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all duration-200 flex items-center gap-2">
-                <span>See More Projects</span>
-                <i class="fas fa-chevron-down text-xs"></i>
-            </button>
-        </div>
-    @endif
 
     <div class="flex items-center space-x-4 mb-8">
         <div class="h-px flex-1 bg-slate-200"></div>
@@ -230,11 +215,6 @@
                                        title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <button wire:click="$dispatch('manage-project-details', { projectId: {{ $project->id }} })"
-                                            class="text-slate-400 hover:text-purple-600 transition-colors"
-                                            title="Manage Details">
-                                        <i class="fas fa-file-alt"></i>
-                                    </button>
                                     <button wire:click="editProject({{ $project->id }})"
                                             class="text-slate-400 hover:text-amber-500 transition-colors"
                                             title="Edit Project">
@@ -259,8 +239,6 @@
     </div>
 
     <!-- Pagination -->
-    <!-- Pagination (Hidden for Cards View) -->
-    @if(false)
     <div class="flex items-center justify-between mt-6">
         <div class="text-sm text-slate-600">
             Showing {{ $projects->firstItem() ?? 0 }} to {{ $projects->lastItem() ?? 0 }} of {{ $projects->total() }} projects
@@ -269,8 +247,7 @@
             {{ $projects->links() }}
         </div>
     </div>
-    @endif
-
+</div>
 
 @if($showDonationsModal && $selectedProject)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" x-data="{ show: @entangle('showDonationsModal') }" x-show="show" x-cloak>
@@ -336,7 +313,4 @@
         </div>
     </div>
 @endif
-
-
-    @livewire('admin.manage-project-details')
 </div>

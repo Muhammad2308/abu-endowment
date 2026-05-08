@@ -5,13 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Donor;
 use App\Models\DonorSession;
-use App\Models\DeviceSession;
 use App\Http\Resources\DonorResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class DonorsController extends Controller
 {
@@ -32,42 +30,40 @@ class DonorsController extends Controller
         }
 
         // Validate input based on donor type
-        $normalizedType = strtolower($donorType);
-        $isAlumni = str_contains($normalizedType, 'alumni');
+        $donorType = $request->input('donor_type');
         
         $validationRules = [
-            'donor_type' => 'required|string',
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
+            'donor_type' => 'required|string|in:Alumni,Staff,Individual,Corporate,supporter,addressable_alumni,non_addressable_alumni,Organization,NGO',
+            'name' => 'required|string|max:255', // ✅ Required when creating donor
+            'surname' => 'required|string|max:255', // ✅ Required when creating donor
             'other_name' => 'nullable|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'nullable|string|max:20',
-            'password' => 'required|string|min:6',
-            'device_fingerprint' => 'nullable|string|max:500',
+            'email' => 'required|email|unique:donors,email',
+            'phone' => 'nullable|string|max:20|unique:donors,phone', // ✅ Make optional, unique only if provided
             'session_id' => 'nullable|exists:donor_sessions,id',
         ];
         
         // Add conditional validation based on donor type
-        if ($isAlumni) {
+        if ($donorType === 'Alumni') {
             $validationRules['department_id'] = 'required|exists:departments,id';
-            $validationRules['entry_year'] = 'nullable|integer|min:1950|max:' . date('Y');
-            $validationRules['graduation_year'] = 'nullable|integer|min:1950|max:' . date('Y');
-            $validationRules['reg_number'] = 'nullable|string|max:255';
+            $validationRules['entry_year'] = 'required|integer|min:1950|max:' . date('Y');
+            $validationRules['graduation_year'] = 'required|integer|min:1950|max:' . date('Y');
+            $validationRules['reg_number'] = 'nullable|string|max:255|unique:donors,reg_number';
 
-        } elseif ($normalizedType === 'staff') {
+        } elseif ($donorType === 'Staff') {
             $validationRules['department_id'] = 'required|exists:departments,id';
 
-        } elseif ($normalizedType === 'corporate') {
+        } elseif ($donorType === 'Corporate') {
             $validationRules['organization_name'] = 'required|string|max:255';
         } else {
+            $validationRules['reg_number'] = 'nullable|string|max:255';
             $validationRules['faculty_id'] = 'nullable|exists:faculties,id';
             $validationRules['department_id'] = 'nullable|exists:departments,id';
         }
         
         // Common validation for all donor types - make optional for minimal registration
-        $validationRules['nationality'] = 'nullable|string|max:255';
-        $validationRules['state'] = 'nullable|string|max:255';
-        $validationRules['lga'] = 'nullable|string|max:255';
+        $validationRules['nationality'] = 'nullable|string|max:255'; // ✅ Make optional
+        $validationRules['state'] = 'nullable|string|max:255'; // ✅ Make optional
+        $validationRules['lga'] = 'nullable|string|max:255'; // ✅ Make optional
         $validationRules['address'] = 'nullable|string';
         
         $validator = Validator::make($request->all(), $validationRules);
@@ -81,55 +77,33 @@ class DonorsController extends Controller
         }
 
         try {
-            // Check if a donor with this email already exists
-            $existingDonor = Donor::where('email', $request->email)->first();
-            if ($existingDonor) {
-                // Check if they already have a session — return login info
-                $existingSession = DonorSession::where('donor_id', $existingDonor->id)->first();
-                if ($existingSession) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Email already registered. Please login instead.',
-                        'existing_donor' => true,
-                        'donor' => new DonorResource($existingDonor),
-                        'session_id' => $existingSession->id,
-                    ], 409);
-                }
-            }
-
             // Prepare data for creation
-            $donorData = $request->except(['password', 'device_fingerprint', 'session_id']);
+            $donorData = $request->all();
             
             // Handle different donor types
-            if ($normalizedType === 'supporter') {
+            if ($donorType === 'supporter') {
+                // For supporters, reg_number is not required
                 $donorData['reg_number'] = null;
                 $donorData['faculty_id'] = null;
                 $donorData['department_id'] = null;
                 $donorData['entry_year'] = null;
                 $donorData['graduation_year'] = null;
             } else {
+                // For alumni, ensure reg_number is unique and generate if needed
                 if (empty($donorData['reg_number'])) {
                     $donorData['reg_number'] = 'REG-' . strtoupper(substr($donorData['surname'], 0, 3)) . '-' . date('Y') . '-' . str_pad(Donor::count() + 1, 4, '0', STR_PAD_LEFT);
                 }
-                
-                // AUTOMATED FACULTY LOOKUP (for Alumni or any type with department)
-                if (!empty($donorData['department_id'])) {
-                    $department = \App\Models\Department::find($donorData['department_id']);
-                    if ($department) {
-                        $donorData['faculty_id'] = $department->faculty_id;
-                    }
-                }
             }
             
-            // Set defaults for optional fields
+            // Set defaults for optional fields if not provided (for minimal registration)
             if (empty($donorData['surname'])) {
-                $donorData['surname'] = '';
+                $donorData['surname'] = ''; // Default to empty string
             }
             if (empty($donorData['phone'])) {
-                $donorData['phone'] = null;
+                $donorData['phone'] = null; // Default to null
             }
             if (empty($donorData['nationality'])) {
-                $donorData['nationality'] = 'Nigerian';
+                $donorData['nationality'] = 'Nigerian'; // Default nationality
             }
             if (empty($donorData['state'])) {
                 $donorData['state'] = null;
@@ -138,78 +112,46 @@ class DonorsController extends Controller
                 $donorData['lga'] = null;
             }
 
-            // Create donor (or use existing one without a session)
-            $donor = $existingDonor ?? Donor::create($donorData);
-
-            // Create DeviceSession if fingerprint provided
-            $deviceSession = null;
-            $fingerprint = $request->input('device_fingerprint');
-            if ($fingerprint) {
-                $deviceSession = DeviceSession::firstOrCreate(
-                    ['device_fingerprint' => $fingerprint],
-                    [
-                        'donor_id' => $donor->id,
-                        'session_token' => Str::random(64),
-                        'user_agent' => $request->userAgent() ?? 'unknown',
-                        'ip_address' => $request->ip() ?? '0.0.0.0',
-                        'expires_at' => now()->addYears(10),
-                    ]
-                );
-                // Update donor_id if device existed but had no donor
-                if (!$deviceSession->donor_id) {
-                    $deviceSession->update(['donor_id' => $donor->id]);
-                }
-            }
-
-            // Handle session: use existing or create new
+            // Create donor
+            $donor = Donor::create($donorData);
+            // Handle session for auto-login
             $session = null;
             if ($request->input('session_id')) {
                 $session = DonorSession::find($request->input('session_id'));
                 if ($session) {
-                    $session->update([
-                        'donor_id' => $donor->id,
-                        'device_session_id' => $deviceSession?->id,
-                    ]);
+                    $session->update(['donor_id' => $donor->id]);
                 }
             }
             
-            // If no session exists, use updateOrCreate to avoid UNIQUE constraint crash
+            // If no session exists (or not provided), create one
             if (!$session) {
-                $session = DonorSession::updateOrCreate(
-                    ['username' => $donor->email],
-                    [
-                        'donor_id' => $donor->id,
-                        'password' => $request->input('password'),
-                        'device_session_id' => $deviceSession?->id,
-                        'auth_provider' => 'email',
-                    ]
-                );
+                $session = DonorSession::create([
+                    'donor_id' => $donor->id,
+                    'username' => $donor->email,
+                    'is_active' => true,
+                    'last_login_at' => now(),
+                    'expires_at' => now()->addDays(30),
+                ]);
             }
             
-            Log::info('Donor registered successfully', [
+            Log::info('Donor created successfully', [
                 'donor_id' => $donor->id,
                 'email' => $donor->email,
                 'donor_type' => $donor->donor_type,
-                'session_id' => $session->id,
-                'device_session_id' => $deviceSession?->id,
+                'has_surname' => !empty($donor->surname),
+                'has_phone' => !empty($donor->phone)
             ]);
 
             return response()->json([
-                'success' => true,
                 'message' => 'Registration successful!',
                 'donor' => new DonorResource($donor),
                 'session_id' => $session->id,
                 'username' => $session->username,
                 'auth_token' => $session->id,
-                'device_session_id' => $deviceSession?->id,
-                'session_token' => $deviceSession?->session_token,
             ], 201);
         } catch (\Exception $e) {
-            Log::error('Donor registration error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-            ]);
+            Log::error('Donor registration error: ' . $e->getMessage());
             return response()->json([
-                'success' => false,
                 'message' => 'Registration failed. Please try again.',
                 'error' => $e->getMessage()
             ], 500);
@@ -333,29 +275,21 @@ class DonorsController extends Controller
     public function checkByDevice(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'device_fingerprint' => 'required|string',
+            'device_id' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Check if the device fingerprint is associated with any donor via DeviceSession
-        $deviceSession = DeviceSession::where('device_fingerprint', $request->device_fingerprint)
-            ->with('donor')
-            ->first();
+        // Check if the device is associated with any donor
+        // This is a placeholder - you may need to adjust based on your actual implementation
+        $donor = Donor::where('device_id', $request->device_id)->first();
 
-        if ($deviceSession && $deviceSession->donor) {
-            $donorSession = DonorSession::where('donor_id', $deviceSession->donor_id)->first();
+        if ($donor) {
             return response()->json([
                 'exists' => true,
-                'donor' => new DonorResource($deviceSession->donor),
-                'device_session_id' => $deviceSession->id,
-                'session_token' => $deviceSession->session_token,
-                'donor_session' => $donorSession ? [
-                    'id' => $donorSession->id,
-                    'username' => $donorSession->username,
-                ] : null,
+                'donor' => new DonorResource($donor)
             ]);
         }
 
