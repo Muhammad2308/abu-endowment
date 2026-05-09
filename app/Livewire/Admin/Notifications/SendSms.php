@@ -15,7 +15,7 @@ class SendSms extends Component
     public $statusType = 'success';
 
     protected $rules = [
-        'receiver' => 'required|string|max:30',
+        'receiver' => 'required|string|max:500',
         'message' => 'required|string|max:918',
     ];
 
@@ -26,35 +26,80 @@ class SendSms extends Component
         $this->sending = true;
         $this->statusMessage = null;
 
-        $smsService = new KudiSmsService();
-        $result = $smsService->sendSms($this->receiver, $this->message, 'ABU');
+        $recipients = $this->parseRecipients($this->receiver);
 
-        $status = $result['success'] ? 'sent' : 'failed';
-        $errorMessage = $result['success'] ? null : ($result['error'] ?? 'Failed to send SMS.');
+        if (empty($recipients)) {
+            $this->statusType = 'error';
+            $this->statusMessage = 'Please enter at least one valid phone number.';
+            $this->sending = false;
+            return;
+        }
+
+        $smsService = new KudiSmsService();
+        $recipientString = implode(',', $recipients);
+        $result = $smsService->sendSms($recipientString, $this->message, 'ABU');
+
         $responsePayload = is_array($result['response']) ? json_encode($result['response']) : (string) ($result['response'] ?? '');
         $cost = is_array($result['response']) ? ($result['response']['cost'] ?? null) : null;
 
-        SmsLog::create([
-            'recipient_phone' => $this->receiver,
-            'sender_id' => 'ABU',
-            'message' => $this->message,
-            'status' => $status,
-            'error_message' => $errorMessage,
-            'cost' => $cost,
-            'response_payload' => $responsePayload,
-            'sent_at' => $result['success'] ? now() : null,
-        ]);
+        foreach ($recipients as $recipient) {
+            SmsLog::create([
+                'recipient_phone' => $recipient,
+                'sender_id' => 'ABU',
+                'message' => $this->message,
+                'status' => $result['success'] ? 'sent' : 'failed',
+                'error_message' => $result['success'] ? null : ($result['error'] ?? 'Failed to send SMS.'),
+                'cost' => $cost,
+                'response_payload' => $responsePayload,
+                'sent_at' => $result['success'] ? now() : null,
+            ]);
+        }
 
         if ($result['success']) {
             $this->statusType = 'success';
-            $this->statusMessage = 'SMS sent successfully.';
+            $this->statusMessage = 'SMS sent successfully to ' . count($recipients) . ' recipient' . (count($recipients) > 1 ? 's' : '') . '.';
             $this->reset(['receiver', 'message']);
         } else {
             $this->statusType = 'error';
-            $this->statusMessage = $errorMessage;
+            $this->statusMessage = $result['error'] ?? 'Failed to send SMS.';
         }
 
         $this->sending = false;
+    }
+
+    private function parseRecipients(string $receiver): array
+    {
+        $parts = preg_split('/[\s,;]+/', trim($receiver));
+
+        return collect($parts)
+            ->filter()
+            ->map(function ($recipient) {
+                $normalized = $this->normalizePhoneNumber($recipient);
+                return $normalized;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function normalizePhoneNumber(string $phone): ?string
+    {
+        $digits = preg_replace('/[^0-9]/', '', $phone);
+
+        if (empty($digits)) {
+            return null;
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = ltrim($digits, '0');
+        }
+
+        if (!str_starts_with($digits, '234') && strlen($digits) <= 10) {
+            $digits = '234' . $digits;
+        }
+
+        return $digits;
     }
 
     public function render()

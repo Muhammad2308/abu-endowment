@@ -18,12 +18,12 @@
 
     <form wire:submit.prevent="sendSms" class="space-y-6">
         <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">Receiver Phone Number</label>
-            <input wire:model.defer="receiver" type="text" placeholder="e.g. +2348012345678 or 08012345678"
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Receiver Phone Number(s)</label>
+            <input wire:model.defer="receiver" type="text" placeholder="e.g. +2348012345678, 08012345678, 2348012345678"
                    class="block w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none"
                    autocomplete="tel">
             @error('receiver') <p class="mt-2 text-sm text-rose-600">{{ $message }}</p> @enderror
-            <p class="mt-2 text-xs text-slate-500">Enter a valid phone number. Country code is automatically normalized to Nigeria (234) if omitted.</p>
+            <p class="mt-2 text-xs text-slate-500">Enter one or more phone numbers separated by commas, semicolons, spaces, or new lines. Country code is automatically normalized to Nigeria (234) if omitted.</p>
         </div>
 
         <div>

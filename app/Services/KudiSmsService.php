@@ -86,21 +86,27 @@ class KudiSmsService
 
     private function normalizeRecipient(string $recipient, string $defaultCountryId): string
     {
-        $recipient = trim($recipient);
-        $digits = preg_replace('/[^0-9]/', '', $recipient);
+        $parts = preg_split('/[\s,;]+/', trim($recipient));
+        $normalized = [];
 
-        if (empty($digits)) {
-            return '';
+        foreach ($parts as $part) {
+            $digits = preg_replace('/[^0-9]/', '', $part);
+
+            if (empty($digits)) {
+                continue;
+            }
+
+            if (str_starts_with($digits, '0')) {
+                $digits = ltrim($digits, '0');
+            }
+
+            if (!str_starts_with($digits, $defaultCountryId) && strlen($digits) <= 10) {
+                $digits = $defaultCountryId . $digits;
+            }
+
+            $normalized[] = $digits;
         }
 
-        if (str_starts_with($digits, '0')) {
-            $digits = ltrim($digits, '0');
-        }
-
-        if (!str_starts_with($digits, $defaultCountryId) && strlen($digits) <= 10) {
-            $digits = $defaultCountryId . $digits;
-        }
-
-        return $digits;
+        return implode(',', array_unique($normalized));
     }
 }
