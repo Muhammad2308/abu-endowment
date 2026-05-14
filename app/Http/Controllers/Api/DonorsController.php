@@ -246,10 +246,12 @@ class DonorsController extends Controller
             'entry_year'        => 'nullable|integer|min:1950|max:' . date('Y'),
             'graduation_year'   => 'nullable|integer|min:1950|max:' . date('Y'),
             'organization_name' => 'nullable|string|max:255',
+            'email'             => 'nullable|email|unique:donors,email,' . $id,
             'state'             => 'nullable|string|max:255',
             'lga'               => 'nullable|string|max:255',
             'nationality'       => 'nullable|string|max:255',
             'address'           => 'nullable|string',
+            'profile_image'     => 'nullable|string',
             'program_ids'       => 'nullable|array',
             'program_ids.*'     => 'integer|exists:programs,id',
             'donor_tier_id'     => 'nullable|exists:donor_tiers,id',
@@ -265,10 +267,10 @@ class DonorsController extends Controller
 
         try {
             $donor->update($request->only([
-                'name', 'surname', 'other_name', 'phone', 'gender',
+                'name', 'surname', 'other_name', 'email', 'phone', 'gender',
                 'donor_type', 'department_id', 'entry_year', 'graduation_year',
                 'organization_name', 'state', 'lga', 'nationality', 'address',
-                'donor_tier_id',
+                'profile_image', 'donor_tier_id',
             ]));
 
             // Sync program selections to pivot
