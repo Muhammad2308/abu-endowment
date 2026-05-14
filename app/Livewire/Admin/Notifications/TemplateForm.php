@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Notifications;
 
 use Livewire\Component;
 
+use App\Models\DonorTier;
 use App\Models\EmailTemplate;
 use Illuminate\Support\Str;
 
@@ -17,6 +18,7 @@ class TemplateForm extends Component
     public $body_text;
     public $is_active = true;
     public $variables = [];
+    public $donor_tier_id = null;
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -37,6 +39,7 @@ class TemplateForm extends Component
             $this->body_html = $template->body_html;
             $this->body_text = $template->body_text;
             $this->is_active = $template->is_active;
+            $this->donor_tier_id = $template->donor_tier_id;
         }
     }
 
@@ -63,6 +66,7 @@ class TemplateForm extends Component
             'body_html' => $this->body_html,
             'body_text' => strip_tags($this->body_html), // Auto-generate plain text
             'is_active' => $this->is_active,
+            'donor_tier_id' => $this->donor_tier_id ?: null,
             'variables' => ['donor_name', 'donor_email', 'amount', 'donation_date', 'reference', 'project_name', 'organization_name'],
         ];
 
@@ -80,6 +84,8 @@ class TemplateForm extends Component
 
     public function render()
     {
-        return view('livewire.admin.notifications.template-form');
+        return view('livewire.admin.notifications.template-form', [
+            'tiers' => DonorTier::active()->orderBy('sort_order')->get(),
+        ]);
     }
 }

@@ -29,6 +29,7 @@ class Donor extends Model
         'ranking',
         'faculty_id',
         'department_id',
+        'donor_tier_id',
     ];
 
     public function faculty()
@@ -39,6 +40,11 @@ class Donor extends Model
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function tier()
+    {
+        return $this->belongsTo(DonorTier::class, 'donor_tier_id');
     }
 
     public function donations()

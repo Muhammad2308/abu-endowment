@@ -32,7 +32,7 @@ class DonorsController extends Controller
         }
 
         // Validate input based on donor type
-        $normalizedType = strtolower($donorType);
+        $normalizedType = strtolower($request->donor_type);
         $isAlumni = str_contains($normalizedType, 'alumni');
         
         $validationRules = [
@@ -236,14 +236,23 @@ class DonorsController extends Controller
 
         // Validate input
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'other_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20|unique:donors,phone,' . $id,
-            'state' => 'nullable|string|max:255',
-            'lga' => 'nullable|string|max:255',
-            'nationality' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
+            'name'              => 'nullable|string|max:255',
+            'surname'           => 'nullable|string|max:255',
+            'other_name'        => 'nullable|string|max:255',
+            'phone'             => 'nullable|string|max:20|unique:donors,phone,' . $id,
+            'gender'            => 'nullable|string|max:10',
+            'donor_type'        => 'nullable|string|max:50',
+            'department_id'     => 'nullable|exists:departments,id',
+            'entry_year'        => 'nullable|integer|min:1950|max:' . date('Y'),
+            'graduation_year'   => 'nullable|integer|min:1950|max:' . date('Y'),
+            'organization_name' => 'nullable|string|max:255',
+            'state'             => 'nullable|string|max:255',
+            'lga'               => 'nullable|string|max:255',
+            'nationality'       => 'nullable|string|max:255',
+            'address'           => 'nullable|string',
+            'program_ids'       => 'nullable|array',
+            'program_ids.*'     => 'integer|exists:programs,id',
+            'donor_tier_id'     => 'nullable|exists:donor_tiers,id',
         ]);
 
         if ($validator->fails()) {
@@ -256,9 +265,25 @@ class DonorsController extends Controller
 
         try {
             $donor->update($request->only([
-                'name', 'surname', 'other_name', 'phone', 
-                'state', 'lga', 'nationality', 'address'
+                'name', 'surname', 'other_name', 'phone', 'gender',
+                'donor_type', 'department_id', 'entry_year', 'graduation_year',
+                'organization_name', 'state', 'lga', 'nationality', 'address',
+                'donor_tier_id',
             ]));
+
+            // Sync program selections to pivot
+            if ($request->has('program_ids')) {
+                $rows = collect($request->program_ids)->map(fn($pid) => [
+                    'donor_id'   => $donor->id,
+                    'program_id' => $pid,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                \DB::table('department_programs')->where('donor_id', $donor->id)->delete();
+                if ($rows->isNotEmpty()) {
+                    \DB::table('department_programs')->insert($rows->all());
+                }
+            }
 
             return response()->json([
                 'success' => true,

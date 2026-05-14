@@ -18,6 +18,14 @@ use App\Http\Controllers\Api\FacultiesVisionController;
 use App\Http\Controllers\Api\DepartmentVisionController;
 use App\Http\Controllers\Api\DonorsController;
 use App\Http\Controllers\Api\DonorSessionController;
+use App\Http\Controllers\Api\DonorTierController;
+
+// Donor tiers
+Route::get('/donor-tiers', [DonorTierController::class, 'index']);
+Route::post('/donor-tiers', [DonorTierController::class, 'store']);
+Route::get('/donor-tiers/{donorTier}', [DonorTierController::class, 'show']);
+Route::put('/donor-tiers/{donorTier}', [DonorTierController::class, 'update']);
+Route::delete('/donor-tiers/{donorTier}', [DonorTierController::class, 'destroy']);
 
 // Public routes (no authentication required) - like search endpoints
 Route::post('/donors', [\App\Http\Controllers\Api\DonorsController::class, 'store']); // NEW REFACTORED CONTROLLER
@@ -47,9 +55,10 @@ Route::post('/verification/verify-email', [VerificationController::class, 'verif
 // Projects (public)
 Route::get('/projects', [ProjectController::class, 'index']);
 
-// Public Faculty/Department data
+// Public Faculty/Department/Program data
 Route::get('/departments', [\App\Http\Controllers\Api\DepartmentController::class, 'index']);
 Route::get('/faculties', [\App\Http\Controllers\Api\FacultyController::class, 'index']);
+Route::get('/programs', [\App\Http\Controllers\Api\ProgramController::class, 'index']);
 
 
 // Donations (public - no authentication required)

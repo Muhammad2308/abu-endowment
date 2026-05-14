@@ -45,7 +45,18 @@ class DonorResource extends JsonResource
                     'name' => $this->department->current_name,
                     'code' => $this->department->code ?? null
                 ];
-            })
+            }),
+            'donor_tier_id' => $this->donor_tier_id,
+            'tier' => $this->whenLoaded('tier', function() {
+                return [
+                    'id'         => $this->tier->id,
+                    'name'       => $this->tier->name,
+                    'color'      => $this->tier->color,
+                    'icon'       => $this->tier->icon,
+                    'min_amount' => $this->tier->min_amount,
+                    'max_amount' => $this->tier->max_amount,
+                ];
+            }),
         ];
     }
 } 

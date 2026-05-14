@@ -17,6 +17,7 @@ class EmailTemplate extends Model
         'body_text',
         'is_active',
         'variables',
+        'donor_tier_id',
     ];
 
     protected $casts = [
@@ -27,5 +28,10 @@ class EmailTemplate extends Model
     public function logs()
     {
         return $this->hasMany(EmailLog::class, 'template_id');
+    }
+
+    public function tier()
+    {
+        return $this->belongsTo(DonorTier::class, 'donor_tier_id');
     }
 }

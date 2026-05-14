@@ -13,6 +13,7 @@ use App\Models\Donor;
 use App\Models\DeviceSession;
 use App\Models\Project;
 use App\Models\PaymentTransaction;
+use App\Services\TierNotificationService;
 
 class PaymentController extends Controller
 {
@@ -360,9 +361,10 @@ class PaymentController extends Controller
                     $this->updateProjectRaised($donation->project_id, $donation->id);
                 }
 
-                // Send thank you email if payment is successful
+                // Send thank you email and tier notification if payment is successful
                 if ($isSuccessful) {
                     $this->sendThankYouEmail($donation);
+                    (new TierNotificationService())->handleDonationTierCheck($donation);
                 }
 
                 // If redirect is requested (from frontend), redirect to homepage with success
@@ -521,8 +523,9 @@ class PaymentController extends Controller
             $this->updateProjectRaised($donation->project_id, $donation->id);
         }
 
-        // Send thank you email
+        // Send thank you email and tier notification
         $this->sendThankYouEmail($donation);
+        (new TierNotificationService())->handleDonationTierCheck($donation);
 
         Log::info('Paystack webhook: Payment marked as completed', [
             'donation_id' => $donation->id,
