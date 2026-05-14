@@ -5,7 +5,7 @@
             <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-full">
                 <!-- Modal Header -->
                 <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl">
-                    <h3 class="text-xl font-bold text-slate-800">Add New Donor</h3>
+                    <h3 class="text-xl font-bold text-slate-800">Alumnus/Donor Insert</h3>
                     <button type="button" class="text-slate-400 hover:text-slate-600 transition-colors" wire:click="closeModal">
                         <i class="fas fa-times text-xl"></i>
                     </button>
