@@ -65,4 +65,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    // Squad Payments Configuration
+    'squad' => [
+        'secret_key' => env('SQUAD_SECRET_KEY'),
+        'base_url' => env('SQUAD_API_URL', 'https://api-d.squadco.com'),
+    ],
+
 ];

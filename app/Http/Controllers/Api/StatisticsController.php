@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Donation;
 use App\Models\Donor;
 use App\Models\Department;
+use App\Models\PaymentTransaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -239,6 +241,74 @@ class StatisticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch gender statistics',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get payment transaction trend over the last 14 days
+     */
+    public function transactions(Request $request)
+    {
+        try {
+            $days = (int) $request->query('days', 14);
+            $days = max(7, min(30, $days));
+            $start = Carbon::now()->subDays($days - 1)->startOfDay();
+
+            $transactionStats = PaymentTransaction::selectRaw('DATE(created_at) as day')
+                ->selectRaw('COUNT(*) as transaction_count')
+                ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
+                ->where('created_at', '>=', $start)
+                ->groupBy('day')
+                ->orderBy('day')
+                ->get()
+                ->keyBy('day');
+
+            $labels = [];
+            $transactionCounts = [];
+            $totalAmounts = [];
+
+            for ($i = 0; $i < $days; $i++) {
+                $date = $start->copy()->addDays($i);
+                $dayKey = $date->format('Y-m-d');
+                $labels[] = $date->format('M j');
+                $row = $transactionStats->get($dayKey);
+                $transactionCounts[] = $row ? (int) $row->transaction_count : 0;
+                $totalAmounts[] = $row ? (float) $row->total_amount : 0;
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'labels' => $labels,
+                    'datasets' => [
+                        [
+                            'label' => 'Transactions',
+                            'data' => $transactionCounts,
+                            'borderColor' => '#10b981',
+                            'backgroundColor' => 'rgba(16,184,129,0.18)',
+                            'fill' => true,
+                            'tension' => 0.35,
+                            'pointRadius' => 4
+                        ],
+                        [
+                            'label' => 'Amount (₦)',
+                            'data' => $totalAmounts,
+                            'borderColor' => '#3b82f6',
+                            'backgroundColor' => 'rgba(59,130,246,0.16)',
+                            'fill' => true,
+                            'tension' => 0.35,
+                            'pointRadius' => 4,
+                            'yAxisID' => 'amountAxis'
+                        ]
+                    ]
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch transaction statistics',
                 'error' => $e->getMessage()
             ], 500);
         }

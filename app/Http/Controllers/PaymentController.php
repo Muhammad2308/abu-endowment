@@ -104,6 +104,28 @@ class PaymentController extends Controller
                 'payment_reference' => 'ABU_' . time() . '_' . $donor->id,
             ]);
 
+            // Track the initialization event for this payment
+            PaymentTransaction::create([
+                'donation_id' => $donation->id,
+                'donor_id' => $donor->id,
+                'project_id' => $donation->project_id,
+                'payment_gateway' => 'paystack',
+                'category' => $donation->project_id ? 'project' : 'general',
+                'event_type' => 'payment.initialized',
+                'payment_reference' => $donation->payment_reference,
+                'gateway_reference' => null,
+                'amount' => $donation->amount,
+                'currency' => 'NGN',
+                'status' => 'pending',
+                'gateway_status' => 'initialized',
+                'channel' => null,
+                'fee' => 0,
+                'metadata' => array_merge($metadata, [
+                    'donor_status' => empty($metadata['donor_id']) ? 'new' : 'existing',
+                    'flow' => empty($metadata['donor_id']) ? ($donation->project_id ? 'new_user_project' : 'new_user_general') : ($donation->project_id ? 'existing_user_project' : 'existing_user_general'),
+                ]),
+            ]);
+
             // 2. Initialize Paystack transaction with donation payment_reference
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->paystackSecretKey,
@@ -130,6 +152,14 @@ class PaymentController extends Controller
                 $donation->update([
                     'payment_reference' => $data['data']['reference']
                 ]);
+
+                // Update initialization transaction record with the provider reference and payload
+                PaymentTransaction::where('donation_id', $donation->id)
+                    ->where('event_type', 'payment.initialized')
+                    ->update([
+                        'gateway_reference' => $data['data']['reference'],
+                        'response_payload' => json_encode($data),
+                    ]);
 
                 // Create/Update device session only if device_fingerprint is provided
                 if ($deviceFingerprint) {
@@ -162,9 +192,18 @@ class PaymentController extends Controller
                     ]
                 ]);
             } else {
-                // If Paystack fails, delete the donation record
-                $donation->delete();
-                
+                // If Paystack fails, mark donation and init transaction as failed
+                $donation->update(['status' => 'failed']);
+
+                PaymentTransaction::where('donation_id', $donation->id)
+                    ->where('event_type', 'payment.initialized')
+                    ->update([
+                        'status' => 'failed',
+                        'gateway_status' => 'failed',
+                        'response_payload' => json_encode($response->json()),
+                        'message' => $response->json()['message'] ?? null,
+                    ]);
+
                 $errorResponse = $response->json();
                 $errorMessage = $errorResponse['message'] ?? 'Unknown error';
                 $errorCode = $errorResponse['code'] ?? 'unknown_error';
@@ -331,6 +370,26 @@ class PaymentController extends Controller
                     'status' => $isSuccessful ? 'completed' : 'failed',
                     'verified_at' => now(),
                     'paid_at' => $isSuccessful ? ($data['paid_at'] ?? now()) : null
+                ]);
+
+                // Record the verification result as a separate transaction event
+                PaymentTransaction::create([
+                    'donation_id' => $donation->id,
+                    'donor_id' => $donation->donor_id,
+                    'project_id' => $donation->project_id,
+                    'payment_gateway' => 'paystack',
+                    'category' => $donation->project_id ? 'project' : 'general',
+                    'event_type' => $isSuccessful ? 'charge.success' : 'charge.failed',
+                    'payment_reference' => $data['reference'] ?? $reference,
+                    'gateway_reference' => $data['reference'] ?? $reference,
+                    'amount' => isset($data['amount']) ? ($data['amount'] / 100) : $donation->amount,
+                    'currency' => 'NGN',
+                    'status' => $isSuccessful ? 'completed' : 'failed',
+                    'gateway_status' => $data['status'] ?? ($isSuccessful ? 'success' : 'failed'),
+                    'channel' => $data['channel'] ?? null,
+                    'fee' => isset($data['fees']) ? ($data['fees'] / 100) : 0,
+                    'metadata' => $data['metadata'] ?? [],
+                    'response_payload' => json_encode($data),
                 ]);
 
                 // Update payment_reference if Paystack returned a different one

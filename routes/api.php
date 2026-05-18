@@ -171,6 +171,7 @@ Route::prefix('statistics')->group(function () {
     Route::get('/states', [\App\Http\Controllers\Api\StatisticsController::class, 'states']);
     Route::get('/lgas', [\App\Http\Controllers\Api\StatisticsController::class, 'lgas']);
     Route::get('/gender', [\App\Http\Controllers\Api\StatisticsController::class, 'gender']);
+    Route::get('/transactions', [\App\Http\Controllers\Api\StatisticsController::class, 'transactions']);
     Route::get('/summary', [\App\Http\Controllers\Api\StatisticsController::class, 'summary']);
 });
 Route::get('/faculties/{id}/departments', [\App\Http\Controllers\Api\FacultyController::class, 'departments']);
@@ -253,12 +254,14 @@ Route::post('/device/session', [DeviceController::class, 'createSession']); // K
 Route::get('/device/donor-info', [DeviceController::class, 'getDonorInfo']); // Keep existing
 
 // Payment routes (public - no authentication required)
-Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
+Route::post('/payments/initialize', [PaymentController::class, 'initialize'])->name('api.payments.initialize');
 Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
+Route::get('/squad/verify/{reference}', [SquadPaymentController::class, 'verify']);
 Route::get('/payments/test', [PaymentController::class, 'test']); // Test configuration
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/squad/webhook', [SquadPaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 use App\Http\Controllers\Api\MessageController;
 

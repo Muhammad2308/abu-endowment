@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Admin\FacultyController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\UserController;
@@ -75,6 +76,14 @@ Route::match(['GET', 'OPTIONS', 'HEAD'], '/storage/{path}', function ($path) {
 
 // Welcome page
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+
+// Donor Registration & Login Routes
+Route::get('/register', [RegistrationController::class, 'showRegistrationForm'])->name('register.form');
+Route::post('/register', [RegistrationController::class, 'register'])->name('register');
+Route::get('/login', [RegistrationController::class, 'showLoginForm'])->name('login.form');
+Route::post('/login', [RegistrationController::class, 'login'])->name('login');
+Route::post('/logout', [RegistrationController::class, 'logout'])->name('logout');
+Route::get('/donor-departments/{facultyId}', [RegistrationController::class, 'getDepartments'])->name('get.departments');
 
 // About page
 Route::get('/about', [\App\Http\Controllers\AboutController::class, 'index'])->name('about');
@@ -158,11 +167,6 @@ Route::post('/donations', [DonorController::class, 'makeDonation']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/donations/history', [DonorController::class, 'donationHistory']);
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
-});
-
-// Redirect /login to /admin/login for session expiry or direct access
-Route::get('/login', function () {
-    return redirect()->route('admin.login');
 });
 
 require __DIR__.'/auth.php';

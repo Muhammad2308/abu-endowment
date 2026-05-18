@@ -30,7 +30,12 @@ class DonorsController extends Controller
         }
 
         // Validate input based on donor type
+<<<<<<< Updated upstream
         $donorType = $request->input('donor_type');
+=======
+        $normalizedType = strtolower($request->donor_type);
+        $isAlumni = str_contains($normalizedType, 'alumni');
+>>>>>>> Stashed changes
         
         $validationRules = [
             'donor_type' => 'required|string|in:Alumni,Staff,Individual,Corporate,supporter,addressable_alumni,non_addressable_alumni,Organization,NGO',

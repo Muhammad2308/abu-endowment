@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Donation;
 use App\Models\Donor;
 use App\Models\Department;
+use App\Models\PaymentTransaction;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -178,6 +179,58 @@ class StatisticsManager extends Component
                 ];
             });
 
+        // 7. Payment transactions trend (successful only)
+        $transactionData = PaymentTransaction::selectRaw('DATE(created_at) as day')
+            ->selectRaw('COUNT(*) as transaction_count')
+            ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
+            ->where('created_at', '>=', Carbon::now()->subDays(13)->startOfDay())
+            ->where(function ($query) {
+                $query->where('status', 'completed')
+                      ->orWhere('gateway_status', 'success');
+            })
+            ->groupBy('day')
+            ->orderBy('day')
+            ->get()
+            ->keyBy('day');
+
+        $transactionLabels = [];
+        $transactionCounts = [];
+        $transactionAmounts = [];
+
+        for ($i = 13; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $dayKey = $date->format('Y-m-d');
+            $transactionLabels[] = $date->format('M j');
+            $row = $transactionData->get($dayKey);
+            $transactionCounts[] = $row ? (int) $row->transaction_count : 0;
+            $transactionAmounts[] = $row ? (float) $row->total_amount : 0;
+        }
+
+        $transactions = [
+            'labels' => $transactionLabels,
+            'datasets' => [
+                [
+                    'label' => 'Transactions',
+                    'data' => $transactionCounts,
+                    'borderColor' => '#10b981',
+                    'backgroundColor' => 'rgba(16,185,129,0.2)',
+                    'fill' => false,
+                    'tension' => 0.35,
+                    'pointRadius' => 3,
+                ],
+                [
+                    'label' => 'Amount (₦)',
+                    'data' => $transactionAmounts,
+                    'borderColor' => '#3b82f6',
+                    'backgroundColor' => 'rgba(59,130,246,0.16)',
+                    'fill' => true,
+                    'tension' => 0.35,
+                    'pointRadius' => 3,
+                    'yAxisID' => 'amountAxis',
+                ],
+            ],
+        ];
+
         $this->chartData = [
             'donors' => $this->formatChartData($topDonors),
             'faculties' => $this->formatChartData($faculties),
@@ -186,6 +239,7 @@ class StatisticsManager extends Component
             'states' => $this->formatChartData($states, true),
             'lgas' => $this->formatChartData($lgas),
             'gender' => $this->formatChartData($gender, true),
+            'transactions' => $transactions,
         ];
     }
 

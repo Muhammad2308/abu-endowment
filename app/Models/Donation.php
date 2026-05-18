@@ -15,6 +15,9 @@ class Donation extends Model
         'endowment',
         'status',
         'payment_reference',
+        'gateway_reference',
+        'verified_at',
+        'paid_at',
     ];
 
     protected $casts = [

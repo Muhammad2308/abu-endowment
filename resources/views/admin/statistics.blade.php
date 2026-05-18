@@ -35,6 +35,22 @@
             </div>
         </div>
 
+        <!-- Payment Transactions Trend -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 dark:border-slate-700 print:shadow-none print:border print:border-slate-200">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Payment Transactions Trend</h2>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Transactions and payment volume over the last 14 days.</p>
+                </div>
+                <span class="inline-flex items-center gap-2 rounded-full bg-slate-100/80 dark:bg-slate-900/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                    <i class="fas fa-chart-line"></i> Transactions
+                </span>
+            </div>
+            <div class="relative h-[320px]">
+                <canvas id="transactionsChart"></canvas>
+            </div>
+        </div>
+
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
             <!-- Total Donations -->
@@ -394,6 +410,7 @@
                     `${API_BASE}/states`,
                     `${API_BASE}/lgas`,
                     `${API_BASE}/gender`,
+                    `${API_BASE}/transactions`,
                     `${API_BASE}/summary`
                 ];
                 
@@ -401,7 +418,7 @@
                     endpoints.map(url => fetch(url).then(r => r.json()))
                 );
                 
-                const [donors, donorTypes, departments, states, lgas, gender, summary] = responses;
+                const [donors, donorTypes, departments, states, lgas, gender, transactions, summary] = responses;
                 
                 if (summary.success) updateSummaryCards(summary.data);
                 
@@ -411,7 +428,8 @@
                     departments: departments.data,
                     states: states.data,
                     lgas: lgas.data,
-                    gender: gender.data
+                    gender: gender.data,
+                    transactions: transactions.data
                 });
                 
             } catch (error) {
@@ -487,6 +505,45 @@
                 charts.gender = new Chart(
                     document.getElementById('genderChart'),
                     createChartConfig('pie', data.gender)
+                );
+            }
+
+            if (data.transactions) {
+                charts.transactions = new Chart(
+                    document.getElementById('transactionsChart'),
+                    createChartConfig('line', data.transactions, {
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: theme.colors.text
+                                }
+                            },
+                            y: {
+                                display: false
+                            },
+                            amountAxis: {
+                                type: 'linear',
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false,
+                                    color: theme.colors.grid
+                                },
+                                ticks: {
+                                    color: theme.colors.text,
+                                    callback: value => '₦' + Number(value).toLocaleString()
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₦)',
+                                    color: theme.colors.text
+                                }
+                            }
+                        }
+                    })
                 );
             }
         }

@@ -19,6 +19,22 @@
         </div>
     </div>
 
+    <!-- Transactions Trend Chart -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 dark:border-slate-700 print:shadow-none print:border print:border-slate-200">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Payment Transactions Trend</h2>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Transaction volume and total amount over the last 14 days.</p>
+            </div>
+            <span class="inline-flex items-center gap-2 rounded-full bg-slate-100/80 dark:bg-slate-900/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                <i class="fas fa-chart-line"></i> Payments
+            </span>
+        </div>
+        <div class="relative h-[320px]">
+            <canvas id="transactionsChart"></canvas>
+        </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
         <!-- Total Donations -->
@@ -234,30 +250,36 @@
     <!-- Chart Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('livewire:initialized', () => {
-             // Theme Colors
+        function initAdminStatisticsCharts(rawData) {
+            if (!rawData) return;
+
             const isDarkMode = document.documentElement.classList.contains('dark');
             const theme = {
                 colors: {
-                    primary: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444'], 
+                    primary: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444'],
                     grid: isDarkMode ? '#334155' : '#f1f5f9',
-                    text: isDarkMode ? '#94a3b8' : '#64748b',
-                    title: isDarkMode ? '#f8fafc' : '#1e293b',
-                    tooltipBg: isDarkMode ? '#1e293b' : '#ffffff',
-                    tooltipText: isDarkMode ? '#f8fafc' : '#1e293b'
+                    text: isDarkMode ? '#94a3b8' : '#64748b'
                 }
             };
 
+<<<<<<< Updated upstream
             // Chart Configuration Factory
             function createChartConfig(type, data, chartTypeLabel) {
+=======
+            function createChartConfig(type, data, options = {}) {
+>>>>>>> Stashed changes
                 return {
                     type: type,
                     data: {
                         labels: data.labels,
                         datasets: data.datasets.map((dataset, index) => ({
                             ...dataset,
-                            backgroundColor: theme.colors.primary,
-                            borderColor: theme.colors.primary,
+                            backgroundColor: Array.isArray(dataset.data)
+                                ? dataset.backgroundColor ?? theme.colors.primary
+                                : theme.colors.primary,
+                            borderColor: Array.isArray(dataset.data)
+                                ? dataset.borderColor ?? theme.colors.primary
+                                : theme.colors.primary,
                             borderWidth: 0,
                             borderRadius: 6
                         }))
@@ -300,14 +322,15 @@
                                 }
                             }
                         },
-                        scales: type === 'bar' ? {
-                            x: { ticks: { color: theme.colors.text }, grid: { display: false } },
+                        scales: type === 'bar' || type === 'line' ? {
+                            x: { ticks: { color: theme.colors.text }, grid: { display: false, color: theme.colors.grid } },
                             y: { ticks: { color: theme.colors.text }, grid: { color: theme.colors.grid, borderDash: [4, 4] } }
                         } : undefined
                     }
                 };
             }
 
+<<<<<<< Updated upstream
             const chartData = @json($chartData);
             
             // Render Charts
@@ -325,5 +348,37 @@
             if(chartData.lgas) new Chart(document.getElementById('lgaChart'), createChartConfig('bar', chartData.lgas, 'lgas'));
             if(chartData.gender) new Chart(document.getElementById('genderChart'), createChartConfig('pie', chartData.gender, 'gender'));
         });
+=======
+            if (rawData.transactions) {
+                new Chart(document.getElementById('transactionsChart'), createChartConfig('line', rawData.transactions, {
+                    scales: {
+                        x: { ticks: { color: theme.colors.text }, grid: { display: false, color: theme.colors.grid } },
+                        y: { beginAtZero: true, ticks: { color: theme.colors.text }, grid: { color: theme.colors.grid, borderDash: [4, 4] } },
+                        amountAxis: { type: 'linear', position: 'right', grid: { drawOnChartArea: false, color: theme.colors.grid }, ticks: { color: theme.colors.text, callback: v => '₦' + Number(v).toLocaleString() } }
+                    }
+                }));
+            }
+
+            if (rawData.donors) new Chart(document.getElementById('donorNameChart'), createChartConfig('bar', rawData.donors));
+            if (rawData.faculties) new Chart(document.getElementById('facultyChart'), createChartConfig('pie', rawData.faculties));
+            if (rawData.departments) {
+                new Chart(document.getElementById('departmentChart'), createChartConfig('pie', rawData.departments));
+                new Chart(document.getElementById('departmentBarChart'), createChartConfig('bar', rawData.departments));
+            }
+            if (rawData.projects) {
+                new Chart(document.getElementById('projectChart'), createChartConfig('pie', rawData.projects));
+                new Chart(document.getElementById('projectBarChart'), createChartConfig('bar', rawData.projects));
+            }
+            if (rawData.states) new Chart(document.getElementById('stateChart'), createChartConfig('pie', rawData.states));
+            if (rawData.lgas) new Chart(document.getElementById('lgaChart'), createChartConfig('bar', rawData.lgas));
+            if (rawData.gender) new Chart(document.getElementById('genderChart'), createChartConfig('pie', rawData.gender));
+        }
+
+        const chartData = @json($chartData);
+
+        document.addEventListener('DOMContentLoaded', () => initAdminStatisticsCharts(chartData));
+        document.addEventListener('livewire:load', () => initAdminStatisticsCharts(chartData));
+        document.addEventListener('livewire:update', () => initAdminStatisticsCharts(chartData));
+>>>>>>> Stashed changes
     </script>
 </div>

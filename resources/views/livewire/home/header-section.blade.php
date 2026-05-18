@@ -42,7 +42,8 @@
                             <a href="{{ url('/') }}" class="d-flex align-items-center" style="text-decoration: none;">
                                 <img src="{{ asset('abu_logo.png') }}" alt="ALUMNI FUND" style="height: 50px; width: auto; margin-right: 15px; filter: brightness(0) invert(1);">
                                 <div class="logo-text" style="display: flex; flex-direction: column; line-height: 1.2;">
-                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">Alumni Giving</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.5px;">ABU Alumni Giving</span>
+                                    <!-- <span style="font-size: 12px; font-weight: 400; color: rgba(255,255,255,0.9); letter-spacing: 0.5px;">& Crowd Funding</span> -->
                                 </div>
                             </a>
                         </div>
@@ -99,9 +100,10 @@
                                 @endif
 
                                 <!-- Donate Button -->
-                                <a data-scroll-nav="1" href="#make-donation" class="btn header-btn-fill">
+                                <a href="#" id="squadDonateBtn" class="btn header-btn-fill">
                                     <i class="fa fa-heart mr-2"></i> Make Donation
                                 </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -222,4 +224,67 @@
             background-color: #f0fdf4;
         }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const button = document.getElementById('squadDonateBtn');
+            if (!button) {
+                return;
+            }
+
+            button.addEventListener('click', async function (event) {
+                event.preventDefault();
+
+                const rawAmount = prompt('Enter donation amount in Naira (e.g. 1000):');
+                if (!rawAmount) {
+                    return;
+                }
+
+                const amountValue = parseFloat(rawAmount.replace(/[^0-9.]/g, ''));
+                if (Number.isNaN(amountValue) || amountValue < 100) {
+                    alert('Please enter a valid amount of at least 100 Naira.');
+                    return;
+                }
+
+                const email = prompt('Enter your email address:');
+                if (!email) {
+                    return;
+                }
+
+                button.disabled = true;
+                const originalContent = button.innerHTML;
+                button.innerHTML = 'Please wait...';
+
+                try {
+                    const response = await fetch('{{ route('api.squad.pay') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            amount: Math.round(amountValue * 100),
+                            email: email,
+                            callback_url: window.location.origin + '/?payment_status=success',
+                        }),
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Unable to initialize Squad payment.');
+                    }
+
+                    if (!result.checkout_url) {
+                        throw new Error('Payment provider did not return a checkout URL.');
+                    }
+
+                    window.location.href = result.checkout_url;
+                } catch (error) {
+                    alert(error.message || 'Failed to initiate Squad payment.');
+                } finally {
+                    button.disabled = false;
+                    button.innerHTML = originalContent;
+                }
+            });
+        });
+    </script>
 </header>
