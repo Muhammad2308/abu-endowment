@@ -33,13 +33,22 @@ class TemplateForm extends Component
         if ($templateId) {
             $this->templateId = $templateId;
             $template = EmailTemplate::findOrFail($templateId);
-            $this->name = $template->name;
-            $this->slug = $template->slug;
-            $this->subject = $template->subject;
-            $this->body_html = $template->body_html;
-            $this->body_text = $template->body_text;
-            $this->is_active = $template->is_active;
+            $this->name        = $template->name;
+            $this->slug        = $template->slug;
+            $this->subject     = $template->subject;
+            $this->body_text   = $template->body_text;
+            $this->is_active   = $template->is_active;
             $this->donor_tier_id = $template->donor_tier_id;
+
+            // Decode HTML entities that may have been introduced by the old Trix
+            // rich-text editor (which stored pasted HTML as &lt;div&gt; etc.).
+            // Strip the outer Trix wrapper element so the textarea shows clean HTML.
+            $decoded = html_entity_decode($template->body_html ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            // Trix wraps the whole content in a single <div>…</div> — remove that outer shell
+            $decoded = preg_replace('/^\s*<div>([\s\S]*)<\/div>\s*$/i', '$1', trim($decoded));
+            // Trix also replaces newlines with <br> — convert back for readability
+            $decoded = str_replace('<br>', "\n", $decoded);
+            $this->body_html   = $decoded;
         }
     }
 

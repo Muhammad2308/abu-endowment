@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\DonorController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SquadPaymentController;
 use Illuminate\Support\Facades\Storage;
 
 // Serve storage files - this route must be registered before Laravel's default storage route
@@ -165,6 +166,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/donations/history', [DonorController::class, 'donationHistory']);
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
 });
+
+// Squad payment confirmation page
+Route::get('/donation/thank-you', [SquadPaymentController::class, 'confirm'])->name('donation.thankyou');
 
 // Redirect /login to /admin/login for session expiry or direct access
 Route::get('/login', function () {

@@ -67,12 +67,15 @@
         </div>
 
         {{-- Row 3: Email Body (full width) --}}
-        <div wire:ignore>
+        <div>
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                <label class="block text-sm font-medium text-gray-700">Email Body <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700">
+                    Email Body <span class="text-red-500">*</span>
+                    <span class="text-xs text-gray-400 font-normal ml-1">(paste raw HTML)</span>
+                </label>
                 <select id="variableSelect"
                     class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm text-xs self-start sm:self-auto">
-                    <option value="">Insert Variable into Editor</option>
+                    <option value="">Insert Variable</option>
                     <option value="{!! '{{donor_name}}' !!}">Donor Name</option>
                     <option value="{!! '{{donor_email}}' !!}">Donor Email</option>
                     <option value="{!! '{{amount}}' !!}">Amount</option>
@@ -82,8 +85,11 @@
                     <option value="{!! '{{organization_name}}' !!}">Organization Name</option>
                 </select>
             </div>
-            <input id="body_html" type="hidden" name="content" value="{{ $body_html }}">
-            <trix-editor input="body_html" class="trix-content min-h-[300px] border border-gray-300 rounded-md"></trix-editor>
+            <textarea id="body_html_textarea"
+                wire:model.defer="body_html"
+                rows="20"
+                class="block w-full font-mono text-xs border border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 resize-y"
+                placeholder="Paste your raw HTML email template here…">{{ $body_html }}</textarea>
         </div>
         @error('body_html') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
 
@@ -104,28 +110,18 @@
     </form>
 
     <script>
-        function insertVariableAtCursor(input, value) {
-            if (!value) return;
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-            const text = input.value;
-            input.value = text.substring(0, start) + value + text.substring(end);
-            input.selectionStart = input.selectionEnd = start + value.length;
-            input.focus();
-        }
-
-        document.addEventListener('livewire:initialized', function () {
-            const trixEditor = document.querySelector('trix-editor');
-
-            trixEditor.addEventListener('trix-change', function (e) {
-                @this.set('body_html', e.target.value);
-            });
-
+        document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('variableSelect').addEventListener('change', function (e) {
-                if (e.target.value) {
-                    trixEditor.editor.insertString(e.target.value);
-                    e.target.value = '';
-                }
+                const value = e.target.value;
+                if (!value) return;
+                const ta = document.getElementById('body_html_textarea');
+                const start = ta.selectionStart;
+                const end = ta.selectionEnd;
+                ta.value = ta.value.substring(0, start) + value + ta.value.substring(end);
+                ta.selectionStart = ta.selectionEnd = start + value.length;
+                ta.focus();
+                ta.dispatchEvent(new Event('input'));
+                e.target.value = '';
             });
         });
     </script>

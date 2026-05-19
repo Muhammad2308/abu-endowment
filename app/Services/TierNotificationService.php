@@ -71,6 +71,8 @@ class TierNotificationService
     ): void {
         $donorName = trim("{$donor->surname} {$donor->name}") ?: $donor->email;
 
+        $logoUrl = 'https://abu-endowment.cloud/abu_logo_white_for_email.png';
+
         $variables = [
             'donor_name'        => $donorName,
             'donor_email'       => $donor->email,
@@ -79,11 +81,18 @@ class TierNotificationService
             'amount'            => '₦' . number_format((float) $donation->amount, 2),
             'reference'         => $donation->payment_reference ?? '',
             'donation_date'     => now()->format('d M Y'),
-            'project_name'      => $donation->project?->project_title ?? 'ABU Endowment Fund',
-            'organization_name' => $donor->organization_name ?? 'ABU Endowment Fund',
+            'project_name'      => $donation->project?->project_title ?? 'ABU Giving',
+            'organization_name' => $donor->organization_name ?? 'ABU Giving',
+            'logo_url'          => $logoUrl,
         ];
 
-        $bodyHtml = $this->replaceVariables($template->body_html ?? '', $variables);
+        // Decode HTML entities in case the template was saved via the old Trix editor
+        $rawHtml = html_entity_decode($template->body_html ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Replace any logo filename references with the absolute production URL
+        $rawHtml = $this->fixLogoImageUrls($rawHtml, $logoUrl);
+
+        $bodyHtml = $this->replaceVariables($rawHtml, $variables);
         $subject  = $this->replaceVariables(
             $template->subject ?: "Thank you for your donation — {$tier->name}",
             $variables
@@ -103,7 +112,7 @@ class TierNotificationService
                         ->subject($subject)
                         ->from(
                             config('mail.from.address', 'abuendowment@gmail.com'),
-                            config('mail.from.name', 'ABU Endowment Fund')
+                            config('mail.from.name', 'ABU Giving')
                         );
             });
 
@@ -125,6 +134,24 @@ class TierNotificationService
                 'error'    => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Replace any logo src references (relative or absolute) with the production URL.
+     */
+    private function fixLogoImageUrls(string $html, string $logoUrl): string
+    {
+        $filenames = ['abu_logo_white_for_email.png', 'abu_logo.png'];
+
+        foreach ($filenames as $filename) {
+            $html = preg_replace(
+                '/src=["\'][^"\']*' . preg_quote($filename, '/') . '["\']/i',
+                'src="' . $logoUrl . '"',
+                $html
+            );
+        }
+
+        return $html;
     }
 
     /**

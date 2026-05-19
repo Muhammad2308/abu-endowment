@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Donation;
 use App\Models\PaymentTransaction;
+use App\Services\SquadService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -25,6 +28,152 @@ class PaymentTransactions extends Component
         'category' => ['except' => ''],
         'perPage' => ['except' => 15],
     ];
+
+    public function mount()
+    {
+        $this->backfillDonationsToTransactions();
+        $this->verifyPendingSquadTransactions();
+    }
+
+    public function backfillDonationsToTransactions()
+    {
+        $existingRefs = PaymentTransaction::pluck('payment_reference')->unique()->toArray();
+
+        $donations = Donation::with('donor', 'project')
+            ->whereNotIn('payment_reference', $existingRefs)
+            ->whereNotNull('payment_reference')
+            ->get();
+
+        foreach ($donations as $donation) {
+            $ref     = $donation->payment_reference;
+            $gateway = str_contains($ref, '_SQUAD_') ? 'squad' : 'paystack';
+            $status  = $donation->status === 'completed' ? 'completed' : ($donation->status === 'failed' ? 'failed' : 'pending');
+            $event   = $status === 'completed' ? 'charge.success' : ($status === 'failed' ? 'charge.failed' : 'payment.initialized');
+
+            PaymentTransaction::create([
+                'donation_id'       => $donation->id,
+                'donor_id'          => $donation->donor_id,
+                'project_id'        => $donation->project_id,
+                'payment_gateway'   => $gateway,
+                'category'          => $donation->project_id ? 'project' : 'general',
+                'event_type'        => $event,
+                'payment_reference' => $ref,
+                'gateway_reference' => $ref,
+                'amount'            => $donation->amount,
+                'currency'          => 'NGN',
+                'status'            => $status,
+                'gateway_status'    => $status,
+                'channel'           => null,
+                'fee'               => 0,
+                'response_payload'  => null,
+            ]);
+        }
+    }
+
+    public function verifyPendingSquadTransactions()
+    {
+        $squadService = new SquadService();
+
+        $pendingTransactions = PaymentTransaction::where('payment_gateway', 'squad')
+            ->where('status', 'pending')
+            ->where('event_type', 'payment.initialized')
+            ->get();
+
+        foreach ($pendingTransactions as $transaction) {
+            $reference = $transaction->gateway_reference ?: $transaction->payment_reference;
+            if (!$reference) {
+                continue;
+            }
+
+            $result = $squadService->verifyTransaction($reference);
+            if (!$result['success'] || empty($result['data'])) {
+                continue;
+            }
+
+            $data      = $result['data'];
+            $status    = strtolower($data['transaction_status'] ?? $data['status'] ?? 'unknown');
+            $verifyRef = $data['transaction_ref'] ?? $reference;
+
+            $donation = Donation::find($transaction->donation_id);
+            if (!$donation) {
+                continue;
+            }
+
+            if ($status === 'success') {
+                if ($donation->status !== 'completed') {
+                    $donation->update([
+                        'status'      => 'completed',
+                        'verified_at' => now(),
+                        'paid_at'     => $data['transaction_date'] ?? now(),
+                    ]);
+                }
+
+                $transaction->update([
+                    'status'           => 'completed',
+                    'gateway_status'   => 'success',
+                    'gateway_reference'=> $verifyRef,
+                    'response_payload' => json_encode($result['raw'] ?? $data),
+                ]);
+
+                if (!PaymentTransaction::where('payment_reference', $transaction->payment_reference)
+                    ->where('event_type', 'charge.success')
+                    ->exists()) {
+                    PaymentTransaction::create([
+                        'donation_id'       => $donation->id,
+                        'donor_id'          => $donation->donor_id,
+                        'project_id'        => $donation->project_id,
+                        'payment_gateway'   => 'squad',
+                        'category'          => $donation->project_id ? 'project' : 'general',
+                        'event_type'        => 'charge.success',
+                        'payment_reference' => $transaction->payment_reference,
+                        'gateway_reference' => $verifyRef,
+                        'amount'            => $data['amount'] ?? $donation->amount,
+                        'currency'          => 'NGN',
+                        'status'            => 'completed',
+                        'gateway_status'    => $status,
+                        'channel'           => $data['payment_method'] ?? null,
+                        'fee'               => $data['fee'] ?? 0,
+                        'response_payload'  => json_encode($result['raw'] ?? $data),
+                    ]);
+                }
+            }
+
+            if (in_array($status, ['failed', 'declined'])) {
+                if ($donation->status !== 'failed') {
+                    $donation->update(['status' => 'failed']);
+                }
+
+                $transaction->update([
+                    'status'           => 'failed',
+                    'gateway_status'   => $status,
+                    'gateway_reference'=> $verifyRef,
+                    'response_payload' => json_encode($result['raw'] ?? $data),
+                ]);
+
+                if (!PaymentTransaction::where('payment_reference', $transaction->payment_reference)
+                    ->where('event_type', 'charge.failed')
+                    ->exists()) {
+                    PaymentTransaction::create([
+                        'donation_id'       => $donation->id,
+                        'donor_id'          => $donation->donor_id,
+                        'project_id'        => $donation->project_id,
+                        'payment_gateway'   => 'squad',
+                        'category'          => $donation->project_id ? 'project' : 'general',
+                        'event_type'        => 'charge.failed',
+                        'payment_reference' => $transaction->payment_reference,
+                        'gateway_reference' => $verifyRef,
+                        'amount'            => $data['amount'] ?? $donation->amount,
+                        'currency'          => 'NGN',
+                        'status'            => 'failed',
+                        'gateway_status'    => $status,
+                        'channel'           => $data['payment_method'] ?? null,
+                        'fee'               => $data['fee'] ?? 0,
+                        'response_payload'  => json_encode($result['raw'] ?? $data),
+                    ]);
+                }
+            }
+        }
+    }
 
     public function updatingSearch()
     {
@@ -56,6 +205,56 @@ class PaymentTransactions extends Component
     {
         $this->showDetailsModal = false;
         $this->selectedTransaction = null;
+    }
+
+    public function getChartData(): array
+    {
+        $days   = 30;
+        $start  = now()->subDays($days - 1)->startOfDay();
+        $labels = [];
+        for ($i = 0; $i < $days; $i++) {
+            $labels[] = now()->subDays($days - 1 - $i)->format('M d');
+        }
+
+        $rows = PaymentTransaction::select(
+                DB::raw("strftime('%Y-%m-%d', created_at) as day"),
+                'payment_gateway',
+                DB::raw('SUM(amount) as total')
+            )
+            ->where('created_at', '>=', $start)
+            ->whereIn('status', ['completed', 'success'])
+            ->groupBy('day', 'payment_gateway')
+            ->get()
+            ->groupBy('payment_gateway');
+
+        $fill = function ($gateway) use ($labels, $rows, $days) {
+            $map  = [];
+            foreach ($rows[$gateway] ?? [] as $row) {
+                $map[$row->day] = (float) $row->total;
+            }
+            $data = [];
+            for ($i = 0; $i < $days; $i++) {
+                $key    = now()->subDays($days - 1 - $i)->format('Y-m-d');
+                $data[] = $map[$key] ?? 0;
+            }
+            return $data;
+        };
+
+        $totalPaystack = array_sum($fill('paystack'));
+        $totalSquad    = array_sum($fill('squad'));
+        $totalAll      = $totalPaystack + $totalSquad;
+
+        return [
+            'labels'   => $labels,
+            'paystack' => $fill('paystack'),
+            'squad'    => $fill('squad'),
+            'totals'   => [
+                'all'      => number_format($totalAll, 2),
+                'paystack' => number_format($totalPaystack, 2),
+                'squad'    => number_format($totalSquad, 2),
+                'count'    => PaymentTransaction::whereIn('status', ['completed', 'success'])->count(),
+            ],
+        ];
     }
 
     public function render()
@@ -94,6 +293,7 @@ class PaymentTransactions extends Component
 
         return view('livewire.admin.payments.transactions', [
             'transactions' => $transactions,
+            'chartData'    => $this->getChartData(),
         ]);
     }
 }

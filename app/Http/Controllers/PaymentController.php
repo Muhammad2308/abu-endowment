@@ -94,21 +94,47 @@ class PaymentController extends Controller
             $amountNaira = $request->amount; // e.g., 1000
             $amountKobo = $this->nairaToKobo($amountNaira);
 
-            // Generate a unique reference — no donation record is created here.
-            // The donation is only written to the database after Paystack confirms success
-            // (via verify() or webhook), so declined/abandoned payments never appear in the table.
-            $paymentReference = 'ABU_' . time() . '_' . $donor->id;
+            // 1. Create donation record first (store naira)
+            $donation = Donation::create([
+                'donor_id' => $donor->id,
+                'project_id' => $metadata['project_id'] ?? null,
+                'amount' => $amountNaira,
+                'type' => $donationType,
+                'frequency' => 'onetime',
+                'endowment' => $metadata['endowment'],
+                'status' => 'pending',
+                'payment_reference' => 'ABU_' . time() . '_' . $donor->id,
+            ]);
 
-            // Initialize Paystack transaction
+            // Track the initialization event
+            $initTransaction = PaymentTransaction::create([
+                'donation_id'     => $donation->id,
+                'donor_id'        => $donor->id,
+                'project_id'      => $donation->project_id,
+                'payment_gateway' => 'paystack',
+                'category'        => $donation->project_id ? 'project' : 'general',
+                'event_type'      => 'payment.initialized',
+                'payment_reference' => $donation->payment_reference,
+                'gateway_reference' => null,
+                'amount'          => $donation->amount,
+                'currency'        => 'NGN',
+                'status'          => 'pending',
+                'gateway_status'  => 'initialized',
+                'channel'         => null,
+                'fee'             => 0,
+            ]);
+
+            // 2. Initialize Paystack transaction with donation payment_reference
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->paystackSecretKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.paystack.co/transaction/initialize', [
                 'email' => $request->email,
                 'amount' => $amountKobo,
-                'reference' => $paymentReference,
+                'reference' => $donation->payment_reference,
                 'callback_url' => $request->callback_url,
                 'metadata' => [
+                    'donation_id' => $donation->id,
                     'donor_id' => $donor->id,
                     'project_id' => $metadata['project_id'] ?? null,
                     'endowment' => $metadata['endowment'],
@@ -121,6 +147,17 @@ class PaymentController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
+
+                // 3. Update donation with Paystack reference
+                $donation->update([
+                    'payment_reference' => $data['data']['reference']
+                ]);
+
+                // Update init transaction with the provider's reference and response
+                $initTransaction->update([
+                    'gateway_reference' => $data['data']['reference'],
+                    'response_payload'  => json_encode($data),
+                ]);
 
                 // Create/Update device session only if device_fingerprint is provided
                 if ($deviceFingerprint) {
@@ -142,6 +179,7 @@ class PaymentController extends Controller
                         'authorization_url' => $data['data']['authorization_url'],
                         'access_code' => $data['data']['access_code'],
                         'reference' => $data['data']['reference'],
+                        'donation_id' => $donation->id,
                         'donor' => [
                             'id' => $donor->id,
                             'name' => $donor->name,
@@ -151,6 +189,14 @@ class PaymentController extends Controller
                     ]
                 ]);
             } else {
+                // Paystack rejected — mark donation as failed (preserve the record for auditing)
+                $donation->update(['status' => 'failed']);
+                $initTransaction->update([
+                    'status'           => 'failed',
+                    'gateway_status'   => 'failed',
+                    'response_payload' => json_encode($response->json()),
+                ]);
+
                 $errorResponse = $response->json();
                 $errorMessage = $errorResponse['message'] ?? 'Unknown error';
                 $errorCode = $errorResponse['code'] ?? 'unknown_error';
@@ -299,12 +345,55 @@ class PaymentController extends Controller
                         ]);
                     }
 
+                    // Record the successful verification as a transaction event
+                    PaymentTransaction::create([
+                        'donation_id'       => $donation->id,
+                        'donor_id'          => $donation->donor_id,
+                        'project_id'        => $donation->project_id,
+                        'payment_gateway'   => 'paystack',
+                        'category'          => $donation->project_id ? 'project' : 'general',
+                        'event_type'        => 'charge.success',
+                        'payment_reference' => $data['reference'] ?? $reference,
+                        'gateway_reference' => $data['reference'] ?? $reference,
+                        'amount'            => isset($data['amount']) ? ($data['amount'] / 100) : $donation->amount,
+                        'currency'          => 'NGN',
+                        'status'            => 'completed',
+                        'gateway_status'    => $data['status'] ?? 'success',
+                        'channel'           => $data['channel'] ?? null,
+                        'fee'               => isset($data['fees']) ? ($data['fees'] / 100) : 0,
+                        'response_payload'  => json_encode($data),
+                    ]);
+
                     if ($donation->project_id) {
                         $this->updateProjectRaised($donation->project_id, $donation->id);
                     }
 
                     $this->sendThankYouEmail($donation);
                     (new TierNotificationService())->handleDonationTierCheck($donation);
+                } elseif ($donation) {
+                    // Payment failed — update existing donation record and log a transaction
+                    $donation->update([
+                        'status'      => 'failed',
+                        'verified_at' => now(),
+                    ]);
+
+                    PaymentTransaction::create([
+                        'donation_id'       => $donation->id,
+                        'donor_id'          => $donation->donor_id,
+                        'project_id'        => $donation->project_id,
+                        'payment_gateway'   => 'paystack',
+                        'category'          => $donation->project_id ? 'project' : 'general',
+                        'event_type'        => 'charge.failed',
+                        'payment_reference' => $data['reference'] ?? $reference,
+                        'gateway_reference' => $data['reference'] ?? $reference,
+                        'amount'            => isset($data['amount']) ? ($data['amount'] / 100) : $donation->amount,
+                        'currency'          => 'NGN',
+                        'status'            => 'failed',
+                        'gateway_status'    => $data['status'] ?? 'failed',
+                        'channel'           => $data['channel'] ?? null,
+                        'fee'               => 0,
+                        'response_payload'  => json_encode($data),
+                    ]);
                 }
 
                 if ($request->has('redirect')) {
@@ -569,19 +658,20 @@ class PaymentController extends Controller
             $donorName = $donor->full_name ?? trim("{$donor->surname} {$donor->name} {$donor->other_name}");
             $amount = number_format($donation->amount, 2);
             $reference = $donation->payment_reference;
-            $projectName = $donation->project ? $donation->project->project_title : 'ABU Endowment Fund';
+            $projectName = $donation->project ? $donation->project->project_title : 'ABU Giving';
             
             Mail::send('emails.thank-you', [
-                'donorName' => $donorName,
-                'amount' => $amount,
-                'reference' => $reference,
-                'projectName' => $projectName,
+                'donorName'    => $donorName,
+                'amount'       => $amount,
+                'reference'    => $reference,
+                'projectName'  => $projectName,
                 'donationDate' => $donation->paid_at ?? now(),
-                'donationType' => $donation->endowment === 'yes' ? 'Endowment Fund' : 'Project Donation'
+                'donationType' => $donation->endowment === 'yes' ? 'ABU Giving Fund' : 'Project Donation',
+                'logoUrl'      => 'https://abu-endowment.cloud/abu_logo_white_for_email.png',
             ], function($message) use ($donor) {
-                $message->from(config('mail.from.address', 'noreply@abu-endowment.edu.ng'), config('mail.from.name', 'ABU Endowment Fund'))
+                $message->from(config('mail.from.address', 'noreply@abu-endowment.edu.ng'), config('mail.from.name', 'ABU Giving'))
                         ->to($donor->email)
-                        ->subject('Thank You for Your Generous Donation - ABU Endowment Fund');
+                        ->subject('Thank You for Your Generous Donation - ABU Giving');
             });
 
             Log::info('Thank you email sent successfully', [

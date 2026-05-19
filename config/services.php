@@ -55,6 +55,12 @@ return [
         'url' => env('KUDI_SMS_URL', 'https://my.kudisms.net/api/intcomposesms'),
     ],
 
+    // Squad Payment Configuration
+    'squad' => [
+        'secret_key' => env('SQUAD_SECRET_KEY', ''),
+        'base_url'   => env('SQUAD_API_URL', env('SQUAD_BASE_URL', 'https://api-d.squadco.com')),
+    ],
+
     // Paystack Configuration
     'paystack' => [
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),

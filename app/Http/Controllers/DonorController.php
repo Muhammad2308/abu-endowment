@@ -609,7 +609,6 @@ class DonorController extends Controller
 
         if ($donorId) {
             $donations = \App\Models\Donation::where('donor_id', $donorId)
-                ->where('status', 'completed')
                 ->orderBy('created_at', 'desc')
                 ->get();
         }

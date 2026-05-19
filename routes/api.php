@@ -303,6 +303,7 @@ Route::post('/squad/pay', [SquadPaymentController::class, 'initiate'])->name('ap
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/squad/webhook', [SquadPaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->name('api.squad.webhook');
 
 use App\Http\Controllers\Api\MessageController;
 

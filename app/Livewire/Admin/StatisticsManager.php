@@ -2,201 +2,238 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
 use App\Models\Donation;
 use App\Models\Donor;
-use App\Models\Department;
-use Illuminate\Support\Facades\DB;
+use App\Models\DonorTier;
+use App\Models\PaymentTransaction;
+use App\Models\Project;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class StatisticsManager extends Component
 {
-    public $totalDonations = 0;
-    public $totalDonors = 0;
-    public $newDonorsThisWeek = 0;
-    public $alumniPercentage = 0;
-    public $averageDonation = 0;
-    
-    // Comparisons (vs last month)
-    public $donationGrowth = 0;
-    public $avgDonationGrowth = 0;
+    public string $period = '30';
 
-    public $chartData = [];
+    public array $kpi            = [];
+    public array $revenueChart   = [];
+    public array $statusChart    = [];
+    public array $gatewayChart   = [];
+    public array $tierChart      = [];
+    public array $typeChart      = [];
+    public array $projectsData   = [];
+    public array $demoData       = [];
+    public array $txnHourChart   = [];
+    public array $recentActivity = [];
+    public array $topDonors      = [];
 
-    public function mount()
+    protected $queryString = ['period' => ['except' => '30']];
+
+    public function mount(): void { $this->loadAll(); }
+
+    public function updatedPeriod(): void { $this->loadAll(); }
+
+    private function start(): Carbon  { return now()->subDays((int) $this->period)->startOfDay(); }
+    private function pStart(): Carbon { return now()->subDays((int) $this->period * 2)->startOfDay(); }
+    private function pEnd(): Carbon   { return $this->start()->subSecond(); }
+
+    private function trend($cur, $prev): float
     {
-        $this->calculateSummaryMetrics();
-        $this->prepareChartData();
+        if ($prev == 0) return $cur > 0 ? 100.0 : 0.0;
+        return round((($cur - $prev) / $prev) * 100, 1);
     }
 
-    public function calculateSummaryMetrics()
+    public function loadAll(): void
     {
-        // Totals
-        $this->totalDonations = Donation::where('status', 'success')->sum('amount') + Donation::where('status', 'paid')->sum('amount');
-        $this->totalDonors = Donor::count();
-        $this->averageDonation = Donation::whereIn('status', ['success', 'paid'])->avg('amount') ?? 0;
+        $start = $this->start();
+        $ps    = $this->pStart();
+        $pe    = $this->pEnd();
 
-        // Growth Logic (vs Last Month)
-        $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
-        $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
-        
-        $currentMonthDonations = Donation::whereIn('status', ['success', 'paid'])
-            ->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()])
-            ->sum('amount');
-            
-        $lastMonthDonations = Donation::whereIn('status', ['success', 'paid'])
-            ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
-            ->sum('amount');
+        // ── KPI cards ────────────────────────────────────────────
+        $raised      = Donation::where('status', 'completed')->where('created_at', '>=', $start)->sum('amount');
+        $prevRaised  = Donation::where('status', 'completed')->whereBetween('created_at', [$ps, $pe])->sum('amount');
 
-        $this->donationGrowth = $lastMonthDonations > 0 
-            ? (($currentMonthDonations - $lastMonthDonations) / $lastMonthDonations) * 100 
-            : 0;
+        $completed   = Donation::where('status', 'completed')->where('created_at', '>=', $start)->count();
+        $prevComp    = Donation::where('status', 'completed')->whereBetween('created_at', [$ps, $pe])->count();
 
-        // New Donors
-        $this->newDonorsThisWeek = Donor::where('created_at', '>=', Carbon::now()->startOfWeek())->count();
+        $allTx       = Donation::where('created_at', '>=', $start)->count();
+        $prevAllTx   = Donation::whereBetween('created_at', [$ps, $pe])->count();
+        $rate        = $allTx > 0 ? round($completed / $allTx * 100, 1) : 0;
+        $prevRate    = $prevAllTx > 0 ? round($prevComp / $prevAllTx * 100, 1) : 0;
 
-        // Alumni Percentage
-        $alumniCount = Donor::where('donor_type', 'alumni')->count();
-        $this->alumniPercentage = $this->totalDonors > 0 
-            ? round(($alumniCount / $this->totalDonors) * 100, 1) 
-            : 0;
-    }
+        $donors      = Donor::count();
+        $prevDonors  = Donor::where('created_at', '<', $start)->count();
 
-    public function prepareChartData()
-    {
-        // 1. Top Donors (by Name)
-        $topDonors = Donation::whereIn('status', ['success', 'paid'])
-            ->selectRaw('donor_id, sum(amount) as total')
-            ->groupBy('donor_id')
-            ->orderByDesc('total')
-            ->take(8)
-            ->with('donor')
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => $row->donor->full_name ?? 'Unknown',
-                    'value' => $row->total
-                ];
-            });
+        $avg         = $completed > 0 ? round((float) $raised / $completed, 2) : 0;
+        $prevAvg     = $prevComp  > 0 ? round((float) $prevRaised / $prevComp, 2) : 0;
 
-        // 2. Faculties (by Amount Donated)
-        $faculties = Donation::whereIn('donations.status', ['success', 'paid'])
-            ->whereHas('donor.faculty')
-            ->join('donors', 'donations.donor_id', '=', 'donors.id')
-            ->join('faculties', 'donors.faculty_id', '=', 'faculties.id')
-            ->selectRaw('faculties.current_name as name, sum(donations.amount) as total')
-            ->groupBy('faculties.id', 'faculties.current_name')
-            ->orderByDesc('total')
-            ->take(10)
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => $row->name,
-                    'value' => $row->total
-                ];
-            });
+        $fees        = PaymentTransaction::where('status', 'completed')->where('created_at', '>=', $start)->sum('fee');
 
-        // 3. Departments
-        $departments = Donation::whereIn('donations.status', ['success', 'paid'])
-            ->whereHas('donor.department') // Ensure donor has department
-            ->join('donors', 'donations.donor_id', '=', 'donors.id')
-            ->join('departments', 'donors.department_id', '=', 'departments.id')
-            ->selectRaw('departments.current_name as name, sum(donations.amount) as total')
-            ->groupBy('departments.id', 'departments.current_name') // Group by ID is safer for SQL modes
-            ->orderByDesc('total')
-            ->take(10)
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => $row->name,
-                    'value' => $row->total
-                ];
-            });
+        $endoAmt     = Donation::where('status', 'completed')->where('endowment', 'yes')->where('created_at', '>=', $start)->sum('amount');
+        $endoCnt     = Donation::where('status', 'completed')->where('endowment', 'yes')->where('created_at', '>=', $start)->count();
+        $projAmt     = Donation::where('status', 'completed')->where('type', 'project')->where('created_at', '>=', $start)->sum('amount');
+        $projCnt     = Donation::where('status', 'completed')->where('type', 'project')->where('created_at', '>=', $start)->count();
 
-        // 4. Projects
-        $projects = Donation::whereIn('donations.status', ['success', 'paid'])
-            ->whereHas('project') // Ensure donation has a project
-            ->join('projects', 'donations.project_id', '=', 'projects.id')
-            ->selectRaw('projects.project_title as name, sum(donations.amount) as total')
-            ->groupBy('projects.id', 'projects.project_title')
-            ->orderByDesc('total')
-            ->take(8)
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => \Illuminate\Support\Str::limit($row->name, 20), // Truncate long titles
-                    'value' => $row->total
-                ];
-            });
-
-        // 5. States (by Amount Donated)
-        $states = Donation::whereIn('donations.status', ['success', 'paid'])
-            ->join('donors', 'donations.donor_id', '=', 'donors.id')
-            ->whereNotNull('donors.state')
-            ->selectRaw('donors.state, sum(donations.amount) as total')
-            ->groupBy('donors.state')
-            ->orderByDesc('total')
-            ->take(8)
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => $row->state,
-                    'value' => $row->total
-                ];
-            });
-
-        // 5. LGAs
-        $lgas = Donor::selectRaw('lga, count(*) as count')
-            ->whereNotNull('lga')
-            ->groupBy('lga')
-            ->orderByDesc('count')
-            ->take(10)
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => $row->lga,
-                    'value' => $row->count
-                ];
-            });
-
-        // 6. Gender
-        $gender = Donor::selectRaw('gender, count(*) as count')
-            ->whereNotNull('gender')
-            ->groupBy('gender')
-            ->get()
-            ->map(function ($row) {
-                return [
-                    'label' => ucfirst($row->gender),
-                    'value' => $row->count
-                ];
-            });
-
-        $this->chartData = [
-            'donors' => $this->formatChartData($topDonors),
-            'faculties' => $this->formatChartData($faculties), // Replaced donorTypes
-            'departments' => $this->formatChartData($departments),
-            'projects' => $this->formatChartData($projects),
-            'states' => $this->formatChartData($states, true),
-            'lgas' => $this->formatChartData($lgas),
-            'gender' => $this->formatChartData($gender, true),
+        $this->kpi = [
+            'raised'    => ['value' => (float) $raised,   'trend' => $this->trend($raised, $prevRaised), 'fmt' => 'currency', 'label' => 'Total Raised',         'icon' => 'wallet',       'color' => 'emerald'],
+            'completed' => ['value' => (int)   $completed,'trend' => $this->trend($completed, $prevComp), 'fmt' => 'number',  'label' => 'Completed Donations',   'icon' => 'check-circle', 'color' => 'blue'],
+            'donors'    => ['value' => (int)   $donors,   'trend' => $this->trend($donors, $prevDonors),  'fmt' => 'number',  'label' => 'Total Donors',          'icon' => 'users',        'color' => 'violet'],
+            'avg'       => ['value' => (float) $avg,      'trend' => $this->trend($avg, $prevAvg),        'fmt' => 'currency','label' => 'Avg. Donation',         'icon' => 'trending-up',  'color' => 'amber'],
+            'rate'      => ['value' => (float) $rate,     'trend' => $this->trend($rate, $prevRate),      'fmt' => 'percent', 'label' => 'Success Rate',          'icon' => 'pie-chart',    'color' => 'teal'],
+            'fees'      => ['value' => (float) $fees,     'trend' => 0,                                   'fmt' => 'currency','label' => 'Total Fees Paid',        'icon' => 'receipt',      'color' => 'rose'],
+            'endowment' => ['value' => (float) $endoAmt,  'trend' => 0, 'count' => $endoCnt,             'fmt' => 'currency','label' => 'Endowment Donations',   'icon' => 'heart',        'color' => 'pink'],
+            'project'   => ['value' => (float) $projAmt,  'trend' => 0, 'count' => $projCnt,             'fmt' => 'currency','label' => 'Project Donations',     'icon' => 'folder',       'color' => 'indigo'],
         ];
+
+        // ── Revenue by gateway per day ────────────────────────────
+        $days = (int) $this->period;
+        $rows = PaymentTransaction::select(
+                DB::raw("strftime('%Y-%m-%d', created_at) as day"),
+                'payment_gateway',
+                DB::raw('SUM(amount) as total')
+            )
+            ->where('created_at', '>=', $start)
+            ->where('status', 'completed')
+            ->groupBy('day', 'payment_gateway')
+            ->get()
+            ->groupBy('payment_gateway');
+
+        $psMap = collect($rows->get('paystack', collect()))->keyBy('day')->map(fn($r) => (float) $r->total);
+        $sqMap = collect($rows->get('squad',    collect()))->keyBy('day')->map(fn($r) => (float) $r->total);
+
+        $rLabels = $rPs = $rSq = [];
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $key      = now()->subDays($i)->format('Y-m-d');
+            $rLabels[]= now()->subDays($i)->format($days > 60 ? 'M d' : 'M d');
+            $rPs[]    = $psMap[$key] ?? 0;
+            $rSq[]    = $sqMap[$key] ?? 0;
+        }
+        $this->revenueChart = ['labels' => $rLabels, 'paystack' => $rPs, 'squad' => $rSq];
+
+        // ── Status breakdown ──────────────────────────────────────
+        $sc = Donation::where('created_at', '>=', $start)
+            ->selectRaw('status, count(*) as cnt, COALESCE(sum(amount),0) as total')
+            ->groupBy('status')->get()->keyBy('status');
+
+        $this->statusChart = [
+            'completed' => ['count' => (int)(($sc['completed'] ?? null)?->cnt ?? 0),  'total' => (float)(($sc['completed'] ?? null)?->total ?? 0)],
+            'pending'   => ['count' => (int)(($sc['pending']   ?? null)?->cnt ?? 0),  'total' => (float)(($sc['pending']   ?? null)?->total ?? 0)],
+            'failed'    => ['count' => (int)(($sc['failed']    ?? null)?->cnt ?? 0),  'total' => (float)(($sc['failed']    ?? null)?->total ?? 0)],
+        ];
+
+        // ── Gateway split ─────────────────────────────────────────
+        $gw = PaymentTransaction::where('status', 'completed')->where('created_at', '>=', $start)
+            ->selectRaw('payment_gateway, count(*) as cnt, COALESCE(sum(amount),0) as total, COALESCE(sum(fee),0) as fees')
+            ->groupBy('payment_gateway')->get()->keyBy('payment_gateway');
+
+        $this->gatewayChart = [
+            'paystack' => ['amount' => (float)(($gw['paystack'] ?? null)?->total ?? 0), 'count' => (int)(($gw['paystack'] ?? null)?->cnt ?? 0), 'fee' => (float)(($gw['paystack'] ?? null)?->fees ?? 0)],
+            'squad'    => ['amount' => (float)(($gw['squad']    ?? null)?->total ?? 0), 'count' => (int)(($gw['squad']    ?? null)?->cnt ?? 0), 'fee' => (float)(($gw['squad']    ?? null)?->fees ?? 0)],
+        ];
+
+        // ── Donor tiers ───────────────────────────────────────────
+        $this->tierChart = DonorTier::orderBy('sort_order')->get()->map(function ($tier) {
+            $cnt   = Donor::where('donor_tier_id', $tier->id)->count();
+            $total = Donation::where('status', 'completed')
+                ->whereHas('donor', fn($q) => $q->where('donor_tier_id', $tier->id))
+                ->sum('amount');
+            return [
+                'name'  => $tier->name,
+                'color' => $tier->color ?? '#10b981',
+                'count' => $cnt,
+                'min'   => (float) $tier->min_amount,
+                'max'   => (float) ($tier->max_amount ?? 0),
+                'total' => (float) $total,
+            ];
+        })->toArray();
+
+        // ── Donation type by month ────────────────────────────────
+        $typeRows = Donation::where('status', 'completed')->where('created_at', '>=', $start)
+            ->selectRaw("strftime('%Y-%m', created_at) as month, type, COALESCE(sum(amount),0) as total")
+            ->groupBy('month', 'type')->orderBy('month')->get()->groupBy('month');
+
+        $tLabels = $tEndo = $tProj = [];
+        foreach ($typeRows as $month => $rr) {
+            $tLabels[] = Carbon::parse($month . '-01')->format('M Y');
+            $tEndo[]   = (float)(($rr->firstWhere('type', 'endowment'))->total ?? 0);
+            $tProj[]   = (float)(($rr->firstWhere('type', 'project'))->total ?? 0);
+        }
+        $this->typeChart = ['labels' => $tLabels, 'endowment' => $tEndo, 'project' => $tProj];
+
+        // ── Projects progress ─────────────────────────────────────
+        $this->projectsData = Project::withoutTrashed()->where('target', '>', 0)
+            ->orderByDesc('raised')->take(8)->get()
+            ->map(fn($p) => [
+                'title'  => $p->project_title,
+                'target' => (float) $p->target,
+                'raised' => (float) ($p->raised ?? 0),
+                'status' => $p->status ?? 'active',
+                'pct'    => $p->target > 0 ? min(round($p->raised / $p->target * 100, 1), 100) : 0,
+            ])->toArray();
+
+        // ── Demographics ──────────────────────────────────────────
+        $dTypes   = Donor::selectRaw('donor_type, count(*) as cnt')->groupBy('donor_type')->get();
+        $dGenders = Donor::whereNotNull('gender')->selectRaw('gender, count(*) as cnt')->groupBy('gender')->get();
+        $dStates  = Donor::whereNotNull('state')
+            ->join('donations', 'donors.id', '=', 'donations.donor_id')
+            ->where('donations.status', 'completed')
+            ->selectRaw('donors.state, COALESCE(sum(donations.amount),0) as total')
+            ->groupBy('donors.state')->orderByDesc('total')->take(6)->get();
+
+        $this->demoData = [
+            'types'  => $dTypes->map(fn($r)   => ['label' => $r->donor_type ?: 'Unknown', 'count' => (int)$r->cnt])->toArray(),
+            'gender' => $dGenders->map(fn($r)  => ['label' => ucfirst($r->gender),          'count' => (int)$r->cnt])->toArray(),
+            'states' => $dStates->map(fn($r)   => ['label' => $r->state,                    'total' => (float)$r->total])->toArray(),
+        ];
+
+        // ── Transactions by hour ──────────────────────────────────
+        $hrRows = PaymentTransaction::where('status', 'completed')->where('created_at', '>=', $start)
+            ->selectRaw("CAST(strftime('%H', created_at) AS INTEGER) as hr, count(*) as cnt")
+            ->groupBy('hr')->get()->keyBy('hr');
+
+        $hLabels = $hData = [];
+        for ($h = 0; $h < 24; $h++) {
+            $hLabels[] = str_pad($h, 2, '0', STR_PAD_LEFT) . ':00';
+            $hData[]   = (int)(($hrRows[$h] ?? null)?->cnt ?? 0);
+        }
+        $this->txnHourChart = ['labels' => $hLabels, 'data' => $hData];
+
+        // ── Recent activity ───────────────────────────────────────
+        $this->recentActivity = PaymentTransaction::with('donor')
+            ->where('status', 'completed')->latest()->take(8)->get()
+            ->map(fn($t) => [
+                'name'    => optional($t->donor)->full_name ?? 'Anonymous',
+                'initials'=> $this->initials(optional($t->donor)->full_name ?? 'AN'),
+                'amount'  => (float) $t->amount,
+                'gateway' => $t->payment_gateway,
+                'ago'     => $t->created_at->diffForHumans(),
+                'status'  => $t->status,
+            ])->toArray();
+
+        // ── Top donors ────────────────────────────────────────────
+        $this->topDonors = Donation::where('donations.status', 'completed')
+            ->where('donations.created_at', '>=', $start)
+            ->join('donors', 'donations.donor_id', '=', 'donors.id')
+            ->selectRaw('donors.surname, donors.name, donors.email, donors.donor_type, count(*) as gifts, COALESCE(sum(donations.amount),0) as total')
+            ->groupBy('donors.id', 'donors.surname', 'donors.name', 'donors.email', 'donors.donor_type')
+            ->orderByDesc('total')->take(10)->get()
+            ->map(fn($r) => [
+                'name'  => trim(($r->surname ?? '') . ' ' . ($r->name ?? '')),
+                'email' => $r->email,
+                'type'  => $r->donor_type,
+                'gifts' => (int) $r->gifts,
+                'total' => (float) $r->total,
+            ])->toArray();
     }
 
-    private function formatChartData($collection, $isPie = false)
+    private function initials(string $name): string
     {
-        return [
-            'labels' => $collection->pluck('label'),
-            'datasets' => [
-                [
-                    'data' => $collection->pluck('value'),
-                ]
-            ]
-        ];
+        $parts = array_filter(explode(' ', trim($name)));
+        return strtoupper(substr($parts[0] ?? 'A', 0, 1) . substr($parts[1] ?? '', 0, 1));
     }
 
     public function render()
     {
-        return view('livewire.admin.statistics-manager')
-            ->layout('layouts.admin');
+        return view('livewire.admin.statistics-manager')->layout('layouts.admin');
     }
 }

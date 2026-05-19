@@ -1,301 +1,561 @@
-@section('title', 'View Analytics')
+@section('title', 'Analytics')
+<div class="space-y-6">
 
-<div class="space-y-8 print:space-y-4" id="statistics-container">
-    <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
+    {{-- ── PAGE HEADER ─────────────────────────────────────────── --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">Donation Analytics</h1>
-            <p class="mt-2 text-slate-500 dark:text-slate-400">Real-time insights into donation patterns and donor engagement.</p>
+            <h1 class="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Analytics & Insights</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Comprehensive giving data across all channels</p>
         </div>
-        <div class="flex gap-3">
-            <button id="printBtn" onclick="window.print()" class="group inline-flex items-center px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
-                <i class="fas fa-print mr-2 text-slate-500 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200 transition-colors"></i>
-                Print Report
+        <div class="flex items-center gap-3 flex-wrap">
+            {{-- Period selector --}}
+            <div class="inline-flex rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-sm">
+                @foreach(['7' => '7D', '30' => '30D', '90' => '90D', '365' => '1Y'] as $val => $label)
+                    <button wire:click="$set('period','{{ $val }}')"
+                        class="px-3 py-2 text-xs font-semibold transition-colors
+                            {{ $period === $val
+                                ? 'bg-emerald-600 text-white'
+                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
+            <button wire:click="loadAll" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 shadow-sm transition">
+                <i class="fas fa-sync-alt text-emerald-500" wire:loading.class="animate-spin"></i> Refresh
             </button>
-            <button wire:click="$refresh" class="group inline-flex items-center px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200">
-                <i class="fas fa-sync-alt mr-2 text-emerald-500 group-hover:rotate-180 transition-transform duration-500" wire:loading.class="animate-spin"></i>
-                Refresh Data
-            </button>
         </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
-        <!-- Total Donations -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300 print:shadow-none print:border print:border-slate-200">
-            <div class="flex items-start justify-between">
+    {{-- ── KPI CARDS ────────────────────────────────────────────── --}}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @php
+        $kpiIcons = [
+            'raised'    => ['icon'=>'fa-wallet',        'bg'=>'bg-emerald-50 dark:bg-emerald-900/30', 'text'=>'text-emerald-600 dark:text-emerald-400'],
+            'completed' => ['icon'=>'fa-circle-check',  'bg'=>'bg-blue-50 dark:bg-blue-900/30',     'text'=>'text-blue-600 dark:text-blue-400'],
+            'donors'    => ['icon'=>'fa-users',         'bg'=>'bg-violet-50 dark:bg-violet-900/30', 'text'=>'text-violet-600 dark:text-violet-400'],
+            'avg'       => ['icon'=>'fa-chart-line',    'bg'=>'bg-amber-50 dark:bg-amber-900/30',   'text'=>'text-amber-600 dark:text-amber-400'],
+            'rate'      => ['icon'=>'fa-percent',       'bg'=>'bg-teal-50 dark:bg-teal-900/30',     'text'=>'text-teal-600 dark:text-teal-400'],
+            'fees'      => ['icon'=>'fa-receipt',       'bg'=>'bg-rose-50 dark:bg-rose-900/30',     'text'=>'text-rose-600 dark:text-rose-400'],
+            'endowment' => ['icon'=>'fa-heart',         'bg'=>'bg-pink-50 dark:bg-pink-900/30',     'text'=>'text-pink-600 dark:text-pink-400'],
+            'project'   => ['icon'=>'fa-folder-open',  'bg'=>'bg-indigo-50 dark:bg-indigo-900/30', 'text'=>'text-indigo-600 dark:text-indigo-400'],
+        ];
+        @endphp
+
+        @foreach($kpi as $key => $card)
+        @php $ico = $kpiIcons[$key] ?? ['icon'=>'fa-circle','bg'=>'bg-slate-50','text'=>'text-slate-600']; @endphp
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-start justify-between mb-3">
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide leading-tight">{{ $card['label'] }}</p>
+                <div class="p-2 rounded-xl {{ $ico['bg'] }}">
+                    <i class="fas {{ $ico['icon'] }} text-sm {{ $ico['text'] }}"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-slate-800 dark:text-white">
+                @if($card['fmt'] === 'currency') ₦{{ number_format($card['value'], 0) }}
+                @elseif($card['fmt'] === 'percent') {{ $card['value'] }}%
+                @else {{ number_format($card['value']) }}
+                @endif
+            </p>
+            @if(isset($card['count']))
+                <p class="text-xs text-slate-400 mt-0.5">{{ $card['count'] }} donations</p>
+            @endif
+            <div class="mt-2 flex items-center gap-1 text-xs">
+                @if($card['trend'] > 0)
+                    <span class="text-emerald-600 font-semibold flex items-center gap-0.5"><i class="fas fa-arrow-up text-[10px]"></i>{{ $card['trend'] }}%</span>
+                    <span class="text-slate-400">vs prev period</span>
+                @elseif($card['trend'] < 0)
+                    <span class="text-rose-500 font-semibold flex items-center gap-0.5"><i class="fas fa-arrow-down text-[10px]"></i>{{ abs($card['trend']) }}%</span>
+                    <span class="text-slate-400">vs prev period</span>
+                @else
+                    <span class="text-slate-400">— no comparison data</span>
+                @endif
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- ── REVENUE LINE CHART ───────────────────────────────────── --}}
+    <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h2 class="text-base font-bold text-slate-800 dark:text-white">Revenue Over Time</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Daily collection — last {{ $period }} days</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-slate-500">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-emerald-500 inline-block rounded"></span>Paystack</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-blue-500 inline-block rounded"></span>Squad</span>
+            </div>
+        </div>
+        <div style="height:260px;position:relative;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+
+    {{-- ── STATUS + GATEWAY ROW ────────────────────────────────── --}}
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+
+        {{-- Donation Status --}}
+        <div wire:ignore class="lg:col-span-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Donation Status Breakdown</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">Count and value by status</p>
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                @php
+                $statusCfg = [
+                    'completed' => ['label'=>'Completed','bg'=>'bg-emerald-50 dark:bg-emerald-900/20','text'=>'text-emerald-700 dark:text-emerald-400','dot'=>'bg-emerald-500'],
+                    'pending'   => ['label'=>'Pending',  'bg'=>'bg-amber-50 dark:bg-amber-900/20',   'text'=>'text-amber-700 dark:text-amber-400',    'dot'=>'bg-amber-400'],
+                    'failed'    => ['label'=>'Failed',   'bg'=>'bg-rose-50 dark:bg-rose-900/20',     'text'=>'text-rose-700 dark:text-rose-400',      'dot'=>'bg-rose-500'],
+                ];
+                $totalStatus = collect($statusChart)->sum('count') ?: 1;
+                @endphp
+                @foreach($statusCfg as $s => $cfg)
+                <div class="rounded-xl p-3 {{ $cfg['bg'] }}">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="w-2 h-2 rounded-full {{ $cfg['dot'] }}"></span>
+                        <span class="text-xs font-medium {{ $cfg['text'] }}">{{ $cfg['label'] }}</span>
+                    </div>
+                    <p class="text-xl font-bold {{ $cfg['text'] }}">{{ $statusChart[$s]['count'] ?? 0 }}</p>
+                    <p class="text-xs {{ $cfg['text'] }} opacity-75">₦{{ number_format($statusChart[$s]['total'] ?? 0, 0) }}</p>
+                    <p class="text-xs {{ $cfg['text'] }} opacity-60 mt-0.5">{{ $totalStatus > 0 ? round(($statusChart[$s]['count'] ?? 0) / $totalStatus * 100, 1) : 0 }}%</p>
+                </div>
+                @endforeach
+            </div>
+            <div style="height:180px;position:relative;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        {{-- Gateway Split --}}
+        <div wire:ignore class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 flex flex-col">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Gateway Split</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Paystack vs Squad</p>
+            <div style="height:180px;position:relative;" class="mb-4">
+                <canvas id="gatewayChart"></canvas>
+            </div>
+            @php $gwTotal = ($gatewayChart['paystack']['amount'] ?? 0) + ($gatewayChart['squad']['amount'] ?? 0); @endphp
+            <div class="space-y-2 mt-auto">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Paystack</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-emerald-700 dark:text-emerald-400">₦{{ number_format($gatewayChart['paystack']['amount'] ?? 0, 0) }}</p>
+                        <p class="text-[10px] text-emerald-600 opacity-70">{{ $gatewayChart['paystack']['count'] ?? 0 }} txns · {{ $gwTotal > 0 ? round(($gatewayChart['paystack']['amount'] ?? 0) / $gwTotal * 100, 1) : 0 }}%</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                        <span class="text-xs font-semibold text-blue-700 dark:text-blue-400">Squad</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-blue-700 dark:text-blue-400">₦{{ number_format($gatewayChart['squad']['amount'] ?? 0, 0) }}</p>
+                        <p class="text-[10px] text-blue-600 opacity-70">{{ $gatewayChart['squad']['count'] ?? 0 }} txns · {{ $gwTotal > 0 ? round(($gatewayChart['squad']['amount'] ?? 0) / $gwTotal * 100, 1) : 0 }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── DONOR TIERS ──────────────────────────────────────────── --}}
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h2 class="text-base font-bold text-slate-800 dark:text-white">Donor Tier Distribution</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Giving ladder from General Supporter to Platinum</p>
+            </div>
+        </div>
+        <div class="space-y-3">
+            @php
+            $tierColors = ['General Supporter'=>'#64748b','Bronze Benefactor'=>'#cd7f32','Silver Benefactor'=>'#9ca3af','Gold Benefactor'=>'#f59e0b','Platinum Benefactor'=>'#8b5cf6'];
+            $maxTierTotal = collect($tierChart)->max('total') ?: 1;
+            @endphp
+            @forelse($tierChart as $tier)
+            <div class="flex items-center gap-4">
+                <div class="w-36 shrink-0">
+                    <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $tier['name'] }}</p>
+                    <p class="text-[10px] text-slate-400">{{ $tier['count'] }} donor{{ $tier['count'] != 1 ? 's' : '' }}</p>
+                </div>
+                <div class="flex-1">
+                    <div class="h-5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                        @php $barPct = $maxTierTotal > 0 ? max(($tier['total'] / $maxTierTotal) * 100, $tier['count'] > 0 ? 3 : 0) : 0; @endphp
+                        <div class="h-full rounded-full transition-all duration-700"
+                            style="width:{{ $barPct }}%;background-color:{{ $tierColors[$tier['name']] ?? '#10b981' }};">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-28 text-right shrink-0">
+                    <p class="text-xs font-bold text-slate-700 dark:text-slate-200">₦{{ number_format($tier['total'], 0) }}</p>
+                    <p class="text-[10px] text-slate-400">
+                        ₦{{ number_format($tier['min'], 0) }}{{ $tier['max'] > 0 ? '–₦'.number_format($tier['max'],0) : '+' }}
+                    </p>
+                </div>
+            </div>
+            @empty
+            <p class="text-sm text-slate-400 text-center py-4">No tier data available.</p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- ── DONATION TYPE + PROJECTS ─────────────────────────────── --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {{-- Donation type by month --}}
+        <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Endowment vs Project</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Monthly donation type breakdown</p>
+            @if(count($typeChart['labels'] ?? []) > 0)
+            <div style="height:220px;position:relative;">
+                <canvas id="typeChart"></canvas>
+            </div>
+            @else
+            <div class="h-44 flex items-center justify-center text-slate-400 text-sm">No data for this period.</div>
+            @endif
+        </div>
+
+        {{-- Projects progress --}}
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Project Funding Progress</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Raised vs target for active projects</p>
+            <div class="space-y-3 overflow-y-auto" style="max-height:240px;">
+                @forelse($projectsData as $proj)
                 <div>
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Donations</p>
-                    <h3 class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">₦{{ number_format($totalDonations, 2) }}</h3>
-                    <div class="mt-2 flex items-center text-xs">
-                        <span class="{{ $donationGrowth >= 0 ? 'text-emerald-500' : 'text-rose-500' }} flex items-center font-medium">
-                            <i class="fas fa-arrow-{{ $donationGrowth >= 0 ? 'up' : 'down' }} mr-1"></i> {{ number_format(abs($donationGrowth), 1) }}%
+                    <div class="flex items-center justify-between mb-1">
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[60%]">{{ $proj['title'] }}</p>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium
+                                {{ $proj['status'] === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
+                                {{ ucfirst($proj['status']) }}
+                            </span>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ $proj['pct'] }}%</span>
+                        </div>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                        <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+                            style="width:{{ $proj['pct'] }}%"></div>
+                    </div>
+                    <div class="flex justify-between mt-0.5">
+                        <span class="text-[10px] text-slate-400">₦{{ number_format($proj['raised'], 0) }} raised</span>
+                        <span class="text-[10px] text-slate-400">₦{{ number_format($proj['target'], 0) }} target</span>
+                    </div>
+                </div>
+                @empty
+                <p class="text-sm text-slate-400 text-center py-8">No project data available.</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    {{-- ── DEMOGRAPHICS ─────────────────────────────────────────── --}}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        {{-- Donor type --}}
+        <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-1">Donor Type</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Alumni vs Individual</p>
+            <div style="height:160px;position:relative;">
+                <canvas id="donorTypeChart"></canvas>
+            </div>
+            <div class="mt-3 space-y-1">
+                @foreach($demoData['types'] ?? [] as $i => $t)
+                @php $typeColors = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ec4899']; @endphp
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full" style="background:{{ $typeColors[$i % count($typeColors)] }}"></span>
+                        <span class="text-slate-600 dark:text-slate-300">{{ $t['label'] }}</span>
+                    </div>
+                    <span class="font-semibold text-slate-700 dark:text-slate-200">{{ $t['count'] }}</span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Gender --}}
+        <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-1">Gender Split</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Donor gender distribution</p>
+            @if(count($demoData['gender'] ?? []) > 0)
+            <div style="height:160px;position:relative;">
+                <canvas id="genderChart"></canvas>
+            </div>
+            @else
+            <div class="h-40 flex items-center justify-center text-slate-400 text-xs">No gender data recorded.</div>
+            @endif
+        </div>
+
+        {{-- Top states --}}
+        <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-sm font-bold text-slate-800 dark:text-white mb-1">Top States</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">By total amount donated</p>
+            @if(count($demoData['states'] ?? []) > 0)
+            <div style="height:200px;position:relative;">
+                <canvas id="statesChart"></canvas>
+            </div>
+            @else
+            <div class="h-40 flex items-center justify-center text-slate-400 text-xs">No state data recorded.</div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ── PEAK HOURS + RECENT ACTIVITY ────────────────────────── --}}
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+
+        {{-- Transactions by hour --}}
+        <div wire:ignore class="lg:col-span-3 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Peak Payment Hours</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">When donors are most active (24h)</p>
+            <div style="height:200px;position:relative;">
+                <canvas id="hourChart"></canvas>
+            </div>
+        </div>
+
+        {{-- Recent activity --}}
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Recent Activity</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Latest completed payments</p>
+            <div class="space-y-3 overflow-y-auto" style="max-height:220px;">
+                @forelse($recentActivity as $act)
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0">
+                        {{ $act['initials'] }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $act['name'] }}</p>
+                        <p class="text-[10px] text-slate-400">{{ $act['ago'] }}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-200">₦{{ number_format($act['amount'], 0) }}</p>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium
+                            {{ $act['gateway'] === 'paystack' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">
+                            {{ ucfirst($act['gateway']) }}
                         </span>
-                        <span class="text-slate-400 ml-2">vs last month</span>
                     </div>
                 </div>
-                <div class="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl print:bg-transparent">
-                    <i class="fas fa-hand-holding-dollar text-xl text-emerald-600 dark:text-emerald-400"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Donors -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300 print:shadow-none print:border print:border-slate-200">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Donors</p>
-                    <h3 class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">{{ number_format($totalDonors) }}</h3>
-                    <div class="mt-2 flex items-center text-xs">
-                        <span class="text-emerald-500 flex items-center font-medium">
-                            <i class="fas fa-arrow-up mr-1"></i> {{ $newDonorsThisWeek }}
-                        </span>
-                        <span class="text-slate-400 ml-2">new this week</span>
-                    </div>
-                </div>
-                <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl print:bg-transparent">
-                    <i class="fas fa-users text-xl text-blue-600 dark:text-blue-400"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Alumni Donors -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300 print:shadow-none print:border print:border-slate-200">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Alumni Ratio</p>
-                    <h3 class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">{{ $alumniPercentage }}%</h3>
-                    <div class="mt-2 flex items-center text-xs">
-                        <span class="text-slate-400">of total donor base</span>
-                    </div>
-                </div>
-                <div class="p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl print:bg-transparent">
-                    <i class="fas fa-user-graduate text-xl text-amber-600 dark:text-amber-400"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Avg. Donation -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300 print:shadow-none print:border print:border-slate-200">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Avg. Donation</p>
-                    <h3 class="mt-2 text-2xl font-bold text-slate-800 dark:text-white">₦{{ number_format($averageDonation, 2) }}</h3>
-                    <div class="mt-2 flex items-center text-xs">
-                        <!-- Placeholder for avg growth calculation if available -->
-                        <span class="text-slate-400 ml-2">Overall average</span>
-                    </div>
-                </div>
-                <div class="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl print:bg-transparent">
-                    <i class="fas fa-chart-line text-xl text-purple-600 dark:text-purple-400"></i>
-                </div>
+                @empty
+                <p class="text-xs text-slate-400 text-center py-6">No recent activity.</p>
+                @endforelse
             </div>
         </div>
     </div>
 
-    <!-- Charts Grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 print:grid-cols-2 print:gap-6 print:block" wire:ignore>
-        <!-- Donor Name Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top Donors</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Highest contributing individuals</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="donorNameChart"></canvas>
-                </div>
-            </div>
+    {{-- ── TOP DONORS TABLE ─────────────────────────────────────── --}}
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700">
+            <h2 class="text-base font-bold text-slate-800 dark:text-white">Top Donors</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Highest contributors for the selected period</p>
         </div>
-
-        <!-- Faculty Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top Faculties</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">By Amount Donated</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="facultyChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Department Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top Departments (Distribution)</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">By Amount Donated</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="departmentChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Department Chart (Bar) -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top Departments (Comparison)</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">By Amount Donated</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="departmentBarChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Project Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top Projects (Distribution)</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">By Amount Donated</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="projectChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Project Chart (Bar) -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top Projects (Comparison)</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">By Amount Donated</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="projectBarChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- State Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Top States</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">By Amount Donated</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="stateChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- LGA Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Local Impact</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Top LGAs</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="lgaChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gender Chart -->
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden print:shadow-none print:border print:border-slate-200 print:mb-6 print:break-inside-avoid">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 dark:text-white">Demographics</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">Gender Distribution</p>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="relative h-80">
-                    <canvas id="genderChart"></canvas>
-                </div>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-100 dark:divide-slate-700">
+                <thead class="bg-slate-50 dark:bg-slate-900/50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">#</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Donor</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider">Gifts</th>
+                        <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donated</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                    @forelse($topDonors as $i => $donor)
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                        <td class="px-6 py-3 text-sm font-bold text-slate-400">
+                            @if($i === 0) 🥇
+                            @elseif($i === 1) 🥈
+                            @elseif($i === 2) 🥉
+                            @else <span class="text-slate-400">{{ $i + 1 }}</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">
+                                    {{ strtoupper(substr($donor['name'], 0, 1)) }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">{{ $donor['name'] ?: 'Anonymous' }}</p>
+                                    <p class="text-xs text-slate-400">{{ $donor['email'] }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-3">
+                            <span class="text-xs px-2 py-0.5 rounded-full font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {{ $donor['type'] ?? 'N/A' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3 text-center text-sm font-semibold text-slate-600 dark:text-slate-300">{{ $donor['gifts'] }}</td>
+                        <td class="px-6 py-3 text-right">
+                            <span class="text-sm font-bold text-emerald-600 dark:text-emerald-400">₦{{ number_format($donor['total'], 0) }}</span>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-sm text-slate-400">No donor data for this period.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Chart Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- ── CHARTS SCRIPT ────────────────────────────────────────── --}}
+    @script
     <script>
-        document.addEventListener('livewire:initialized', () => {
-             // Theme Colors
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const theme = {
-                colors: {
-                    primary: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444'], 
-                    grid: isDarkMode ? '#334155' : '#f1f5f9',
-                    text: isDarkMode ? '#94a3b8' : '#64748b',
-                    title: isDarkMode ? '#f8fafc' : '#1e293b',
-                    tooltipBg: isDarkMode ? '#1e293b' : '#ffffff',
-                    tooltipText: isDarkMode ? '#f8fafc' : '#1e293b'
+        var revenue  = @json($revenueChart);
+        var statusD  = @json($statusChart);
+        var gatewayD = @json($gatewayChart);
+        var typeD    = @json($typeChart);
+        var demoD    = @json($demoData);
+        var hourD    = @json($txnHourChart);
+
+        var isDark  = document.documentElement.classList.contains('dark');
+        var gridClr = isDark ? 'rgba(148,163,184,0.12)' : 'rgba(148,163,184,0.18)';
+        var txtClr  = isDark ? '#94a3b8' : '#64748b';
+
+        function naira(v) {
+            if (v >= 1e6) return '₦' + (v/1e6).toFixed(1) + 'M';
+            if (v >= 1e3) return '₦' + (v/1e3).toFixed(0) + 'k';
+            return '₦' + v;
+        }
+
+        function baseOpts(yFmt) {
+            return {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) {
+                                var v = c.parsed.y !== undefined ? c.parsed.y : c.parsed;
+                                return ' ' + c.dataset.label + ': ' + (yFmt === 'currency' ? '₦' + Number(v).toLocaleString('en-NG') : v);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: txtClr, font: { size: 10 }, maxRotation: 0, maxTicksLimit: 10 } },
+                    y: { beginAtZero: true, grid: { color: gridClr }, ticks: { color: txtClr, font: { size: 10 },
+                        callback: yFmt === 'currency' ? function(v){ return naira(v); } : undefined
+                    }}
                 }
             };
+        }
 
-            // Chart Configuration Factory
-            function createChartConfig(type, data, options = {}) {
-                return {
-                    type: type,
-                    data: {
-                        labels: data.labels,
-                        datasets: data.datasets.map((dataset, index) => ({
-                            ...dataset,
-                            backgroundColor: theme.colors.primary,
-                            borderColor: theme.colors.primary,
-                            borderWidth: 0,
-                            borderRadius: 6
-                        }))
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: type === 'pie' ? 'right' : 'top',
-                                labels: { color: theme.colors.text }
-                            }
-                        },
-                        scales: type === 'bar' ? {
-                            x: { ticks: { color: theme.colors.text }, grid: { display: false } },
-                            y: { ticks: { color: theme.colors.text }, grid: { color: theme.colors.grid, borderDash: [4, 4] } }
-                        } : undefined,
-                        ...options
+        function initChart(id, cfg) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            if (el._ch) { el._ch.destroy(); el._ch = null; }
+            if (typeof Chart === 'undefined') return;
+            el._ch = new Chart(el, cfg);
+        }
+
+        // Revenue line chart
+        initChart('revenueChart', {
+            type: 'line',
+            data: {
+                labels: revenue.labels,
+                datasets: [
+                    { label: 'Paystack', data: revenue.paystack, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 2, tension: 0.4, pointRadius: 2, fill: true },
+                    { label: 'Squad',    data: revenue.squad,    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', borderWidth: 2, tension: 0.4, pointRadius: 2, fill: true },
+                ]
+            },
+            options: baseOpts('currency')
+        });
+
+        // Status doughnut
+        initChart('statusChart', {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Pending', 'Failed'],
+                datasets: [{ data: [statusD.completed.count, statusD.pending.count, statusD.failed.count], backgroundColor: ['#10b981','#f59e0b','#ef4444'], borderWidth: 0, hoverOffset: 6 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+        });
+
+        // Gateway doughnut
+        initChart('gatewayChart', {
+            type: 'doughnut',
+            data: {
+                labels: ['Paystack', 'Squad'],
+                datasets: [{ data: [gatewayD.paystack.amount, gatewayD.squad.amount], backgroundColor: ['#10b981','#3b82f6'], borderWidth: 0, hoverOffset: 6 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ' + c.label + ': ₦' + Number(c.parsed).toLocaleString('en-NG'); } } } } }
+        });
+
+        // Donation type grouped bar
+        if (typeD.labels && typeD.labels.length) {
+            var typeBaseOpts = baseOpts('currency');
+            typeBaseOpts.plugins.legend = { display: true, labels: { color: txtClr, font: { size: 11 } } };
+            initChart('typeChart', {
+                type: 'bar',
+                data: {
+                    labels: typeD.labels,
+                    datasets: [
+                        { label: 'Endowment', data: typeD.endowment, backgroundColor: '#10b981', borderRadius: 4 },
+                        { label: 'Project',   data: typeD.project,   backgroundColor: '#6366f1', borderRadius: 4 },
+                    ]
+                },
+                options: typeBaseOpts
+            });
+        }
+
+        // Donor type donut
+        var typeColors = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ec4899'];
+        initChart('donorTypeChart', {
+            type: 'doughnut',
+            data: {
+                labels: demoD.types.map(function(t){ return t.label; }),
+                datasets: [{ data: demoD.types.map(function(t){ return t.count; }), backgroundColor: typeColors, borderWidth: 0 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
+        });
+
+        // Gender donut
+        if (demoD.gender && demoD.gender.length) {
+            initChart('genderChart', {
+                type: 'doughnut',
+                data: {
+                    labels: demoD.gender.map(function(g){ return g.label; }),
+                    datasets: [{ data: demoD.gender.map(function(g){ return g.count; }), backgroundColor: ['#3b82f6','#ec4899','#94a3b8'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { color: txtClr, font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
+            });
+        }
+
+        // States horizontal bar
+        if (demoD.states && demoD.states.length) {
+            initChart('statesChart', {
+                type: 'bar',
+                data: {
+                    labels: demoD.states.map(function(s){ return s.label; }),
+                    datasets: [{ label: 'Total (₦)', data: demoD.states.map(function(s){ return s.total; }), backgroundColor: '#6366f1', borderRadius: 4 }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ₦' + Number(c.parsed.x).toLocaleString('en-NG'); } } } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: gridClr }, ticks: { color: txtClr, font: { size: 10 }, callback: function(v){ return naira(v); } } },
+                        y: { grid: { display: false }, ticks: { color: txtClr, font: { size: 10 } } }
                     }
-                };
-            }
+                }
+            });
+        }
 
-            const chartData = @json($chartData);
-            
-            // Render Charts
-            if(chartData.donors) new Chart(document.getElementById('donorNameChart'), createChartConfig('bar', chartData.donors));
-            if(chartData.faculties) new Chart(document.getElementById('facultyChart'), createChartConfig('pie', chartData.faculties));
-            if(chartData.departments) {
-                new Chart(document.getElementById('departmentChart'), createChartConfig('pie', chartData.departments));
-                new Chart(document.getElementById('departmentBarChart'), createChartConfig('bar', chartData.departments));
+        // Peak hours bar chart
+        initChart('hourChart', {
+            type: 'bar',
+            data: {
+                labels: hourD.labels,
+                datasets: [{ label: 'Transactions', data: hourD.data, backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 3 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: txtClr, font: { size: 9 }, maxRotation: 45, maxTicksLimit: 12 } },
+                    y: { beginAtZero: true, grid: { color: gridClr }, ticks: { color: txtClr, font: { size: 10 }, stepSize: 1 } }
+                }
             }
-            if(chartData.projects) {
-                new Chart(document.getElementById('projectChart'), createChartConfig('pie', chartData.projects));
-                new Chart(document.getElementById('projectBarChart'), createChartConfig('bar', chartData.projects));
-            }
-            if(chartData.states) new Chart(document.getElementById('stateChart'), createChartConfig('pie', chartData.states));
-            if(chartData.lgas) new Chart(document.getElementById('lgaChart'), createChartConfig('bar', chartData.lgas));
-            if(chartData.gender) new Chart(document.getElementById('genderChart'), createChartConfig('pie', chartData.gender));
         });
     </script>
+    @endscript
 </div>

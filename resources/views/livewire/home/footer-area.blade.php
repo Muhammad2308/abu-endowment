@@ -17,7 +17,7 @@
                                 <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                     <img src="{{ asset('abu_logo.png') }}" alt="ABU Logo" style="height: 30px; width: auto; filter: brightness(0) invert(1);">
                                 </div>
-                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">Alumni Giving</span>
+                                <span style="font-size: 1.25rem; font-weight: 700; color: #fff;">Give ABU</span>
                             </a>
                         </div>
                         <p style="color: #d1d5db; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; max-width: 400px;">
@@ -92,19 +92,9 @@
     <!-- Footer Bottom -->
     <div class="copy-right_text" style="border-top: 1px solid rgba(255,255,255,0.1); padding: 25px 0;">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
-                    <p style="color: #9ca3af; font-size: 0.9rem; margin: 0;">
-                        &copy; <script>document.write(new Date().getFullYear());</script> ABU Endowment Fund. All rights reserved.
-                    </p>
-                </div>
-                <div class="col-md-6 text-center text-md-right">
-                    <div class="d-inline-flex align-items-center" style="color: #9ca3af; font-size: 0.9rem;">
-                        <i class="fas fa-lock mr-2" style="font-size: 0.8rem;"></i>
-                        All donations are securely processed.
-                    </div>
-                </div>
-            </div>
+            <p style="color: #9ca3af; font-size: 0.9rem; margin: 0; text-align: center;">
+                &copy; <script>document.write(new Date().getFullYear());</script> Ahmadu Bello University Zaria Development Foundation. All rights reserved.
+            </p>
         </div>
     </div>
 
