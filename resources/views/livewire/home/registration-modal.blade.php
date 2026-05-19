@@ -349,8 +349,13 @@
                     const parentWidth = buttonElement.parentElement.offsetWidth || 400;
                     
                     // Initialize Google Sign-In
+                    var _googleClientId = "{{ config('services.google.client_id') }}";
+                    if (!_googleClientId) {
+                        buttonElement.innerHTML = '<p class="text-xs text-slate-400 text-center">Google Sign-In not configured.</p>';
+                        return;
+                    }
                     window.google.accounts.id.initialize({
-                        client_id: "{{ config('services.google.client_id') }}",
+                        client_id: _googleClientId,
                         callback: window.handleGoogleCredentialResponse
                     });
                     
