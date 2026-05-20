@@ -6,4 +6,3 @@ deployment:
     - /usr/local/bin/php artisan cache:clear
     - /usr/local/bin/php artisan view:clear
     - /usr/local/bin/php artisan route:clear
-    - /usr/local/bin/php artisan storage:link --force 2>/dev/null; true

@@ -26,7 +26,7 @@
                 <div class="project-card-home" style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: none; height: 100%; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                     <!-- Image Area -->
                     <div class="project-thumb" style="position: relative; height: 240px; overflow: hidden;">
-                        <img src="{{ $project->icon_image ? asset('storage/' . $project->icon_image) : asset('img/causes/1.png') }}" 
+                        <img src="{{ $project->icon_image ? $project->icon_image_url : asset('img/causes/1.png') }}" 
                              alt="{{ $project->project_title }}" 
                              style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease;">
                         
@@ -249,14 +249,14 @@
         $galleryPhotos = [];
         // Add main project image
         $galleryPhotos[] = [
-            'url' => $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png'),
+            'url' => $galleryProject->icon_image ? $galleryProject->icon_image_url : asset('img/causes/1.png'),
             'description' => $galleryProject->project_description,
             'title' => $galleryProject->project_title
         ];
         // Add other photos
         foreach($galleryProject->photos as $photo) {
             $galleryPhotos[] = [
-                'url' => asset('storage/' . $photo->body_image),
+                'url' => $photo->image_url,
                 'description' => $photo->description ?? '',
                 'title' => $photo->title ?? ''
             ];
@@ -276,7 +276,7 @@
             <div class="project-details-header">
                 <div class="d-flex align-items-center">
                     <div class="project-icon mr-3">
-                        <img src="{{ $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png') }}" alt="Icon">
+                        <img src="{{ $galleryProject->icon_image ? $galleryProject->icon_image_url : asset('img/causes/1.png') }}" alt="Icon">
                     </div>
                     <div>
                         <h3 class="mb-0" style="font-weight: 700; font-size: 1.5rem; color: #227722;">{{ $galleryProject->project_title }}</h3>

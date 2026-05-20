@@ -51,7 +51,7 @@
                 <!-- Card Image/Icon -->
                 <div class="relative h-48 bg-slate-100 overflow-hidden">
                     @if($project->icon_image)
-                        <img src="{{ $project->icon_image_url ?? asset('storage/' . $project->icon_image) }}" 
+                        <img src="{{ $project->icon_image_url }}"
                              alt="{{ $project->project_title }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">

@@ -23,8 +23,8 @@ class AppServiceProvider extends ServiceProvider
     private function ensureStorageDirectories(): void
     {
         $dirs = [
-            storage_path('app/public/projects/icons'),
-            storage_path('app/public/projects/photos'),
+            public_path('uploads/projects/icons'),
+            public_path('uploads/projects/photos'),
             storage_path('app/livewire-tmp'),
         ];
 
@@ -32,13 +32,6 @@ class AppServiceProvider extends ServiceProvider
             if (!is_dir($dir)) {
                 mkdir($dir, 0775, true);
             }
-        }
-
-        // Create public/storage symlink if it doesn't exist
-        $link   = public_path('storage');
-        $target = storage_path('app/public');
-        if (!file_exists($link) && !is_link($link)) {
-            symlink($target, $link);
         }
     }
 }

@@ -27,7 +27,7 @@
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex items-start gap-6">
                         <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-slate-50">
                             @if($project->icon_image)
-                                <img src="{{ $project->icon_image_url ?? asset('storage/' . $project->icon_image) }}" class="w-full h-full object-cover" alt="Icon">
+                                <img src="{{ $project->icon_image_url }}" class="w-full h-full object-cover" alt="Icon">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-slate-400">
                                     <i class="fas fa-project-diagram text-2xl"></i>
