@@ -78,6 +78,17 @@ class AddProject extends Component
         $this->showModal = true;
     }
 
+    public function updatedIconImage(): void
+    {
+        Log::info('Livewire updatedIconImage fired', [
+            'received'  => !is_null($this->icon_image),
+            'class'     => $this->icon_image ? get_class($this->icon_image) : 'null',
+            'tmp_dir'   => storage_path('app/private/livewire-tmp'),
+            'tmp_exists'=> is_dir(storage_path('app/private/livewire-tmp')),
+            'tmp_write' => is_writable(storage_path('app/private/livewire-tmp')),
+        ]);
+    }
+
     public function saveProject()
     {
         Log::info('saveProject method called.');

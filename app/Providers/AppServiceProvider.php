@@ -25,7 +25,8 @@ class AppServiceProvider extends ServiceProvider
         $dirs = [
             storage_path('app/public/projects/icons'),
             storage_path('app/public/projects/photos'),
-            storage_path('app/livewire-tmp'),
+            storage_path('app/private/livewire-tmp'), // Livewire temp: local disk root = app/private
+            storage_path('app/livewire-tmp'),          // fallback for older configs
         ];
 
         foreach ($dirs as $dir) {
