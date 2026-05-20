@@ -167,11 +167,6 @@ class PaymentController extends Controller
             } else {
                 // Paystack rejected — mark donation as failed (preserve the record for auditing)
                 $donation->update(['status' => 'failed']);
-                $initTransaction->update([
-                    'status'           => 'failed',
-                    'gateway_status'   => 'failed',
-                    'response_payload' => json_encode($response->json()),
-                ]);
 
                 $errorResponse = $response->json();
                 $errorMessage = $errorResponse['message'] ?? 'Unknown error';
