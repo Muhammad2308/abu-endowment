@@ -106,24 +106,6 @@ class PaymentController extends Controller
                 'payment_reference' => 'ABU_' . time() . '_' . $donor->id,
             ]);
 
-            // Track the initialization event
-            $initTransaction = PaymentTransaction::create([
-                'donation_id'     => $donation->id,
-                'donor_id'        => $donor->id,
-                'project_id'      => $donation->project_id,
-                'payment_gateway' => 'paystack',
-                'category'        => $donation->project_id ? 'project' : 'general',
-                'event_type'      => 'payment.initialized',
-                'payment_reference' => $donation->payment_reference,
-                'gateway_reference' => null,
-                'amount'          => $donation->amount,
-                'currency'        => 'NGN',
-                'status'          => 'pending',
-                'gateway_status'  => 'initialized',
-                'channel'         => null,
-                'fee'             => 0,
-            ]);
-
             // 2. Initialize Paystack transaction with donation payment_reference
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->paystackSecretKey,
@@ -151,12 +133,6 @@ class PaymentController extends Controller
                 // 3. Update donation with Paystack reference
                 $donation->update([
                     'payment_reference' => $data['data']['reference']
-                ]);
-
-                // Update init transaction with the provider's reference and response
-                $initTransaction->update([
-                    'gateway_reference' => $data['data']['reference'],
-                    'response_payload'  => json_encode($data),
                 ]);
 
                 // Create/Update device session only if device_fingerprint is provided
