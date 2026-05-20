@@ -224,6 +224,15 @@ class StatisticsManager extends Component
                 'gifts' => (int) $r->gifts,
                 'total' => (float) $r->total,
             ])->toArray();
+
+        $this->dispatch('stats-charts-ready',
+            revenue:  $this->revenueChart,
+            statusD:  $this->statusChart,
+            gatewayD: $this->gatewayChart,
+            typeD:    $this->typeChart,
+            demoD:    $this->demoData,
+            hourD:    $this->txnHourChart,
+        );
     }
 
     private function initials(string $name): string

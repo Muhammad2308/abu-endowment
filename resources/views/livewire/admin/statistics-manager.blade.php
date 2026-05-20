@@ -202,7 +202,7 @@
 
         {{-- Donation type by month --}}
         <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
-            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">Endowment vs Project</h2>
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">General vs Project</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Monthly donation type breakdown</p>
             @if(count($typeChart['labels'] ?? []) > 0)
             <div style="height:220px;position:relative;">
@@ -397,165 +397,107 @@
     </div>
 
     {{-- ── CHARTS SCRIPT ────────────────────────────────────────── --}}
-    @script
     <script>
-        var revenue  = @json($revenueChart);
-        var statusD  = @json($statusChart);
-        var gatewayD = @json($gatewayChart);
-        var typeD    = @json($typeChart);
-        var demoD    = @json($demoData);
-        var hourD    = @json($txnHourChart);
-
-        var isDark  = document.documentElement.classList.contains('dark');
-        var gridClr = isDark ? 'rgba(148,163,184,0.12)' : 'rgba(148,163,184,0.18)';
-        var txtClr  = isDark ? '#94a3b8' : '#64748b';
-
+    (function () {
+        /* ── helpers ───────────────────────────────────────────── */
         function naira(v) {
-            if (v >= 1e6) return '₦' + (v/1e6).toFixed(1) + 'M';
-            if (v >= 1e3) return '₦' + (v/1e3).toFixed(0) + 'k';
+            if (v >= 1e6) return '₦' + (v / 1e6).toFixed(1) + 'M';
+            if (v >= 1e3) return '₦' + (v / 1e3).toFixed(0) + 'k';
             return '₦' + v;
         }
-
+        function theme() {
+            var dark = document.documentElement.classList.contains('dark');
+            return { grid: dark ? 'rgba(148,163,184,0.12)' : 'rgba(148,163,184,0.18)', txt: dark ? '#94a3b8' : '#64748b' };
+        }
         function baseOpts(yFmt) {
+            var t = theme();
             return {
-                responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(c) {
-                                var v = c.parsed.y !== undefined ? c.parsed.y : c.parsed;
-                                return ' ' + c.dataset.label + ': ' + (yFmt === 'currency' ? '₦' + Number(v).toLocaleString('en-NG') : v);
-                            }
-                        }
-                    }
-                },
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) {
+                    var v = c.parsed.y !== undefined ? c.parsed.y : c.parsed;
+                    return ' ' + c.dataset.label + ': ' + (yFmt === 'currency' ? '₦' + Number(v).toLocaleString('en-NG') : v);
+                }}}},
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: txtClr, font: { size: 10 }, maxRotation: 0, maxTicksLimit: 10 } },
-                    y: { beginAtZero: true, grid: { color: gridClr }, ticks: { color: txtClr, font: { size: 10 },
-                        callback: yFmt === 'currency' ? function(v){ return naira(v); } : undefined
-                    }}
+                    x: { grid: { display: false }, ticks: { color: t.txt, font: { size: 10 }, maxRotation: 0, maxTicksLimit: 10 } },
+                    y: { beginAtZero: true, grid: { color: t.grid }, ticks: { color: t.txt, font: { size: 10 },
+                        callback: yFmt === 'currency' ? function (v) { return naira(v); } : undefined }}
                 }
             };
         }
-
-        function initChart(id, cfg) {
+        function ic(id, cfg) {
             var el = document.getElementById(id);
-            if (!el) return;
+            if (!el || typeof Chart === 'undefined') return;
             if (el._ch) { el._ch.destroy(); el._ch = null; }
-            if (typeof Chart === 'undefined') return;
             el._ch = new Chart(el, cfg);
         }
 
-        // Revenue line chart
-        initChart('revenueChart', {
-            type: 'line',
-            data: {
-                labels: revenue.labels,
-                datasets: [
-                    { label: 'Paystack', data: revenue.paystack, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 2, tension: 0.4, pointRadius: 2, fill: true },
-                    { label: 'Squad',    data: revenue.squad,    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', borderWidth: 2, tension: 0.4, pointRadius: 2, fill: true },
-                ]
-            },
-            options: baseOpts('currency')
-        });
+        /* ── main build ─────────────────────────────────────────── */
+        function buildCharts(revenue, statusD, gatewayD, typeD, demoD, hourD) {
+            var t = theme();
 
-        // Status doughnut
-        initChart('statusChart', {
-            type: 'doughnut',
-            data: {
+            ic('revenueChart', { type: 'line', data: { labels: revenue.labels, datasets: [
+                { label: 'Paystack', data: revenue.paystack, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 2, tension: 0.4, pointRadius: 2, fill: true },
+                { label: 'Squad',    data: revenue.squad,    borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', borderWidth: 2, tension: 0.4, pointRadius: 2, fill: true },
+            ]}, options: baseOpts('currency') });
+
+            ic('statusChart', { type: 'doughnut', data: {
                 labels: ['Completed', 'Pending', 'Failed'],
                 datasets: [{ data: [statusD.completed.count, statusD.pending.count, statusD.failed.count], backgroundColor: ['#10b981','#f59e0b','#ef4444'], borderWidth: 0, hoverOffset: 6 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
-        });
+            }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } } });
 
-        // Gateway doughnut
-        initChart('gatewayChart', {
-            type: 'doughnut',
-            data: {
+            ic('gatewayChart', { type: 'doughnut', data: {
                 labels: ['Paystack', 'Squad'],
                 datasets: [{ data: [gatewayD.paystack.amount, gatewayD.squad.amount], backgroundColor: ['#10b981','#3b82f6'], borderWidth: 0, hoverOffset: 6 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ' + c.label + ': ₦' + Number(c.parsed).toLocaleString('en-NG'); } } } } }
-        });
+            }, options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false },
+                tooltip: { callbacks: { label: function (c) { return ' ' + c.label + ': ₦' + Number(c.parsed).toLocaleString('en-NG'); } } } } } });
 
-        // Donation type grouped bar
-        if (typeD.labels && typeD.labels.length) {
-            var typeBaseOpts = baseOpts('currency');
-            typeBaseOpts.plugins.legend = { display: true, labels: { color: txtClr, font: { size: 11 } } };
-            initChart('typeChart', {
-                type: 'bar',
-                data: {
-                    labels: typeD.labels,
-                    datasets: [
-                        { label: 'Endowment', data: typeD.endowment, backgroundColor: '#10b981', borderRadius: 4 },
-                        { label: 'Project',   data: typeD.project,   backgroundColor: '#6366f1', borderRadius: 4 },
-                    ]
-                },
-                options: typeBaseOpts
-            });
-        }
-
-        // Donor type donut
-        var typeColors = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ec4899'];
-        initChart('donorTypeChart', {
-            type: 'doughnut',
-            data: {
-                labels: demoD.types.map(function(t){ return t.label; }),
-                datasets: [{ data: demoD.types.map(function(t){ return t.count; }), backgroundColor: typeColors, borderWidth: 0 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
-        });
-
-        // Gender donut
-        if (demoD.gender && demoD.gender.length) {
-            initChart('genderChart', {
-                type: 'doughnut',
-                data: {
-                    labels: demoD.gender.map(function(g){ return g.label; }),
-                    datasets: [{ data: demoD.gender.map(function(g){ return g.count; }), backgroundColor: ['#3b82f6','#ec4899','#94a3b8'], borderWidth: 0 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { color: txtClr, font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
-            });
-        }
-
-        // States horizontal bar
-        if (demoD.states && demoD.states.length) {
-            initChart('statesChart', {
-                type: 'bar',
-                data: {
-                    labels: demoD.states.map(function(s){ return s.label; }),
-                    datasets: [{ label: 'Total (₦)', data: demoD.states.map(function(s){ return s.total; }), backgroundColor: '#6366f1', borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return ' ₦' + Number(c.parsed.x).toLocaleString('en-NG'); } } } },
-                    scales: {
-                        x: { beginAtZero: true, grid: { color: gridClr }, ticks: { color: txtClr, font: { size: 10 }, callback: function(v){ return naira(v); } } },
-                        y: { grid: { display: false }, ticks: { color: txtClr, font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        // Peak hours bar chart
-        initChart('hourChart', {
-            type: 'bar',
-            data: {
-                labels: hourD.labels,
-                datasets: [{ label: 'Transactions', data: hourD.data, backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 3 }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: txtClr, font: { size: 9 }, maxRotation: 45, maxTicksLimit: 12 } },
-                    y: { beginAtZero: true, grid: { color: gridClr }, ticks: { color: txtClr, font: { size: 10 }, stepSize: 1 } }
-                }
+            if (typeD.labels && typeD.labels.length) {
+                var tOpts = baseOpts('currency');
+                tOpts.plugins.legend = { display: true, labels: { color: t.txt, font: { size: 11 } } };
+                ic('typeChart', { type: 'bar', data: { labels: typeD.labels, datasets: [
+                    { label: 'General', data: typeD.endowment, backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Project', data: typeD.project,   backgroundColor: '#6366f1', borderRadius: 4 },
+                ]}, options: tOpts });
             }
+
+            var demoColors = ['#10b981','#3b82f6','#f59e0b','#8b5cf6','#ec4899'];
+            ic('donorTypeChart', { type: 'doughnut', data: {
+                labels: demoD.types.map(function (x) { return x.label; }),
+                datasets: [{ data: demoD.types.map(function (x) { return x.count; }), backgroundColor: demoColors, borderWidth: 0 }]
+            }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } } });
+
+            if (demoD.gender && demoD.gender.length) {
+                ic('genderChart', { type: 'doughnut', data: {
+                    labels: demoD.gender.map(function (x) { return x.label; }),
+                    datasets: [{ data: demoD.gender.map(function (x) { return x.count; }), backgroundColor: ['#3b82f6','#ec4899','#94a3b8'], borderWidth: 0 }]
+                }, options: { responsive: true, maintainAspectRatio: false, cutout: '60%',
+                    plugins: { legend: { position: 'bottom', labels: { color: t.txt, font: { size: 10 }, boxWidth: 10, padding: 8 } } } } });
+            }
+
+            if (demoD.states && demoD.states.length) {
+                ic('statesChart', { type: 'bar', data: {
+                    labels: demoD.states.map(function (x) { return x.label; }),
+                    datasets: [{ label: 'Total (₦)', data: demoD.states.map(function (x) { return x.total; }), backgroundColor: '#6366f1', borderRadius: 4 }]
+                }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return ' ₦' + Number(c.parsed.x).toLocaleString('en-NG'); } } } },
+                    scales: { x: { beginAtZero: true, grid: { color: t.grid }, ticks: { color: t.txt, font: { size: 10 }, callback: function (v) { return naira(v); } } },
+                              y: { grid: { display: false }, ticks: { color: t.txt, font: { size: 10 } } } }
+                } });
+            }
+
+            ic('hourChart', { type: 'bar', data: { labels: hourD.labels, datasets: [
+                { label: 'Transactions', data: hourD.data, backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 3 }
+            ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false }, ticks: { color: t.txt, font: { size: 9 }, maxRotation: 45, maxTicksLimit: 12 } },
+                          y: { beginAtZero: true, grid: { color: t.grid }, ticks: { color: t.txt, font: { size: 10 }, stepSize: 1 } } }
+            } });
+        }
+
+        /* ── listen for PHP dispatch event ───────────────────────── */
+        document.addEventListener('stats-charts-ready', function (e) {
+            var d = e.detail;
+            buildCharts(d.revenue, d.statusD, d.gatewayD, d.typeD, d.demoD, d.hourD);
         });
+    })();
     </script>
-    @endscript
 </div>
