@@ -73,6 +73,19 @@
                             Uploading image, please wait...
                         </div>
                         @error('icon_image') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+
+                        {{-- Image preview --}}
+                        @if ($icon_image)
+                            <div class="mt-3 flex items-center gap-3">
+                                <img src="{{ $icon_image->temporaryUrl() }}" alt="Preview" class="h-20 w-20 object-cover rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-xs text-slate-500">New image selected</span>
+                            </div>
+                        @elseif ($existing_icon_image)
+                            <div class="mt-3 flex items-center gap-3">
+                                <img src="{{ asset('storage/' . $existing_icon_image) }}" alt="Current Icon" class="h-20 w-20 object-cover rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-xs text-slate-500">Current icon (upload a new one to replace)</span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mb-6">

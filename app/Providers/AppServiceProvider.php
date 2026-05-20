@@ -23,8 +23,8 @@ class AppServiceProvider extends ServiceProvider
     private function ensureStorageDirectories(): void
     {
         $dirs = [
-            storage_path('app/public/projects/icons'),
-            storage_path('app/public/projects/photos'),
+            public_path('storage/projects/icons'),    // public disk root = public/storage
+            public_path('storage/projects/photos'),
             storage_path('app/private/livewire-tmp'), // Livewire temp: local disk root = app/private
             storage_path('app/livewire-tmp'),          // fallback for older configs
         ];

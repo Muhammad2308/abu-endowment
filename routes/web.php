@@ -30,20 +30,21 @@ Route::match(['GET', 'OPTIONS', 'HEAD'], '/storage/{path}', function ($path) {
         abort(403, 'Invalid path');
     }
     
-    // Build the full file path
-    $filePath = storage_path('app/public/' . $decodedPath);
-    
-    // Normalize path separators for Windows
-    $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
-    
-    // Check if file exists using direct file system check
-    if (!file_exists($filePath) || !is_file($filePath)) {
+    // Check public/storage/ first (new files — public disk root = public/storage),
+    // then fall back to storage/app/public/ for files uploaded before the disk change.
+    $publicPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, public_path('storage/' . $decodedPath));
+    $legacyPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, storage_path('app/public/' . $decodedPath));
+
+    if (file_exists($publicPath) && is_file($publicPath)) {
+        $filePath = $publicPath;
+    } elseif (file_exists($legacyPath) && is_file($legacyPath)) {
+        $filePath = $legacyPath;
+    } else {
         \Log::warning('Storage file not found', [
             'requested_path' => $path,
             'decoded_path' => $decodedPath,
-            'full_path' => $filePath,
-            'exists' => file_exists($filePath),
-            'is_file' => is_file($filePath),
+            'public_path' => $publicPath,
+            'legacy_path' => $legacyPath,
         ]);
         abort(404, 'File not found');
     }

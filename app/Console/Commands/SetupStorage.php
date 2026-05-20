@@ -14,8 +14,9 @@ class SetupStorage extends Command
         $base = base_path();
 
         $dirs = [
-            storage_path('app/public/projects/icons'),
-            storage_path('app/public/projects/photos'),
+            public_path('storage/projects/icons'),    // public disk root = public/storage
+            public_path('storage/projects/photos'),
+            storage_path('app/private/livewire-tmp'),
             storage_path('app/livewire-tmp'),
             storage_path('framework/views'),
             storage_path('framework/cache/data'),
@@ -39,7 +40,7 @@ class SetupStorage extends Command
 
         // Write-test
         $this->info('Write test...');
-        $testFile = storage_path('app/public/projects/icons/.keep');
+        $testFile = public_path('storage/projects/icons/.keep');
         if (file_put_contents($testFile, '') !== false) {
             $this->info('  Write test passed.');
         } else {
