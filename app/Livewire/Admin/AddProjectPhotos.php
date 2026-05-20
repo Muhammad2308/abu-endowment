@@ -81,9 +81,13 @@ class AddProjectPhotos extends Component
         $this->validate();
 
         try {
+            Storage::disk('public')->makeDirectory('projects/photos');
             foreach ($this->photos as $index => $photo) {
                 $photoPath = $photo->store('projects/photos', 'public');
-                
+                if ($photoPath === false) {
+                    throw new \RuntimeException('Failed to save photo ' . ($index + 1) . '. Check server storage permissions.');
+                }
+
                 ProjectPhoto::create([
                     'project_id' => $this->project->id,
                     'body_image' => $photoPath,

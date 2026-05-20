@@ -90,7 +90,12 @@ class AddProject extends Component
 
             if ($this->icon_image) {
                 Log::info('Icon image present. Storing...');
+                Storage::disk('public')->makeDirectory('projects/icons');
                 $iconImagePath = $this->icon_image->store('projects/icons', 'public');
+                if ($iconImagePath === false) {
+                    Log::error('Icon image store() returned false — check directory permissions for storage/app/public/projects/icons');
+                    throw new \RuntimeException('Failed to save image. Check server storage permissions.');
+                }
                 Log::info('Icon image stored at: ' . $iconImagePath);
             }
 
