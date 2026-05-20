@@ -1,8 +1,0 @@
-*
-!.gitignore
-!projects/
-projects/*
-!projects/icons/
-!projects/icons/.gitkeep
-!projects/photos/
-!projects/photos/.gitkeep

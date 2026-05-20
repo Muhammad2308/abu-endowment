@@ -14,8 +14,8 @@ class SetupStorage extends Command
         $base = base_path();
 
         $dirs = [
-            public_path('uploads/projects/icons'),
-            public_path('uploads/projects/photos'),
+            storage_path('app/public/projects/icons'),
+            storage_path('app/public/projects/photos'),
             storage_path('app/livewire-tmp'),
             storage_path('framework/views'),
             storage_path('framework/cache/data'),
@@ -39,7 +39,7 @@ class SetupStorage extends Command
 
         // Write-test
         $this->info('Write test...');
-        $testFile = public_path('uploads/projects/icons/.keep');
+        $testFile = storage_path('app/public/projects/icons/.keep');
         if (file_put_contents($testFile, '') !== false) {
             $this->info('  Write test passed.');
         } else {
@@ -56,8 +56,8 @@ class SetupStorage extends Command
 
         $this->info('');
         $this->info('Done. If running on Linux, also run:');
-        $this->line('  sudo chown -R www-data:www-data storage bootstrap/cache public/uploads');
-        $this->line('  sudo chmod -R 775 storage bootstrap/cache public/uploads');
+        $this->line('  sudo chown -R www-data:www-data storage bootstrap/cache');
+        $this->line('  sudo chmod -R 775 storage bootstrap/cache');
 
         return self::SUCCESS;
     }
