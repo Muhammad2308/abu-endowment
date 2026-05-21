@@ -87,8 +87,8 @@
 
     /* ── Mobile (≤ 767px) ────────────────────────── */
     @media (max-width: 767px) {
-        .hero-slide        { min-height: 100svh; }
-        .hero-container    { padding-top: 90px; padding-bottom: 80px; }
+        .hero-slide        { min-height: auto; }
+        .hero-container    { padding-top: 70px; padding-bottom: 50px; }
         .hero-badge        { margin-bottom: 20px !important; }
         .hero-badge span:last-child { font-size: 10px; letter-spacing: 0.5px; }
         .hero-heading      { font-size: 2.4rem; margin-bottom: 18px !important; }
