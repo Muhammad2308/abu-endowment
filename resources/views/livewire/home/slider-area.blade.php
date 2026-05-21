@@ -67,9 +67,8 @@
             </svg>
         </div>
     </div>
-</div>
 
-<style>
+    <style>
     /* ── Desktop ─────────────────────────────────── */
     .hero-slide        { min-height: 850px; }
     .hero-container    { padding-top: 60px; padding-bottom: 100px; }
@@ -110,4 +109,5 @@
         .hero-heading  { font-size: 2rem; }
         .hero-stat     { padding-left: 0.6rem; padding-right: 0.6rem; }
     }
-</style>
+    </style>
+</div>
