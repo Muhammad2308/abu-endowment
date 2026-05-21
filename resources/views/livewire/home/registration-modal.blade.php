@@ -201,17 +201,6 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-3">
-                                    <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Username *</label>
-                                    <input type="text" 
-                                           wire:model="username"
-                                           minlength="3"
-                                           class="form-control form-control-lg border-0"
-                                           style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                           required>
-                                    <small class="text-muted mt-1 d-block" style="font-size: 0.75rem;">Choose a unique username for login</small>
-                                </div>
-
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">

@@ -50,7 +50,7 @@ class RegistrationModal extends Component
         $this->show = true;
         $this->reset([
             'donorType', 'surname', 'name', 'otherName', 'email', 'phone',
-            'state', 'lga', 'nationality', 'username', 'password', 'passwordConfirm',
+            'state', 'lga', 'nationality', 'password', 'passwordConfirm',
             'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading', 'showAlumniFields'
         ]);
         $this->nationality = 'Nigerian';
@@ -64,7 +64,7 @@ class RegistrationModal extends Component
         $this->show = false;
         $this->reset([
             'donorType', 'surname', 'name', 'otherName', 'email', 'phone',
-            'state', 'lga', 'nationality', 'username', 'password', 'passwordConfirm',
+            'state', 'lga', 'nationality', 'password', 'passwordConfirm',
             'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading', 'showAlumniFields'
         ]);
     }
@@ -84,7 +84,6 @@ class RegistrationModal extends Component
             'state' => 'required|string',
             'lga' => 'required|string',
             'nationality' => 'required|string',
-            'username' => 'required|string|min:3',
             'password' => 'required|string|min:6',
             'passwordConfirm' => 'required|string|same:password',
         ]);
@@ -126,9 +125,9 @@ class RegistrationModal extends Component
                 throw new \Exception($donorResult['message'] ?? json_encode($donorResult['errors'] ?? []) ?? 'Registration failed');
             }
 
-            // Step 2: Create donor session
+            // Step 2: Create donor session (email is the username)
             $sessionRequest = Request::create('/api/donor-sessions/register', 'POST', [
-                'username' => $this->username,
+                'username' => $this->email,
                 'password' => $this->password,
                 'donor_id' => $donorResult['data']['donor']['id'] ?? $donorResult['data']['id'],
             ]);
