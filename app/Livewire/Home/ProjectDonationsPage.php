@@ -115,6 +115,26 @@ class ProjectDonationsPage extends Component
         $this->amount = $value;
     }
 
+    public function payWithSquad()
+    {
+        $this->validate([
+            'amount' => 'required|numeric|min:100',
+            'email'  => 'required|email',
+        ]);
+
+        if (!$this->selectedProject) {
+            session()->flash('error', 'Please select a project to donate to.');
+            return;
+        }
+
+        $this->dispatch('initiate-squad', [
+            'email'         => $this->email,
+            'amount'        => $this->amount,
+            'customer_name' => $this->name ?? '',
+            'project_id'    => $this->selectedProject->id,
+        ]);
+    }
+
     public function donate()
     {
         $this->validate([

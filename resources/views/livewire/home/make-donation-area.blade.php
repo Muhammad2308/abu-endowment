@@ -60,63 +60,55 @@
                             @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
 
-                        <!-- Payment Buttons -->
+                        <!-- Payment Method Selection -->
                         <div class="mt-5">
-                            <p class="text-center text-muted mb-3" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Choose Payment Method</p>
+                            <p style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-bottom: 12px; text-align: center;">
+                                Select a payment method
+                            </p>
 
-                            <div class="row" style="gap: 0; margin: 0 -6px;">
-                                <!-- Paystack -->
-                                <div class="col-12 col-sm-6" style="padding: 0 6px; margin-bottom: 12px;">
-                                    <button type="submit"
-                                            wire:loading.attr="disabled"
-                                            wire:loading.class="btn-disabled"
-                                            wire:target="payWithPaystack"
-                                            class="pay-btn paystack-btn">
-                                        <span wire:loading.remove wire:target="payWithPaystack" class="btn-inner">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                                <circle cx="12" cy="12" r="12" fill="white"/>
-                                                <text x="12" y="16" text-anchor="middle" fill="#006aff" font-size="13" font-weight="900" font-family="Arial">P</text>
-                                            </svg>
-                                            Pay with Paystack
-                                        </span>
-                                        <span wire:loading wire:target="payWithPaystack" class="btn-inner">
-                                            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" width="18" height="18">
-                                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.3"/>
-                                                <path fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                            </svg>
-                                            Processing…
-                                        </span>
-                                    </button>
-                                </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
 
-                                <!-- Squad -->
-                                <div class="col-12 col-sm-6" style="padding: 0 6px; margin-bottom: 12px;">
-                                    <button type="button"
-                                            id="squad-pay-btn"
-                                            wire:click="payWithSquad"
-                                            wire:loading.attr="disabled"
-                                            wire:loading.class="btn-disabled"
-                                            wire:target="payWithSquad"
-                                            class="pay-btn squad-btn">
-                                        <span id="squad-btn-text" class="btn-inner">
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                                <circle cx="12" cy="12" r="12" fill="white"/>
-                                                <text x="12" y="16" text-anchor="middle" fill="#00b8a9" font-size="13" font-weight="900" font-family="Arial">S</text>
-                                            </svg>
-                                            Pay with Squad
-                                        </span>
-                                        <span id="squad-btn-loading" class="btn-inner" style="display:none;">
-                                            <svg class="spin-icon" viewBox="0 0 24 24" fill="none" width="18" height="18">
-                                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.3"/>
-                                                <path fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                            </svg>
-                                            Redirecting…
-                                        </span>
-                                    </button>
-                                </div>
+                                <!-- Paystack Card -->
+                                <button type="submit"
+                                        wire:loading.attr="disabled"
+                                        wire:loading.class="pay-card-disabled"
+                                        wire:target="payWithPaystack"
+                                        class="pay-card pay-card-paystack">
+                                    <span wire:loading.remove wire:target="payWithPaystack" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
+                                        <img src="{{ asset('paystack.png') }}" alt="Paystack" style="height:28px;width:auto;max-width:120px;object-fit:contain;">
+                                    </span>
+                                    <span wire:loading wire:target="payWithPaystack" class="pay-card-spinner">
+                                        <svg class="spin-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="10" stroke="#374151" stroke-width="4" opacity="0.25"/>
+                                            <path fill="#374151" d="M4 12a8 8 0 018-8v8z"/>
+                                        </svg>
+                                        Processing…
+                                    </span>
+                                </button>
+
+                                <!-- Squad Card -->
+                                <button type="button"
+                                        id="squad-pay-btn"
+                                        wire:click="payWithSquad"
+                                        wire:loading.attr="disabled"
+                                        wire:loading.class="pay-card-disabled"
+                                        wire:target="payWithSquad"
+                                        class="pay-card pay-card-squad">
+                                    <span id="squad-btn-text" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
+                                        <img src="{{ asset('squad.jpg') }}" alt="Squad" style="height:28px;width:auto;max-width:100px;object-fit:contain;border-radius:4px;">
+                                    </span>
+                                    <span id="squad-btn-loading" class="pay-card-spinner" style="display:none;">
+                                        <svg class="spin-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="10" stroke="#374151" stroke-width="4" opacity="0.25"/>
+                                            <path fill="#374151" d="M4 12a8 8 0 018-8v8z"/>
+                                        </svg>
+                                        Redirecting…
+                                    </span>
+                                </button>
+
                             </div>
 
-                            <p class="text-center mt-2 text-muted small">
+                            <p class="text-center mt-3 text-muted small">
                                 <i class="fa fa-lock mr-1"></i> Secure &amp; encrypted payment
                             </p>
                         </div>
