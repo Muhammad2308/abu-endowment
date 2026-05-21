@@ -82,7 +82,8 @@
                                         <option value="">Select your type</option>
                                         <option value="addressable_alumni">Alumni</option>
                                         <option value="supporter">Supporter</option>
-                                        <option value="non_addressable_alumni">Other</option>
+                                        <option value="corporate">Corporate</option>
+                                        <option value="non_addressable_alumni">Others</option>
                                     </select>
                                 </div>
 
