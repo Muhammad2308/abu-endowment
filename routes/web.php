@@ -168,8 +168,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
 });
 
-// Squad payment confirmation page
+// Squad payment confirmation page (Squad redirects here after checkout)
 Route::get('/donation/thank-you', [SquadPaymentController::class, 'confirm'])->name('donation.thankyou');
+
+// Paystack thank-you page (Livewire verifies inline, then redirects here)
+Route::get('/donation/thank-you/paystack', [\App\Http\Controllers\PaymentController::class, 'thankYou'])->name('donation.thankyou.paystack');
 
 // Redirect /login to /admin/login for session expiry or direct access
 Route::get('/login', function () {

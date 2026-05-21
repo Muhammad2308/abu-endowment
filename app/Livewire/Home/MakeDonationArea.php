@@ -3,7 +3,6 @@
 namespace App\Livewire\Home;
 
 use Livewire\Component;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -14,12 +13,10 @@ use App\Models\Donor;
 class MakeDonationArea extends Component
 {
     public $amount;
-    
-    // User details
     public $email;
     public $name;
     public $phone;
-    
+
     protected $listeners = ['payment-success' => 'verifyPayment'];
 
     public function mount()
@@ -30,12 +27,12 @@ class MakeDonationArea extends Component
     public function checkAuth()
     {
         if (Session::has('donor_token')) {
-            $token = Session::get('donor_token');
+            $token        = Session::get('donor_token');
             $donorSession = DonorSession::with('donor')->find($token);
-            
+
             if ($donorSession && $donorSession->donor) {
                 $this->email = $donorSession->donor->email;
-                $this->name = $donorSession->donor->name; // Or full name
+                $this->name  = $donorSession->donor->name;
                 $this->phone = $donorSession->donor->phone;
             } elseif ($donorSession) {
                 $this->email = $donorSession->username;
@@ -43,60 +40,55 @@ class MakeDonationArea extends Component
         }
     }
 
-    public function donate()
+    public function payWithPaystack()
     {
         $this->validate([
             'amount' => 'required|numeric|min:100',
-            'email' => 'required|email',
+            'email'  => 'required|email',
         ]);
 
-        // Create pending donation
         $reference = 'ABU_' . time() . '_' . uniqid();
-        
-        // Find or create donor if not logged in (simplified logic for now)
-        $donorId = null;
-        if (Session::has('donor_token')) {
-             $token = Session::get('donor_token');
-             $session = DonorSession::find($token);
-             $donorId = $session ? $session->donor_id : null;
-        }
-
-        if (!$donorId) {
-             // Try to find by email or create basic donor
-             $donor = Donor::firstOrCreate(
-                 ['email' => $this->email],
-                 ['name' => 'Guest', 'surname' => 'Donor', 'donor_type' => 'supporter']
-             );
-             $donorId = $donor->id;
-        }
+        $donorId   = $this->resolveDonorId();
 
         $donation = Donation::create([
-            'donor_id' => $donorId,
-            'amount' => $this->amount,
-            'type' => 'endowment', // Defaulting to endowment for general donations
-            'frequency' => 'onetime',
-            'endowment' => 'yes',
-            'status' => 'pending',
+            'donor_id'          => $donorId,
+            'amount'            => $this->amount,
+            'type'              => 'endowment',
+            'frequency'         => 'onetime',
+            'endowment'         => 'yes',
+            'status'            => 'pending',
             'payment_reference' => $reference,
         ]);
 
-        // Dispatch event to frontend to open Paystack
         $this->dispatch('initiate-paystack', [
-            'key' => config('services.paystack.public_key'),
-            'email' => $this->email,
-            'amount' => $this->amount * 100, // In kobo
-            'ref' => $reference,
+            'key'      => config('services.paystack.public_key'),
+            'email'    => $this->email,
+            'amount'   => $this->amount * 100, // kobo
+            'ref'      => $reference,
             'currency' => 'NGN',
             'metadata' => [
-                'donation_id' => $donation->id,
-                'custom_fields' => [
-                    [
-                        'display_name' => "Donation Type",
-                        'variable_name' => "donation_type",
-                        'value' => "Endowment"
-                    ]
-                ]
-            ]
+                'donation_id'   => $donation->id,
+                'custom_fields' => [[
+                    'display_name'  => 'Donation Type',
+                    'variable_name' => 'donation_type',
+                    'value'         => 'Endowment',
+                ]],
+            ],
+        ]);
+    }
+
+    public function payWithSquad()
+    {
+        $this->validate([
+            'amount' => 'required|numeric|min:100',
+            'email'  => 'required|email',
+        ]);
+
+        // JS handler calls /api/squad/pay and redirects to Squad checkout page
+        $this->dispatch('initiate-squad', [
+            'email'         => $this->email,
+            'amount'        => $this->amount,
+            'customer_name' => $this->name ?? '',
         ]);
     }
 
@@ -106,39 +98,52 @@ class MakeDonationArea extends Component
             return;
         }
 
-        // Verify with Paystack via backend API or direct check
-        // For simplicity and security, we'll verify here using the secret key
         $reference = is_array($data) ? $data['reference'] : $data;
-        
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . config('services.paystack.secret_key'),
             ])->get("https://api.paystack.co/transaction/verify/{$reference}");
 
             if ($response->successful()) {
-                $data = $response->json()['data'];
-                
-                if ($data['status'] === 'success') {
+                $txData = $response->json()['data'];
+
+                if ($txData['status'] === 'success') {
                     $donation = Donation::where('payment_reference', $reference)->first();
-                    
+
                     if ($donation) {
                         $donation->update([
-                            'status' => 'completed',
+                            'status'      => 'completed',
                             'verified_at' => now(),
-                            'paid_at' => now(),
+                            'paid_at'     => now(),
                         ]);
-                        
-                        session()->flash('message', 'Donation successful! Thank you for your support.');
                         $this->dispatch('donation-completed');
                     }
-                } else {
-                    session()->flash('error', 'Payment verification failed.');
+
+                    return redirect()->route('donation.thankyou.paystack', ['ref' => $reference]);
                 }
+
+                session()->flash('error', 'Payment could not be verified. Please contact support.');
             }
         } catch (\Exception $e) {
-            Log::error('Payment verification error: ' . $e->getMessage());
+            Log::error('Paystack verification error: ' . $e->getMessage());
             session()->flash('error', 'An error occurred during verification.');
         }
+    }
+
+    private function resolveDonorId(): ?int
+    {
+        if (Session::has('donor_token')) {
+            $session = DonorSession::find(Session::get('donor_token'));
+            if ($session?->donor_id) {
+                return $session->donor_id;
+            }
+        }
+
+        return Donor::firstOrCreate(
+            ['email' => $this->email],
+            ['name' => 'Guest', 'surname' => 'Donor', 'donor_type' => 'supporter']
+        )->id;
     }
 
     public function render()

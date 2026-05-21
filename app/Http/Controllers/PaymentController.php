@@ -660,6 +660,49 @@ class PaymentController extends Controller
     }
 
     /**
+     * Show thank-you page after Paystack inline payment is verified by Livewire.
+     * GET /donation/thank-you/paystack?ref=...
+     */
+    public function thankYou(Request $request)
+    {
+        $ref = $request->query('ref');
+
+        if (!$ref) {
+            return redirect('/');
+        }
+
+        $donation = Donation::with(['donor', 'donor.tier'])
+            ->where('payment_reference', $ref)
+            ->where('status', 'completed')
+            ->first();
+
+        if (!$donation) {
+            return view('donation-thank-you', [
+                'success'   => false,
+                'donorName' => 'Guest',
+                'amount'    => 0,
+                'email'     => '',
+                'tierName'  => null,
+                'ref'       => $ref,
+                'emailSent' => false,
+            ]);
+        }
+
+        $donor       = $donation->donor;
+        $displayName = $donor ? trim("{$donor->surname} {$donor->name}") : 'Valued Donor';
+
+        return view('donation-thank-you', [
+            'success'   => true,
+            'donorName' => $displayName ?: 'Valued Donor',
+            'amount'    => $donation->amount,
+            'email'     => $donor?->email ?? '',
+            'tierName'  => $donor?->tier?->name ?? null,
+            'ref'       => $ref,
+            'emailSent' => true,
+        ]);
+    }
+
+    /**
      * Test Paystack configuration
      */
     public function test()
