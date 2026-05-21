@@ -481,9 +481,11 @@ class DonorController extends Controller
                     'name' => 'required|string|max:255',
                     'surname' => 'required|string|max:255',
                     'other_name' => 'nullable|string|max:255',
-                    'gender' => 'required|in:male,female',
-                    'country' => 'required|string|max:100',
+                    'gender' => 'nullable|in:male,female',
+                    'country' => 'nullable|string|max:100',
+                    'nationality' => 'nullable|string|max:100',
                     'state' => 'nullable|string|max:100',
+                    'lga' => 'nullable|string|max:100',
                     'city' => 'nullable|string|max:100',
                     'address' => 'nullable|string|max:500',
                     'email' => 'required|email|max:255|unique:donors,email',
@@ -513,18 +515,17 @@ class DonorController extends Controller
                     'surname' => $request->surname,
                     'other_name' => $request->other_name,
                     'gender' => $request->gender,
-                    'country' => $request->country,
+                    'country' => $request->country ?? $request->nationality,
                     'email' => $request->email,
                     'phone' => $phone,
                     'address' => $request->address,
                     'state' => $request->state,
-                    'lga' => $request->city, // Map frontend 'city' to database 'lga'
+                    'lga' => $request->lga ?? $request->city,
                     'donor_type' => $request->donor_type,
-                    'nationality' => $request->country,
-                    // Set other fields to null
-                    'graduation_year' => null,
-                    'entry_year' => null,
-                    'reg_number' => null,
+                    'nationality' => $request->nationality ?? $request->country,
+                    'reg_number' => $request->reg_number,
+                    'entry_year' => $request->entry_year,
+                    'graduation_year' => $request->graduation_year,
                     'faculty_id' => null,
                     'department_id' => null,
                     'ranking' => null,
@@ -536,35 +537,11 @@ class DonorController extends Controller
                     'email' => $donor->email
                 ]);
 
-                // 1. Determine the username (email) and password (phone)
-                $username = $donor->email;
-                $password = $donor->phone;
-
-                // 2. CRITICAL FIX: Use updateOrCreate to handle existing sessions gracefully
-                $session = \App\Models\DonorSession::updateOrCreate(
-                    ['username' => $username],
-                    [
-                        'donor_id' => $donor->id,
-                        'password' => $password,
-                    ]
-                );
-
-                // Send welcome email with login details
-                try {
-                    \Illuminate\Support\Facades\Mail::to($donor->email)->send(new \App\Mail\WelcomeDonorMail($donor, $session->username, $donor->phone));
-                } catch (\Exception $e) {
-                    Log::error('Failed to send welcome email', ['error' => $e->getMessage()]);
-                    // Continue execution
-                }
-
-                // 3. Return the SUCCESS response with session details
                 return response()->json([
                     'success' => true,
                     'message' => 'Donor registered successfully',
                     'data' => [
                         'donor' => $donor,
-                        'session_id' => $session->id,
-                        'username' => $session->username,
                     ]
                 ], 201);
 

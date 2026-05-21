@@ -142,9 +142,10 @@ class RegistrationModal extends Component
                 throw new \Exception($sessionResult['message'] ?? 'Failed to create session');
             }
 
-            // Store token in session
-            if (isset($sessionResult['token'])) {
-                Session::put('donor_token', $sessionResult['token']);
+            // Store session ID as the donor token (register returns id, login returns token)
+            $token = $sessionResult['token'] ?? $sessionResult['data']['id'] ?? null;
+            if ($token) {
+                Session::put('donor_token', $token);
             }
 
             // Success
