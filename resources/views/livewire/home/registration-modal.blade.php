@@ -143,7 +143,7 @@
                             <form wire:submit.prevent="register">
                                 <div class="form-group mb-3">
                                     <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">I am a: *</label>
-                                    <select wire:model="donorType"
+                                    <select wire:model.live="donorType"
                                             class="form-control form-control-lg border-0 reg-field @error('donorType') is-invalid @enderror"
                                             style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
                                             required>
