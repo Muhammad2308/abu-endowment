@@ -226,6 +226,8 @@ class RegistrationModal extends Component
                 'session_id' => $sessionId,
                 'error'      => $e->getMessage(),
             ]);
+            // Surface mail error so user knows and can retry later
+            $this->error = 'Could not send verification email: ' . $e->getMessage();
         }
     }
 
