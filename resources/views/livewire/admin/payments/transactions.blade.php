@@ -44,31 +44,77 @@
 
     {{-- Filters + Table --}}
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 {{ $showDetailsModal ? 'mr-[26rem]' : '' }}" style="transition: margin 0.3s ease;">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+
+        {{-- Header row --}}
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
             <div>
                 <h2 class="text-2xl font-semibold text-slate-800 dark:text-white">Payment Transactions</h2>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Track all gateway events for donations and payments.</p>
             </div>
-            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <input type="text" wire:model.debounce.500ms="search" placeholder="Search transactions..." class="w-full sm:w-80 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                <select wire:model="gateway" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="">All gateways</option>
-                    <option value="paystack">Paystack</option>
-                    <option value="squad">Squad</option>
-                    <option value="manual">Manual</option>
-                </select>
-                <select wire:model="status" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="">All status</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="success">Success</option>
-                    <option value="failed">Failed</option>
-                </select>
-                <select wire:model="category" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="">All categories</option>
-                    <option value="general">General</option>
-                    <option value="project">Project</option>
-                </select>
+            {{-- Export button --}}
+            <a href="{{ route('admin.transactions.export', array_filter(['gateway' => $gateway, 'status' => $status, 'category' => $category, 'period' => $period, 'search' => $search])) }}"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow transition whitespace-nowrap">
+                <i class="fas fa-file-excel"></i> Export Excel / CSV
+            </a>
+        </div>
+
+        {{-- Filter bar --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+            <input type="text" wire:model.live.debounce.400ms="search"
+                   placeholder="Search transactions..."
+                   class="lg:col-span-1 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+
+            <select wire:model.live="period"
+                    class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">All time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+            </select>
+
+            <select wire:model.live="gateway"
+                    class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">All gateways</option>
+                <option value="paystack">Paystack</option>
+                <option value="squad">Squad</option>
+                <option value="manual">Manual</option>
+            </select>
+
+            <select wire:model.live="status"
+                    class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">All status</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+                <option value="success">Success</option>
+                <option value="failed">Failed</option>
+            </select>
+
+            <select wire:model.live="category"
+                    class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="">All categories</option>
+                <option value="general">General</option>
+                <option value="project">Project</option>
+            </select>
+        </div>
+
+        {{-- Filtered totals summary bar --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5 p-4 bg-slate-50 dark:bg-slate-700/40 rounded-xl border border-slate-200 dark:border-slate-600">
+            <div>
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total (filtered)</p>
+                <p class="text-xl font-bold text-slate-800 dark:text-white mt-0.5">₦{{ number_format($filteredTotals['total'], 2) }}</p>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Completed</p>
+                <p class="text-xl font-bold text-emerald-600 mt-0.5">₦{{ number_format($filteredTotals['completed'], 2) }}</p>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Pending</p>
+                <p class="text-xl font-bold text-amber-500 mt-0.5">₦{{ number_format($filteredTotals['pending'], 2) }}</p>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Transactions</p>
+                <p class="text-xl font-bold text-slate-800 dark:text-white mt-0.5">{{ number_format($filteredTotals['count']) }}</p>
             </div>
         </div>
 

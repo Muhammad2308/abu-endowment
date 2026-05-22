@@ -109,6 +109,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/transactions', function () {
             return view('admin.transactions');
         })->name('admin.transactions');
+
+        // Transactions CSV export
+        Route::get('/transactions/export', [\App\Http\Controllers\Admin\TransactionExportController::class, 'export'])->name('admin.transactions.export');
         
         // The alumni upload is now a Livewire component on the dashboard
         

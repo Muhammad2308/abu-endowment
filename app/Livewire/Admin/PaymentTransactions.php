@@ -16,16 +16,18 @@ class PaymentTransactions extends Component
     public $gateway = '';
     public $status = '';
     public $category = '';
+    public $period = '';
     public $perPage = 15;
     public $selectedTransaction;
     public $showDetailsModal = false;
 
     protected $queryString = [
-        'search' => ['except' => ''],
-        'gateway' => ['except' => ''],
-        'status' => ['except' => ''],
+        'search'   => ['except' => ''],
+        'gateway'  => ['except' => ''],
+        'status'   => ['except' => ''],
         'category' => ['except' => ''],
-        'perPage' => ['except' => 15],
+        'period'   => ['except' => ''],
+        'perPage'  => ['except' => 15],
     ];
 
     public function mount()
@@ -86,24 +88,46 @@ class PaymentTransactions extends Component
             });
     }
 
-    public function updatingSearch()
+    public function updatingSearch()   { $this->resetPage(); }
+    public function updatingGateway()  { $this->resetPage(); }
+    public function updatingStatus()   { $this->resetPage(); }
+    public function updatingCategory() { $this->resetPage(); }
+    public function updatingPeriod()   { $this->resetPage(); }
+
+    private function applyPeriod($query)
     {
-        $this->resetPage();
+        return match($this->period) {
+            'today' => $query->whereDate('created_at', today()),
+            'week'  => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+            'year'  => $query->whereYear('created_at', now()->year),
+            default => $query,
+        };
     }
 
-    public function updatingGateway()
+    public function getFilteredTotals(): array
     {
-        $this->resetPage();
-    }
+        $base = PaymentTransaction::query()
+            ->when($this->gateway,  fn($q) => $q->where('payment_gateway', $this->gateway))
+            ->when($this->status,   fn($q) => $q->where('status', $this->status))
+            ->when($this->category, fn($q) => $q->where('category', $this->category))
+            ->when($this->search, function ($q) {
+                $s = '%' . $this->search . '%';
+                $q->where(fn($sub) => $sub
+                    ->where('payment_reference', 'like', $s)
+                    ->orWhere('payment_gateway', 'like', $s)
+                    ->orWhere('status', 'like', $s)
+                    ->orWhereHas('donor', fn($d) => $d->where('name', 'like', $s)->orWhere('surname', 'like', $s)->orWhere('email', 'like', $s))
+                );
+            });
+        $base = $this->applyPeriod($base);
 
-    public function updatingStatus()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingCategory()
-    {
-        $this->resetPage();
+        return [
+            'total'     => (float) (clone $base)->sum('amount'),
+            'count'     => (int)   (clone $base)->count(),
+            'completed' => (float) (clone $base)->whereIn('status', ['completed', 'success'])->sum('amount'),
+            'pending'   => (float) (clone $base)->where('status', 'pending')->sum('amount'),
+        ];
     }
 
     public function viewTransaction($id)
@@ -170,41 +194,29 @@ class PaymentTransactions extends Component
 
     public function render()
     {
-        $transactions = PaymentTransaction::with(['donation.project', 'donor', 'project'])
-            ->when($this->gateway, function ($query) {
-                $query->where('payment_gateway', $this->gateway);
-            })
-            ->when($this->status, function ($query) {
-                $query->where('status', $this->status);
-            })
-            ->when($this->category, function ($query) {
-                $query->where('category', $this->category);
-            })
-            ->when($this->search, function ($query) {
-                $search = '%' . $this->search . '%';
-                $query->where(function ($sub) use ($search) {
-                    $sub->where('payment_reference', 'like', $search)
-                        ->orWhere('gateway_reference', 'like', $search)
-                        ->orWhere('payment_gateway', 'like', $search)
-                        ->orWhere('event_type', 'like', $search)
-                        ->orWhere('status', 'like', $search)
-                        ->orWhereHas('donor', function ($donorQuery) use ($search) {
-                            $donorQuery->where('name', 'like', $search)
-                                ->orWhere('surname', 'like', $search)
-                                ->orWhere('other_name', 'like', $search)
-                                ->orWhere('email', 'like', $search);
-                        })
-                        ->orWhereHas('project', function ($projectQuery) use ($search) {
-                            $projectQuery->where('project_title', 'like', $search);
-                        });
-                });
-            })
-            ->latest()
-            ->paginate($this->perPage);
+        $query = PaymentTransaction::with(['donation.project', 'donor', 'project'])
+            ->when($this->gateway,  fn($q) => $q->where('payment_gateway', $this->gateway))
+            ->when($this->status,   fn($q) => $q->where('status', $this->status))
+            ->when($this->category, fn($q) => $q->where('category', $this->category))
+            ->when($this->search, function ($q) {
+                $s = '%' . $this->search . '%';
+                $q->where(fn($sub) => $sub
+                    ->where('payment_reference', 'like', $s)
+                    ->orWhere('gateway_reference', 'like', $s)
+                    ->orWhere('payment_gateway', 'like', $s)
+                    ->orWhere('event_type', 'like', $s)
+                    ->orWhere('status', 'like', $s)
+                    ->orWhereHas('donor', fn($d) => $d->where('name', 'like', $s)->orWhere('surname', 'like', $s)->orWhere('other_name', 'like', $s)->orWhere('email', 'like', $s))
+                    ->orWhereHas('project', fn($p) => $p->where('project_title', 'like', $s))
+                );
+            });
+
+        $query = $this->applyPeriod($query);
 
         return view('livewire.admin.payments.transactions', [
-            'transactions' => $transactions,
-            'chartData'    => $this->getChartData(),
+            'transactions'    => $query->latest()->paginate($this->perPage),
+            'chartData'       => $this->getChartData(),
+            'filteredTotals'  => $this->getFilteredTotals(),
         ]);
     }
 }
