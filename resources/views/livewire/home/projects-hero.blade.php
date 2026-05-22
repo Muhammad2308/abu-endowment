@@ -1,3 +1,4 @@
+<div>
 <div class="projects_hero_area page-hero-area" style="position: relative; background: url('{{ asset('img/ABU SKY IMAGE.jpg') }}') no-repeat center center/cover;">
     <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6, 78, 59, 0.9) 0%, rgba(6, 78, 59, 0.6) 100%);"></div>
 
@@ -32,3 +33,4 @@
         .page-hero-heading   { font-size: 1.8rem; }
     }
 </style>
+</div>

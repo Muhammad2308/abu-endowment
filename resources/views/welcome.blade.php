@@ -81,7 +81,7 @@
 						<a href="#services" class="nav-item nav-link">Services</a>
 						<a href="#donation" class="nav-item nav-link">Donation</a>
 						<a href="#news-events" class="nav-item nav-link">News & Events</a>
-						<a href="#contact" class="nav-item nav-link">Contact</a>
+
                 </div>
 					<div class="d-flex align-items-center ms-auto">
 						<!-- Authentication Section -->
