@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -629,7 +629,7 @@ class PaymentController extends Controller
             $donorName = $donor->full_name ?? trim("{$donor->surname} {$donor->name} {$donor->other_name}");
             $amount = number_format($donation->amount, 2);
             $reference = $donation->payment_reference;
-            $projectName = $donation->project ? $donation->project->project_title : 'ABU Giving';
+            $projectName = $donation->project ? $donation->project->project_title : 'GIVE ABU';
             
             Mail::send('emails.thank-you', [
                 'donorName'    => $donorName,
@@ -637,12 +637,12 @@ class PaymentController extends Controller
                 'reference'    => $reference,
                 'projectName'  => $projectName,
                 'donationDate' => $donation->paid_at ?? now(),
-                'donationType' => $donation->endowment === 'yes' ? 'ABU Giving Fund' : 'Project Donation',
+                'donationType' => $donation->endowment === 'yes' ? 'GIVE ABU Fund' : 'Project Donation',
                 'logoUrl'      => 'https://abu-endowment.cloud/abu_logo_white_for_email.png',
             ], function($message) use ($donor) {
-                $message->from(config('mail.from.address', 'noreply@abu-endowment.edu.ng'), config('mail.from.name', 'ABU Giving'))
+                $message->from(config('mail.from.address', 'noreply@abu-endowment.edu.ng'), config('mail.from.name', 'GIVE ABU'))
                         ->to($donor->email)
-                        ->subject('Thank You for Your Generous Donation - ABU Giving');
+                        ->subject('Thank You for Your Generous Donation - GIVE ABU');
             });
 
             Log::info('Thank you email sent successfully', [

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -439,8 +439,8 @@ class SquadPaymentController extends Controller
                 'reference'        => $ref,
                 'payment_reference'=> $ref,
                 'donation_date'    => now()->format('d M Y'),
-                'project_name'     => 'ABU Giving',
-                'organization_name'=> 'ABU Giving',
+                'project_name'     => 'GIVE ABU',
+                'organization_name'=> 'GIVE ABU',
                 'tier_name'        => '',
                 'total_amount'     => '₦' . number_format($amount, 2),
                 'donation_type'    => 'General Donation',
@@ -454,7 +454,7 @@ class SquadPaymentController extends Controller
                     ->subject($subject)
                     ->from(
                         config('mail.from.address', 'noreply@abu-endowment.edu.ng'),
-                        config('mail.from.name', 'ABU Giving')
+                        config('mail.from.name', 'GIVE ABU')
                     );
             });
 
