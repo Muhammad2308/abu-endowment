@@ -23,8 +23,32 @@
             <button wire:click="loadAll" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 shadow-sm transition">
                 <i class="fas fa-sync-alt text-emerald-500" wire:loading.class="animate-spin"></i> Refresh
             </button>
+            <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-sm font-medium text-white shadow-sm transition">
+                <i class="fas fa-print"></i> Print Report
+            </button>
         </div>
     </div>
+
+    <style>
+        @media print {
+            /* Hide everything except the analytics content */
+            body * { visibility: hidden; }
+            .space-y-6, .space-y-6 * { visibility: visible; }
+            .space-y-6 { position: absolute; top: 0; left: 0; width: 100%; }
+
+            /* Hide the period selector, refresh and print buttons when printing */
+            .space-y-6 button { display: none !important; }
+
+            /* Remove shadows and borders for cleaner print */
+            .shadow-sm, .shadow-md { box-shadow: none !important; }
+
+            /* Ensure charts print correctly */
+            canvas { max-width: 100% !important; }
+
+            /* Page settings */
+            @page { margin: 1cm; size: A4 landscape; }
+        }
+    </style>
 
     {{-- ── KPI CARDS ────────────────────────────────────────────── --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -202,7 +226,7 @@
 
         {{-- Donation type by month --}}
         <div wire:ignore class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6">
-            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">General vs Project</h2>
+            <h2 class="text-base font-bold text-slate-800 dark:text-white mb-1">General vs Project Donations</h2>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Monthly donation type breakdown</p>
             @if(count($typeChart['labels'] ?? []) > 0)
             <div style="height:220px;position:relative;">
