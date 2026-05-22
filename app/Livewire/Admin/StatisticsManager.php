@@ -80,8 +80,7 @@ class StatisticsManager extends Component
             'donors'    => ['value' => (int)   $donors,   'trend' => $this->trend($donors, $prevDonors),  'fmt' => 'number',  'label' => 'Total Donors',          'icon' => 'users',        'color' => 'violet'],
             'avg'       => ['value' => (float) $avg,      'trend' => $this->trend($avg, $prevAvg),        'fmt' => 'currency','label' => 'Avg. Donation',         'icon' => 'trending-up',  'color' => 'amber'],
             'rate'      => ['value' => (float) $rate,     'trend' => $this->trend($rate, $prevRate),      'fmt' => 'percent', 'label' => 'Success Rate',          'icon' => 'pie-chart',    'color' => 'teal'],
-            'fees'      => ['value' => (float) $fees,     'trend' => 0,                                   'fmt' => 'currency','label' => 'Total Fees Paid',        'icon' => 'receipt',      'color' => 'rose'],
-            'endowment' => ['value' => (float) $endoAmt,  'trend' => 0, 'count' => $endoCnt,             'fmt' => 'currency','label' => 'Endowment Donations',   'icon' => 'heart',        'color' => 'pink'],
+            'endowment' => ['value' => (float) $endoAmt,  'trend' => 0, 'count' => $endoCnt,             'fmt' => 'currency','label' => 'General Donations',     'icon' => 'heart',        'color' => 'pink'],
             'project'   => ['value' => (float) $projAmt,  'trend' => 0, 'count' => $projCnt,             'fmt' => 'currency','label' => 'Project Donations',     'icon' => 'folder',       'color' => 'indigo'],
         ];
 
