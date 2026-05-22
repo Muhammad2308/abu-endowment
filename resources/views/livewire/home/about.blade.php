@@ -6,7 +6,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="section_title text-center mb-55">
-                    <h3 style="color: #064e3b; font-size: 36px; font-weight: 700; margin-bottom: 20px; font-family: 'Playfair Display', serif;">Give ABU</h3>
+                    <h3 style="color: #064e3b; font-size: 36px; font-weight: 700; margin-bottom: 20px; font-family: 'Playfair Display', serif;">GIVE ABU</h3>
                     <p style="color: #6b7280; font-size: 16px; line-height: 1.6; max-width: 700px; margin: 0 auto;">
                         The official sustainable funding arm of Ahmadu Bello University, Zaria. We channel donations directly into student scholarships, pioneering research, and campus development.
                     </p>
