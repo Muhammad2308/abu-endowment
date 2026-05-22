@@ -57,7 +57,7 @@
                                     <li><a href="{{ url('/') }}">Home</a></li>
                                     <li><a href="{{ route('about') }}">About</a></li>
                                     <li><a href="{{ route('projects') }}">Projects</a></li>
-                                    <li><a href="#">Contact us</a></li>
+
                                     
                                     <!-- Mobile Only Items -->
                                     <li class="d-lg-none"><a href="#make-donation">Make Donation</a></li>
