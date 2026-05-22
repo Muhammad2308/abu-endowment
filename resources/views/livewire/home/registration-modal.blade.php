@@ -173,16 +173,33 @@
                                 @endif
 
                                 @if($showAlumniFields)
-                                <div class="form-group mb-3">
-                                    <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Entry Year</label>
-                                    <input type="number"
-                                           wire:model="entryYear"
-                                           min="1950"
-                                           max="{{ date('Y') }}"
-                                           placeholder="e.g., 2016"
-                                           class="form-control form-control-lg border-0 reg-field @error('entryYear') is-invalid @enderror"
-                                           style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
-                                    @error('entryYear') <div class="reg-error-msg">{{ $message }}</div> @enderror
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Entry Year</label>
+                                            <input type="number"
+                                                   wire:model="entryYear"
+                                                   min="1950"
+                                                   max="{{ date('Y') }}"
+                                                   placeholder="e.g., 2016"
+                                                   class="form-control form-control-lg border-0 reg-field @error('entryYear') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('entryYear') <div class="reg-error-msg">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Graduation Year</label>
+                                            <input type="number"
+                                                   wire:model="graduationYear"
+                                                   min="1950"
+                                                   max="{{ date('Y') + 6 }}"
+                                                   placeholder="e.g., 2020"
+                                                   class="form-control form-control-lg border-0 reg-field @error('graduationYear') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('graduationYear') <div class="reg-error-msg">{{ $message }}</div> @enderror
+                                        </div>
+                                    </div>
                                 </div>
                                 @endif
 
