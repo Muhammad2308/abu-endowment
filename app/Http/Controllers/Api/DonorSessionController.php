@@ -1214,7 +1214,7 @@ class DonorSessionController extends Controller
             'email_verification_token'  => null,
         ]);
 
-        return redirect('/')->with('success', 'Your email has been verified successfully. Thank you!');
+        return redirect('/')->with('message', 'Your email has been verified! Thank you.');
     }
 
     /**
