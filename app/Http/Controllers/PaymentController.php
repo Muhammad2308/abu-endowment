@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -107,7 +107,7 @@ class PaymentController extends Controller
             ]);
 
             // 2. Initialize Paystack transaction with donation payment_reference
-            $response = Http::withHeaders([
+            $response = Http::timeout(30)->withHeaders([
                 'Authorization' => 'Bearer ' . $this->paystackSecretKey,
                 'Content-Type' => 'application/json',
             ])->post('https://api.paystack.co/transaction/initialize', [
@@ -204,14 +204,14 @@ class PaymentController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Payment initialization error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while initializing payment. Please try again or contact support.',
