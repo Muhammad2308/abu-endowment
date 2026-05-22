@@ -124,6 +124,7 @@
                                 <p class="text-muted" style="font-family: 'Inter', sans-serif; font-size: 1rem;">Please enter your details to register.</p>
                             </div>
 
+                            @if(config('services.google.client_id'))
                             <!-- Google Login at Top -->
                             <div id="googleBtnReg-register" class="mb-3 d-flex justify-content-start" wire:ignore.self></div>
 
@@ -131,6 +132,7 @@
                                 <hr class="my-0">
                                 <span class="position-absolute bg-white px-3 text-muted" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem;">OR</span>
                             </div>
+                            @endif
 
                             <style>
                                 .reg-field.is-invalid { border-color: #dc3545 !important; }
