@@ -1,4 +1,4 @@
-<header>
+﻿<header>
     <div class="header-area">
         <!-- Top Bar -->
         <div class="header-top-bar" style="background: #fff; padding: 10px 0; border-bottom: 1px solid #eee;">
@@ -88,11 +88,24 @@
                                                 </div>
                                             @endif
                                             <span class="ml-2 font-weight-bold">{{ $user['name'] ?? 'User' }}</span>
+                                            @if(!$isVerified)
+                                                <span title="Email not verified" style="margin-left: 6px; font-size: 14px; line-height: 1;">&#9888;&#65039;</span>
+                                            @endif
                                         </a>
-                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" style="border-radius: 0px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 10px;">
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown" style="border-radius: 0px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 10px; min-width: 230px;">
                                             <div class="px-3 py-2 border-bottom">
                                                 <small class="text-muted">{{ $user['email'] ?? '' }}</small>
                                             </div>
+                                            @if(!$isVerified)
+                                                <div style="background: #fffbeb; border-bottom: 1px solid #fde68a; padding: 10px 16px;">
+                                                    <p style="color: #92400e; font-size: 0.78rem; margin: 0 0 6px; font-weight: 600;">&#9888; Email not verified</p>
+                                                    @if($verificationResent)
+                                                        <p style="color: #065f46; font-size: 0.75rem; margin: 0;">&#10003; Verification email sent — check your inbox.</p>
+                                                    @else
+                                                        <a href="#" wire:click.prevent="resendVerification" style="color: #064e3b; font-size: 0.78rem; font-weight: 600; text-decoration: underline;">Resend verification email</a>
+                                                    @endif
+                                                </div>
+                                            @endif
                                             <a class="dropdown-item py-2" href="#" wire:click.prevent="$dispatch('openEditProfileModal')">Profile</a>
                                             <a class="dropdown-item py-2 text-danger" href="#" wire:click.prevent="logout">Logout</a>
                                         </div>
@@ -231,7 +244,7 @@
                     width:32px;height:32px;border-radius:50%;cursor:pointer;
                     font-size:1.1rem;display:flex;align-items:center;justify-content:center;
                     transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
-                <img src="{{ asset('abu_logo_white_for_email.png') }}" alt="ABU Giving" style="height:60px;width:auto;margin-bottom:0.75rem;display:block;margin-left:auto;margin-right:auto;">
+                <img src="{{ asset('abu_logo_white_for_email.png') }}" alt="GIVE ABU" style="height:60px;width:auto;margin-bottom:0.75rem;display:block;margin-left:auto;margin-right:auto;">
                 <h2 style="color:#fff;font-size:1.45rem;font-weight:700;margin:0 0 0.35rem;">Make a Difference Today</h2>
                 <p style="color:rgba(255,255,255,0.82);font-size:0.875rem;margin:0;">Your donation builds the future of ABU</p>
                 {{-- Wave --}}

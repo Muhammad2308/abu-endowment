@@ -47,17 +47,77 @@
                         </div>
                     </div>
 
-                    <!-- Right Side - Form -->
+                    <!-- Right Side - Form or Success Panel -->
                     <div class="col-lg-6 bg-white h-100 position-relative">
                         <!-- Close Button -->
-                        <button type="button" 
-                                class="close position-absolute p-3" 
+                        <button type="button"
+                                class="close position-absolute p-3"
                                 wire:click="close"
                                 aria-label="Close"
                                 style="right: 20px; top: 20px; z-index: 10; opacity: 0.4; transition: all 0.3s; outline: none !important; border: none !important; background: transparent !important; box-shadow: none !important;">
                             <span aria-hidden="true" style="font-size: 2.5rem; font-weight: 300;">&times;</span>
                         </button>
 
+                        {{-- ─── SUCCESS / VERIFICATION PANEL ─────────────────────────── --}}
+                        @if($registrationComplete)
+                        <div class="h-100 d-flex flex-column align-items-center justify-content-center" style="padding: 3rem 3rem; text-align: center;">
+                            {{-- Checkmark icon --}}
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #d1fae5; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="12" fill="#059669"/>
+                                    <path d="M7 12.5l3.5 3.5 6.5-7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+
+                            <h2 class="font-weight-bold mb-2" style="color: #064e3b; font-family: 'Playfair Display', serif; font-size: 1.75rem;">
+                                Registration Successful!
+                            </h2>
+
+                            <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.6; max-width: 380px; margin-bottom: 0.5rem;">
+                                Welcome to <strong>GIVE ABU</strong>. You are now logged in.
+                            </p>
+
+                            @if($verificationSent)
+                            <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 1rem 1.25rem; margin: 1.25rem 0; max-width: 400px; width: 100%; text-align: left;">
+                                <p style="color: #065f46; font-size: 0.88rem; margin: 0; line-height: 1.5;">
+                                    <strong>&#x2709;&#xfe0f; Verification email sent!</strong><br>
+                                    Please check your inbox at <strong>{{ $email }}</strong> and click the link to verify your account.
+                                </p>
+                            </div>
+                            @else
+                            <p style="color: #6b7280; font-size: 0.88rem; line-height: 1.5; max-width: 380px; margin: 0.75rem 0 1.5rem;">
+                                A verification email has been sent to <strong>{{ $email }}</strong>.
+                                Verifying your email unlocks your full donor profile.
+                            </p>
+                            @endif
+
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 360px; margin-top: 1rem;">
+                                {{-- Resend / Verify Email button --}}
+                                <button wire:click="resendVerificationEmail"
+                                        @if($resendLoading) disabled @endif
+                                        style="background: #064e3b; color: #fff; border: none; border-radius: 8px; padding: 13px 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s; width: 100%;">
+                                    @if($resendLoading)
+                                        <span class="spinner-border spinner-border-sm mr-2" role="status"></span> Sending...
+                                    @elseif($verificationSent)
+                                        &#x21bb; Resend Verification Email
+                                    @else
+                                        &#x2709; Send Verification Email
+                                    @endif
+                                </button>
+
+                                {{-- Skip for Now --}}
+                                <button wire:click="skipVerification"
+                                        style="background: transparent; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 20px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; width: 100%;">
+                                    Skip for Now &rarr;
+                                </button>
+                            </div>
+
+                            <p style="color: #9ca3af; font-size: 0.8rem; margin-top: 1.5rem;">
+                                Email verification is optional and will not affect your ability to donate or browse.
+                            </p>
+                        </div>
+                        @else
+                        {{-- ─── REGISTRATION FORM ─────────────────────────────────────── --}}
                         <div class="h-100 overflow-auto custom-scrollbar d-flex flex-column" style="padding: 3rem 4rem;">
                             <div class="mb-4">
                                 <h2 class="font-weight-bold mb-1" style="color: #064e3b; font-family: 'Playfair Display', serif; font-size: 2rem;">Create Account</h2>
@@ -72,11 +132,17 @@
                                 <span class="position-absolute bg-white px-3 text-muted" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem;">OR</span>
                             </div>
 
+                            <style>
+                                .reg-field.is-invalid { border-color: #dc3545 !important; }
+                                .reg-field.is-invalid:focus { box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25) !important; }
+                                .reg-error-msg { color: #dc3545; font-size: 0.78rem; margin-top: 4px; }
+                            </style>
+
                             <form wire:submit.prevent="register">
                                 <div class="form-group mb-3">
                                     <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">I am a: *</label>
-                                    <select wire:model="donorType" 
-                                            class="form-control form-control-lg border-0"
+                                    <select wire:model="donorType"
+                                            class="form-control form-control-lg border-0 reg-field @error('donorType') is-invalid @enderror"
                                             style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
                                             required>
                                         <option value="">Select your type</option>
@@ -85,6 +151,7 @@
                                         <option value="corporate">Corporate</option>
                                         <option value="non_addressable_alumni">Others</option>
                                     </select>
+                                    @error('donorType') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                 </div>
 
                                 @if($showAlumniFields)
@@ -92,23 +159,25 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Registration Number *</label>
-                                            <input type="text" 
+                                            <input type="text"
                                                    wire:model="regNumber"
                                                    placeholder="e.g., U16/ENG/1234"
-                                                   class="form-control form-control-lg border-0"
+                                                   class="form-control form-control-lg border-0 reg-field @error('regNumber') is-invalid @enderror"
                                                    style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('regNumber') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Entry Year</label>
-                                            <input type="number" 
+                                            <input type="number"
                                                    wire:model="entryYear"
-                                                   min="1950" 
+                                                   min="1950"
                                                    max="{{ date('Y') }}"
                                                    placeholder="e.g., 2016"
-                                                   class="form-control form-control-lg border-0"
+                                                   class="form-control form-control-lg border-0 reg-field @error('entryYear') is-invalid @enderror"
                                                    style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('entryYear') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -118,52 +187,54 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Surname *</label>
-                                            <input type="text" 
+                                            <input type="text"
                                                    wire:model="surname"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('surname') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('surname') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">First Name *</label>
-                                            <input type="text" 
+                                            <input type="text"
                                                    wire:model="name"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('name') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('name') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group mb-3">
                                     <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Other Name (Optional)</label>
-                                    <input type="text" 
+                                    <input type="text"
                                            wire:model="otherName"
-                                           class="form-control form-control-lg border-0"
+                                           class="form-control form-control-lg border-0 reg-field @error('otherName') is-invalid @enderror"
                                            style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                    @error('otherName') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Email *</label>
-                                            <input type="email" 
+                                            <input type="email"
                                                    wire:model="email"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('email') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('email') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Phone Number *</label>
-                                            <input type="tel" 
+                                            <input type="tel"
                                                    wire:model="phone"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   placeholder="e.g. 08012345678"
+                                                   class="form-control form-control-lg border-0 reg-field @error('phone') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('phone') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -172,31 +243,31 @@
                                     <div class="col-md-4">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">State *</label>
-                                            <input type="text" 
+                                            <input type="text"
                                                    wire:model="state"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('state') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('state') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">LGA *</label>
-                                            <input type="text" 
+                                            <input type="text"
                                                    wire:model="lga"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('lga') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('lga') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Nationality *</label>
-                                            <input type="text" 
+                                            <input type="text"
                                                    wire:model="nationality"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('nationality') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('nationality') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -205,28 +276,28 @@
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Password *</label>
-                                            <input type="password" 
+                                            <input type="password"
                                                    wire:model="password"
                                                    minlength="6"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('password') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('password') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Confirm Password *</label>
-                                            <input type="password" 
+                                            <input type="password"
                                                    wire:model="passwordConfirm"
-                                                   class="form-control form-control-lg border-0"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;"
-                                                   required>
+                                                   class="form-control form-control-lg border-0 reg-field @error('passwordConfirm') is-invalid @enderror"
+                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            @error('passwordConfirm') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                 </div>
 
                                 @if($error)
-                                <div class="alert alert-danger rounded-lg border-0 mb-4">
+                                <div class="alert alert-danger rounded-lg border-0 mb-4" style="font-size: 0.875rem;">
                                     {{ $error }}
                                 </div>
                                 @endif
@@ -250,8 +321,8 @@
                                 </button>
 
                                 <p class="text-center mt-4 mb-0 text-muted">
-                                    Already have an account? 
-                                    <a href="#" 
+                                    Already have an account?
+                                    <a href="#"
                                        class="font-weight-bold text-decoration-none"
                                        style="color: #064e3b;"
                                        wire:click.prevent="close"
@@ -261,6 +332,8 @@
                                 </p>
                             </form>
                         </div>
+                        @endif
+                        {{-- end registrationComplete --}}
                     </div>
                 </div>
             </div>

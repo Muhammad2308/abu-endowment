@@ -21,6 +21,9 @@ class DonorSession extends Model
         'google_email',
         'google_name',
         'google_picture',
+        // Email verification
+        'email_verified_at',
+        'email_verification_token',
     ];
 
     protected $hidden = [
@@ -29,6 +32,7 @@ class DonorSession extends Model
 
     protected $casts = [
         'auth_provider' => 'string',
+        'email_verified_at' => 'datetime',
     ];
 
     /**

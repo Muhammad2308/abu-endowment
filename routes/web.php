@@ -168,6 +168,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
 });
 
+// Email verification (link from verification email)
+Route::get('/verify-email/{token}', [\App\Http\Controllers\Api\DonorSessionController::class, 'verifyEmail'])->name('email.verify');
+
 // Squad payment confirmation page (Squad redirects here after checkout)
 Route::get('/donation/thank-you', [SquadPaymentController::class, 'confirm'])->name('donation.thankyou');
 

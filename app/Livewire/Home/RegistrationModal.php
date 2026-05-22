@@ -5,8 +5,12 @@ namespace App\Livewire\Home;
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Models\DonorSession;
+use App\Mail\EmailVerificationMail;
 
 class RegistrationModal extends Component
 {
@@ -35,6 +39,12 @@ class RegistrationModal extends Component
     public $loading = false;
     public $showAlumniFields = false;
 
+    // Post-registration state
+    public $registrationComplete = false;
+    public $registeredSessionId = null;
+    public $verificationSent = false;
+    public $resendLoading = false;
+
     protected $listeners = [
         'openRegistrationModal' => 'open',
         'save-auth-token' => 'saveAuthToken'
@@ -51,10 +61,11 @@ class RegistrationModal extends Component
         $this->reset([
             'donorType', 'surname', 'name', 'otherName', 'email', 'phone',
             'state', 'lga', 'nationality', 'password', 'passwordConfirm',
-            'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading', 'showAlumniFields'
+            'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading',
+            'showAlumniFields', 'registrationComplete', 'registeredSessionId', 'verificationSent', 'resendLoading'
         ]);
         $this->nationality = 'Nigerian';
-        
+
         // Initialize Google Sign-In button when modal opens
         $this->dispatch('initGoogleRegistration', componentId: 'register');
     }
@@ -65,7 +76,8 @@ class RegistrationModal extends Component
         $this->reset([
             'donorType', 'surname', 'name', 'otherName', 'email', 'phone',
             'state', 'lga', 'nationality', 'password', 'passwordConfirm',
-            'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading', 'showAlumniFields'
+            'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading',
+            'showAlumniFields', 'registrationComplete', 'registeredSessionId', 'verificationSent', 'resendLoading'
         ]);
     }
 
@@ -122,7 +134,13 @@ class RegistrationModal extends Component
             $donorResult = json_decode($donorResponse->getContent(), true);
 
             if (!$donorResponse->isSuccessful()) {
-                throw new \Exception($donorResult['message'] ?? json_encode($donorResult['errors'] ?? []) ?? 'Registration failed');
+                // Surface any field-level validation errors to Livewire's $errors bag
+                if (!empty($donorResult['errors']) && is_array($donorResult['errors'])) {
+                    foreach ($donorResult['errors'] as $field => $messages) {
+                        $this->addError($field, is_array($messages) ? $messages[0] : $messages);
+                    }
+                }
+                throw new \Exception($donorResult['message'] ?? 'Registration failed. Please check the highlighted fields.');
             }
 
             // Step 2: Create donor session (email is the username)
@@ -147,15 +165,67 @@ class RegistrationModal extends Component
                 Session::put('donor_token', $token);
             }
 
-            // Success
-            $this->success = 'Registration successful! Logging you in...';
-            $this->close();
+            // Store session ID for later use (resend / skip)
+            $this->registeredSessionId = $sessionResult['data']['id'];
+
+            // Auto-login: session already set above, notify header immediately
             $this->dispatch('registration-success');
-            $this->js('setTimeout(() => window.location.reload(), 1500)');
+
+            // Auto-send verification email (silent fail — never block the user)
+            $this->dispatchVerificationEmail($this->registeredSessionId, $this->email, $this->name);
+
+            // Show success state inside the modal instead of closing
+            $this->registrationComplete = true;
+            $this->success = 'Registration successful!';
         } catch (\Exception $e) {
             $this->error = $e->getMessage();
         } finally {
             $this->loading = false;
+        }
+    }
+
+    /**
+     * User clicked "Resend Verification Email" inside the success panel.
+     */
+    public function resendVerificationEmail()
+    {
+        if (!$this->registeredSessionId) return;
+
+        $this->resendLoading = true;
+        $this->dispatchVerificationEmail($this->registeredSessionId, $this->email, $this->name);
+        $this->verificationSent = true;
+        $this->resendLoading = false;
+    }
+
+    /**
+     * User clicked "Skip for Now" — close modal and reload page (they are already logged in).
+     */
+    public function skipVerification()
+    {
+        $this->show = false;
+        $this->registrationComplete = false;
+        $this->js('window.location.reload()');
+    }
+
+    /**
+     * Internal helper: generate token, persist it, send the email.
+     * Failures are logged silently — email verification is optional.
+     */
+    private function dispatchVerificationEmail(int $sessionId, string $email, string $name): void
+    {
+        try {
+            $token = Str::random(64);
+            DonorSession::where('id', $sessionId)->update(['email_verification_token' => $token]);
+
+            $verificationUrl = url('/verify-email/' . $token);
+            Mail::to($email)->send(new EmailVerificationMail($verificationUrl, $name));
+
+            $this->verificationSent = true;
+        } catch (\Exception $e) {
+            Log::error('RegistrationModal: failed to send verification email', [
+                'session_id' => $sessionId,
+                'error'      => $e->getMessage(),
+            ]);
         }
     }
 
