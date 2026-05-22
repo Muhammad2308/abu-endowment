@@ -154,39 +154,40 @@
                                     @error('donorType') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                 </div>
 
+                                @php
+                                $countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo (Congo-Brazzaville)","Costa Rica","Croatia","Cuba","Cyprus","Czechia","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+                                @endphp
+
+                                @if($showCorporateFields)
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Organisation Name *</label>
+                                    <input type="text"
+                                           wire:model="organisationName"
+                                           placeholder="e.g. Dangote Group"
+                                           class="form-control form-control-lg border-0 reg-field @error('organisationName') is-invalid @enderror"
+                                           style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                    @error('organisationName') <div class="reg-error-msg">{{ $message }}</div> @enderror
+                                </div>
+                                @endif
+
                                 @if($showAlumniFields)
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Registration Number *</label>
-                                            <input type="text"
-                                                   wire:model="regNumber"
-                                                   placeholder="e.g., U16/ENG/1234"
-                                                   class="form-control form-control-lg border-0 reg-field @error('regNumber') is-invalid @enderror"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
-                                            @error('regNumber') <div class="reg-error-msg">{{ $message }}</div> @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-3">
-                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Entry Year</label>
-                                            <input type="number"
-                                                   wire:model="entryYear"
-                                                   min="1950"
-                                                   max="{{ date('Y') }}"
-                                                   placeholder="e.g., 2016"
-                                                   class="form-control form-control-lg border-0 reg-field @error('entryYear') is-invalid @enderror"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
-                                            @error('entryYear') <div class="reg-error-msg">{{ $message }}</div> @enderror
-                                        </div>
-                                    </div>
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Entry Year</label>
+                                    <input type="number"
+                                           wire:model="entryYear"
+                                           min="1950"
+                                           max="{{ date('Y') }}"
+                                           placeholder="e.g., 2016"
+                                           class="form-control form-control-lg border-0 reg-field @error('entryYear') is-invalid @enderror"
+                                           style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                    @error('entryYear') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                 </div>
                                 @endif
 
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
-                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Surname *</label>
+                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Donor Surname *</label>
                                             <input type="text"
                                                    wire:model="surname"
                                                    class="form-control form-control-lg border-0 reg-field @error('surname') is-invalid @enderror"
@@ -196,7 +197,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
-                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">First Name *</label>
+                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Donor Name *</label>
                                             <input type="text"
                                                    wire:model="name"
                                                    class="form-control form-control-lg border-0 reg-field @error('name') is-invalid @enderror"
@@ -206,19 +207,12 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group mb-3">
-                                    <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Other Name (Optional)</label>
-                                    <input type="text"
-                                           wire:model="otherName"
-                                           class="form-control form-control-lg border-0 reg-field @error('otherName') is-invalid @enderror"
-                                           style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
-                                    @error('otherName') <div class="reg-error-msg">{{ $message }}</div> @enderror
-                                </div>
-
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-3">
-                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Email *</label>
+                                            <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">
+                                                @if($showCorporateFields) Email (Organization's) * @else Email * @endif
+                                            </label>
                                             <input type="email"
                                                    wire:model="email"
                                                    class="form-control form-control-lg border-0 reg-field @error('email') is-invalid @enderror"
@@ -263,10 +257,16 @@
                                     <div class="col-md-4">
                                         <div class="form-group mb-3">
                                             <label class="font-weight-bold text-dark small text-uppercase mb-1" style="font-family: 'Inter', sans-serif; color: #374151; font-size: 0.75rem;">Nationality *</label>
-                                            <input type="text"
-                                                   wire:model="nationality"
-                                                   class="form-control form-control-lg border-0 reg-field @error('nationality') is-invalid @enderror"
-                                                   style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                            <select wire:model="nationality"
+                                                    class="form-control form-control-lg border-0 reg-field @error('nationality') is-invalid @enderror"
+                                                    style="background-color: #f9fafb; border: 1px solid #e5e7eb !important; border-radius: 0.5rem; font-size: 0.9rem; height: 45px; color: #374151;">
+                                                <option value="Nigerian" selected>Nigerian</option>
+                                                @foreach($countries as $country)
+                                                    @if($country !== 'Nigeria')
+                                                        <option value="{{ $country }}">{{ $country }}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
                                             @error('nationality') <div class="reg-error-msg">{{ $message }}</div> @enderror
                                         </div>
                                     </div>

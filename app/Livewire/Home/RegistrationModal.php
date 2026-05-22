@@ -28,16 +28,19 @@ class RegistrationModal extends Component
     public $username = '';
     public $password = '';
     public $passwordConfirm = '';
-    
+
     // Alumni fields
-    public $regNumber = '';
     public $entryYear = '';
     public $graduationYear = '';
-    
+
+    // Corporate fields
+    public $organisationName = '';
+
     public $error = '';
     public $success = '';
     public $loading = false;
     public $showAlumniFields = false;
+    public $showCorporateFields = false;
 
     // Post-registration state
     public $registrationComplete = false;
@@ -53,6 +56,7 @@ class RegistrationModal extends Component
     public function updatedDonorType()
     {
         $this->showAlumniFields = in_array($this->donorType, ['addressable_alumni', 'non_addressable_alumni']);
+        $this->showCorporateFields = $this->donorType === 'corporate';
     }
 
     public function open()
@@ -61,8 +65,8 @@ class RegistrationModal extends Component
         $this->reset([
             'donorType', 'surname', 'name', 'otherName', 'email', 'phone',
             'state', 'lga', 'nationality', 'password', 'passwordConfirm',
-            'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading',
-            'showAlumniFields', 'registrationComplete', 'registeredSessionId', 'verificationSent', 'resendLoading'
+            'entryYear', 'graduationYear', 'organisationName', 'error', 'success', 'loading',
+            'showAlumniFields', 'showCorporateFields', 'registrationComplete', 'registeredSessionId', 'verificationSent', 'resendLoading'
         ]);
         $this->nationality = 'Nigerian';
 
@@ -76,8 +80,8 @@ class RegistrationModal extends Component
         $this->reset([
             'donorType', 'surname', 'name', 'otherName', 'email', 'phone',
             'state', 'lga', 'nationality', 'password', 'passwordConfirm',
-            'regNumber', 'entryYear', 'graduationYear', 'error', 'success', 'loading',
-            'showAlumniFields', 'registrationComplete', 'registeredSessionId', 'verificationSent', 'resendLoading'
+            'entryYear', 'graduationYear', 'organisationName', 'error', 'success', 'loading',
+            'showAlumniFields', 'showCorporateFields', 'registrationComplete', 'registeredSessionId', 'verificationSent', 'resendLoading'
         ]);
     }
 
@@ -121,9 +125,12 @@ class RegistrationModal extends Component
             ];
 
             if ($this->showAlumniFields) {
-                $donorData['reg_number'] = $this->regNumber;
                 $donorData['entry_year'] = $this->entryYear ? (int)$this->entryYear : null;
                 $donorData['graduation_year'] = $this->graduationYear ? (int)$this->graduationYear : null;
+            }
+
+            if ($this->showCorporateFields) {
+                $donorData['organization_name'] = $this->organisationName;
             }
 
             $donorRequest = Request::create('/api/donors', 'POST', $donorData);
