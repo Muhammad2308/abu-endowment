@@ -94,26 +94,9 @@ class HeaderPages extends Component
 
     public function logout()
     {
-        try {
-            if (Session::has('donor_token')) {
-                // Optional: Call API to invalidate token if needed, but for now just clear session
-                // Http::withToken(Session::get('donor_token'))->post(url('/api/donor-sessions/logout'));
-                
-                Session::forget('donor_token');
-            }
-            
-            $this->user = null;
-            $this->isLoggedIn = false;
-            $this->dispatch('logout-success');
-            
-            return redirect('/');
-        } catch (\Exception $e) {
-            // Force logout on error
-            Session::forget('donor_token');
-            $this->user = null;
-            $this->isLoggedIn = false;
-            return redirect('/');
-        }
+        Session::forget('donor_token');
+        Session::save();
+        $this->js('window.location.href = "/"');
     }
 
     public function render()
