@@ -111,27 +111,17 @@
                                 </div>
                                 @endif
 
-                                <div class="d-flex align-items-center mb-4" style="gap: 12px;">
-                                    <button type="submit"
-                                            class="btn btn-primary btn-lg font-weight-bold shadow-sm"
-                                            style="flex: 1; background-color: #064e3b; color: #ffffff; border: none; border-radius: 0.75rem; padding: 14px; height: auto; font-family: 'Inter', sans-serif; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);"
-                                            @if($loading) disabled @endif>
-                                        @if(!$loading)
-                                            Sign In <i class="fas fa-arrow-right ml-2"></i>
-                                        @else
-                                            <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                                            Logging in...
-                                        @endif
-                                    </button>
-
-                                    <a href="#"
-                                       wire:click.prevent="close"
-                                       onclick="setTimeout(() => Livewire.dispatch('openRegistrationModal'), 100);"
-                                       class="btn btn-lg font-weight-bold"
-                                       style="flex: 1; background-color: #f0fdf4; color: #064e3b; border: 2px solid #064e3b; border-radius: 0.75rem; padding: 14px; font-family: 'Inter', sans-serif; font-weight: 600; text-align: center; white-space: nowrap;">
-                                        Register here
-                                    </a>
-                                </div>
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg btn-block font-weight-bold shadow-sm mb-4"
+                                        style="background-color: #064e3b; color: #ffffff; border: none; border-radius: 0.75rem; padding: 14px; height: auto; font-family: 'Inter', sans-serif; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);"
+                                        @if($loading) disabled @endif>
+                                    @if(!$loading)
+                                        Sign In <i class="fas fa-arrow-right ml-2"></i>
+                                    @else
+                                        <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                        Logging in...
+                                    @endif
+                                </button>
 
                                 <p class="text-center mt-2 mb-0 text-muted">
                                     <a href="#"
@@ -140,6 +130,17 @@
                                         <i class="fas fa-arrow-left mr-2"></i> Back to Website
                                     </a>
                                 </p>
+
+                                <div class="d-flex align-items-center justify-content-center mt-3" style="gap: 10px;">
+                                    <span class="text-muted small">Don't have an account?</span>
+                                    <a href="#"
+                                       wire:click.prevent="close"
+                                       onclick="setTimeout(() => Livewire.dispatch('openRegistrationModal'), 100);"
+                                       class="btn btn-sm font-weight-bold"
+                                       style="background-color: #064e3b; color: #fff; border-radius: 20px; padding: 6px 18px; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
+                                        Register here
+                                    </a>
+                                </div>
                             </form>
                             
                             <div class="mt-auto text-center">
