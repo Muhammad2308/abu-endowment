@@ -1,4 +1,4 @@
-﻿<header>
+<header>
     <div class="header-area">
         <!-- Top Bar -->
         <div class="header-top-bar" style="background: #fff; padding: 10px 0; border-bottom: 1px solid #eee;">
@@ -57,7 +57,7 @@
                                     <li><a href="{{ url('/') }}">Home</a></li>
                                     <li><a href="{{ route('about') }}">About</a></li>
                                     <li><a href="{{ route('projects') }}">Projects</a></li>
-                                    <li><a href="#">Contact us</a></li>
+
                                     
                                     <!-- Mobile Only Items -->
                                     <li class="d-lg-none"><a href="#make-donation">Make Donation</a></li>
