@@ -574,42 +574,24 @@ class DonorController extends Controller
     }
 
     /**
-     * Return donation history for a recognized device (by fingerprint).
-     * Always uses X-Device-Fingerprint header. Returns all donations for the donor_id.
-     */
-    /**
-     * Return donation history for a recognized device (by fingerprint or session token).
+     * Return donation history for the currently authenticated donor.
+     * Resolves via DonorSession (session_id param) first, then device-based fallback.
      */
     public function donationHistory(Request $request)
     {
-        $fingerprint = $request->header('X-Device-Fingerprint');
-        $sessionToken = $request->header('X-Device-Session'); // Support session token
-        $donations = [];
-        $donorId = null;
+        // resolveDonor checks: session_id (DonorSession) → X-Device-Session → fingerprint
+        $donor = $this->resolveDonor($request);
 
-        if ($sessionToken) {
-            $deviceSession = \App\Models\DeviceSession::where('session_token', $sessionToken)->first();
-            if ($deviceSession) {
-                $donorId = $deviceSession->donor_id;
-            }
+        if (!$donor) {
+            return response()->json(['donations' => []], 200);
         }
 
-        if (!$donorId && $fingerprint) {
-            $deviceSession = \App\Models\DeviceSession::where('device_fingerprint', $fingerprint)->first();
-            if ($deviceSession) {
-                $donorId = $deviceSession->donor_id;
-            }
-        }
+        $donations = \App\Models\Donation::where('donor_id', $donor->id)
+            ->with('project:id,project_title')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        if ($donorId) {
-            $donations = \App\Models\Donation::where('donor_id', $donorId)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
-
-        return response()->json([
-            'donations' => $donations
-        ], 200);
+        return response()->json(['donations' => $donations], 200);
     }
 
     /**
