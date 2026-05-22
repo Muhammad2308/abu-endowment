@@ -1,3 +1,4 @@
+<div>
 <div class="about_hero_area page-hero-area" style="position: relative; background: url('{{ asset('img/about-banner.png') }}') no-repeat center center/cover;">
     <div style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6, 78, 59, 0.9) 0%, rgba(6, 78, 59, 0.4) 100%);"></div>
 
@@ -32,3 +33,4 @@
         .page-hero-heading   { font-size: 1.8rem; }
     }
 </style>
+</div>
