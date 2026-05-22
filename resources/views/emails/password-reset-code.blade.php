@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -8,7 +8,7 @@
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; background-color: #006B3F; padding: 30px 20px; border-radius: 10px 10px 0 0;">
             <img src="https://abu-endowment.cloud/abu_logo_white_for_email.png" alt="ABU Logo" style="max-width: 80px; height: auto; display: block; margin: 0 auto 12px auto;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 22px;">ABU Giving</h1>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px;">GIVE ABU</h1>
             <p style="color: #d4f0df; margin: 5px 0 0 0; font-size: 13px;">Ahmadu Bello University, Zaria</p>
         </div>
 
@@ -31,13 +31,13 @@
 
             <p style="margin-top: 30px;">
                 Best regards,<br>
-                <strong>ABU Giving Team</strong>
+                <strong>GIVE ABU Team</strong>
             </p>
         </div>
 
         <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
             <p>This is an automated message. Please do not reply to this email.</p>
-            <p>&copy; {{ date('Y') }} ABU Giving. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} GIVE ABU. All rights reserved.</p>
         </div>
     </div>
 </body>

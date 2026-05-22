@@ -64,6 +64,7 @@
                                 <p class="text-muted" style="font-size: 1.1rem; font-family: 'Inter', sans-serif;">Please enter your details to sign in.</p>
                             </div>
 
+                            @if(config('services.google.client_id'))
                             <!-- Google Login at Top -->
                             <div id="googleBtnLogin-login" class="mb-4 d-flex justify-content-start" wire:ignore.self></div>
 
@@ -71,6 +72,7 @@
                                 <hr class="my-0">
                                 <span class="position-absolute bg-white px-3 text-muted" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.9rem;">OR</span>
                             </div>
+                            @endif
 
                             <form wire:submit.prevent="login">
                                 <div class="form-group mb-4">

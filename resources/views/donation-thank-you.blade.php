@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thank You — ABU Giving</title>
+    <title>Thank You — GIVE ABU</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/abu_logo_white.png') }}">
     <link rel="stylesheet" href="{{ asset('css/font-awesome.min.css') }}">
     <style>
@@ -211,7 +211,7 @@
 
             <div class="card-top">
                 <div class="logo-wrap">
-                    <img src="{{ asset('abu_logo.png') }}" alt="ABU Giving">
+                    <img src="{{ asset('abu_logo.png') }}" alt="GIVE ABU">
                 </div>
 
                 @if($success)
