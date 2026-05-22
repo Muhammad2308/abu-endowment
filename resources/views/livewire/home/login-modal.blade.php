@@ -111,34 +111,33 @@
                                 </div>
                                 @endif
 
-                                <button type="submit" 
-                                        class="btn btn-primary btn-lg btn-block font-weight-bold shadow-sm mb-4"
-                                        style="background-color: #064e3b; color: #ffffff; border: none; border-radius: 0.75rem; padding: 14px; height: auto; font-family: 'Inter', sans-serif; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);"
-                                        @if($loading) disabled @endif>
-                                    @if(!$loading)
-                                        Sign In <i class="fas fa-arrow-right ml-2"></i>
-                                    @else
-                                        <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
-                                        Logging in...
-                                    @endif
-                                </button>
+                                <div class="d-flex align-items-center mb-4" style="gap: 12px;">
+                                    <button type="submit"
+                                            class="btn btn-primary btn-lg font-weight-bold shadow-sm"
+                                            style="flex: 1; background-color: #064e3b; color: #ffffff; border: none; border-radius: 0.75rem; padding: 14px; height: auto; font-family: 'Inter', sans-serif; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);"
+                                            @if($loading) disabled @endif>
+                                        @if(!$loading)
+                                            Sign In <i class="fas fa-arrow-right ml-2"></i>
+                                        @else
+                                            <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>
+                                            Logging in...
+                                        @endif
+                                    </button>
 
-                                <p class="text-center mt-4 mb-0 text-muted">
-                                    <a href="#" 
+                                    <a href="#"
+                                       wire:click.prevent="close"
+                                       onclick="setTimeout(() => Livewire.dispatch('openRegistrationModal'), 100);"
+                                       class="btn btn-lg font-weight-bold"
+                                       style="flex: 1; background-color: #f0fdf4; color: #064e3b; border: 2px solid #064e3b; border-radius: 0.75rem; padding: 14px; font-family: 'Inter', sans-serif; font-weight: 600; text-align: center; white-space: nowrap;">
+                                        Register here
+                                    </a>
+                                </div>
+
+                                <p class="text-center mt-2 mb-0 text-muted">
+                                    <a href="#"
                                        class="font-weight-bold text-decoration-none text-muted"
                                        wire:click.prevent="close">
                                         <i class="fas fa-arrow-left mr-2"></i> Back to Website
-                                    </a>
-                                </p>
-                                
-                                <p class="text-center mt-3 mb-0 text-muted small">
-                                    Don't have an account? 
-                                    <a href="#" 
-                                       class="font-weight-bold text-decoration-none"
-                                       style="color: #064e3b;"
-                                       wire:click.prevent="close"
-                                       onclick="setTimeout(() => Livewire.dispatch('openRegistrationModal'), 100);">
-                                        Register here
                                     </a>
                                 </p>
                             </form>
