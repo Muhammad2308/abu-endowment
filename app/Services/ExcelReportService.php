@@ -549,7 +549,8 @@ class ExcelReportService
             'fill'      => ['fillType' => Fill::FILL_SOLID, 'color' => ['argb' => self::BG_MID]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'indent' => 1],
         ]);
-        $ws->getRowDimension(explode(':', $range)[0])->setRowHeight(20);
+        preg_match('/(\d+)/', explode(':', $range)[0], $m);
+        $ws->getRowDimension((int)($m[1] ?? 1))->setRowHeight(20);
     }
 
     private function tableHeader($ws, int $row, array $headers, string $lastCol): void

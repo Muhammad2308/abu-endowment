@@ -279,6 +279,7 @@
 
 
     @livewireScripts
+    <livewire:admin.excel-exporter />
     <livewire:edit-profile-modal />
 </body>
 </html>

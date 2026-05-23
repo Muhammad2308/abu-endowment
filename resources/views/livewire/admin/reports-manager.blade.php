@@ -1,7 +1,4 @@
 <div>
-    {{-- Reusable Excel exporter modal (listens for openExcelExporter event) --}}
-    @livewire('admin.excel-exporter')
-
     {{-- ═══ HEADER + SEARCH ═══ --}}
     <div class="px-6 pt-6 pb-5 border-b border-gray-200 dark:border-gray-700">
         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-5">

@@ -1,19 +1,13 @@
 <div>
     @if($showModal)
-    {{-- Backdrop --}}
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4"
-         x-data
-         x-init="document.body.style.overflow='hidden'"
-         x-destroy="document.body.style.overflow=''"
+    {{-- Backdrop + centering wrapper --}}
+    <div class="fixed inset-0 z-[9999] flex items-start justify-center pt-10 pb-6 px-4 overflow-y-auto"
          wire:keydown.escape.window="close">
 
-        <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" wire:click="close"></div>
+        <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" wire:click="close"></div>
 
         {{-- Modal --}}
         <div class="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100">
 
             {{-- Header --}}
             <div class="bg-gradient-to-r from-emerald-800 to-emerald-600 px-6 py-5">
