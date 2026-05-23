@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard') - Alumni Giving</title>
+    <title>@yield('title', 'Admin Dashboard') - GIVE ABU Project</title>
     <link rel="icon" href="{{ asset('icon/favicon-32x32.png') }}" type="image/png">
     
     <!-- Tailwind CSS -->
@@ -100,8 +100,8 @@
             <!-- Logo -->
             <div class="flex items-center justify-center h-20 border-b border-slate-700/50">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-white font-bold text-xl tracking-wide">
-                    <img src="{{ asset('icon/Header.png') }}" alt="Logo" class="h-8 w-auto">
-                    <span>Alumni Giving</span>
+                    <img src="{{ asset('abu_logo_white_for_email.png') }}" alt="GIVE ABU" class="h-10 w-auto">
+                    <span>GIVE ABU Project</span>
                 </a>
             </div>
 
