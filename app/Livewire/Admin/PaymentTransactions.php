@@ -7,6 +7,7 @@ use App\Models\PaymentTransaction;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\Donor;
 
 class PaymentTransactions extends Component
 {
@@ -20,6 +21,7 @@ class PaymentTransactions extends Component
     public $perPage = 15;
     public $selectedTransaction;
     public $showDetailsModal = false;
+    public array $donorStats = [];
 
     protected $queryString = [
         'search'   => ['except' => ''],
@@ -134,6 +136,22 @@ class PaymentTransactions extends Component
     {
         $this->selectedTransaction = PaymentTransaction::with(['donation.project', 'donor', 'project'])->find($id);
         $this->showDetailsModal = true;
+        $this->donorStats = [];
+
+        $donorId = $this->selectedTransaction?->donor_id;
+        if ($donorId) {
+            $donations = Donation::where('donor_id', $donorId);
+            $txns      = PaymentTransaction::where('donor_id', $donorId);
+
+            $this->donorStats = [
+                'total_donated'        => (float) (clone $donations)->whereIn('status', ['completed', 'success'])->sum('amount'),
+                'total_donations'      => (int)   (clone $donations)->count(),
+                'successful_donations' => (int)   (clone $donations)->whereIn('status', ['completed', 'success'])->count(),
+                'total_txns'           => (int)   (clone $txns)->count(),
+                'successful_txns'      => (int)   (clone $txns)->whereIn('status', ['completed', 'success'])->count(),
+                'first_donation'       => (clone $donations)->min('created_at'),
+            ];
+        }
     }
 
     public function openExcelExporter(): void

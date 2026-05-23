@@ -253,22 +253,79 @@
                 @if($selectedTransaction->donor)
                     <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
                         <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-semibold mb-3">Donor Information</p>
-                        <div class="space-y-2">
-                            <div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Name</p>
-                                <p class="text-sm text-slate-700 dark:text-slate-200">{{ $selectedTransaction->donor->full_name }}</p>
+
+                        {{-- Avatar + name block --}}
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0 text-base font-bold text-emerald-700 dark:text-emerald-300">
+                                {{ strtoupper(substr($selectedTransaction->donor->surname ?? 'A', 0, 1) . substr($selectedTransaction->donor->name ?? '', 0, 1)) }}
                             </div>
                             <div>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Email</p>
-                                <p class="text-sm text-slate-700 dark:text-slate-200">{{ $selectedTransaction->donor->email }}</p>
+                                <p class="text-sm font-bold text-slate-800 dark:text-white leading-tight">{{ $selectedTransaction->donor->full_name }}</p>
+                                <span class="inline-block text-xs px-2 py-0.5 rounded-full mt-0.5
+                                    {{ strtolower($selectedTransaction->donor->donor_type ?? '') === 'alumni'    ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300' :
+                                      (strtolower($selectedTransaction->donor->donor_type ?? '') === 'corporate' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                       'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300') }}">
+                                    {{ ucfirst($selectedTransaction->donor->donor_type ?? 'Donor') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        {{-- Contact details --}}
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-envelope w-4 text-slate-400 text-xs"></i>
+                                <p class="text-sm text-slate-700 dark:text-slate-300">{{ $selectedTransaction->donor->email }}</p>
                             </div>
                             @if($selectedTransaction->donor->phone)
-                                <div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">Phone</p>
-                                    <p class="text-sm text-slate-700 dark:text-slate-200">{{ $selectedTransaction->donor->phone }}</p>
-                                </div>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-phone w-4 text-slate-400 text-xs"></i>
+                                <p class="text-sm text-slate-700 dark:text-slate-300">{{ $selectedTransaction->donor->phone }}</p>
+                            </div>
+                            @endif
+                            @if($selectedTransaction->donor->organisation)
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-building w-4 text-slate-400 text-xs"></i>
+                                <p class="text-sm text-slate-700 dark:text-slate-300">{{ $selectedTransaction->donor->organisation }}</p>
+                            </div>
+                            @endif
+                            @if(!empty($donorStats['first_donation']))
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-calendar w-4 text-slate-400 text-xs"></i>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">First donation {{ \Carbon\Carbon::parse($donorStats['first_donation'])->format('M Y') }}</p>
+                            </div>
                             @endif
                         </div>
+
+                        {{-- Donor stats grid --}}
+                        @if(!empty($donorStats))
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3 text-center border border-emerald-100 dark:border-emerald-800/40">
+                                <p class="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wide mb-1">Total Donated</p>
+                                <p class="text-lg font-extrabold text-emerald-800 dark:text-emerald-300 leading-tight">₦{{ number_format($donorStats['total_donated'], 0) }}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">{{ $donorStats['successful_donations'] }} successful</p>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-3 text-center border border-blue-100 dark:border-blue-800/40">
+                                <p class="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide mb-1">Transactions</p>
+                                <p class="text-lg font-extrabold text-blue-800 dark:text-blue-300 leading-tight">{{ $donorStats['total_txns'] }}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">{{ $donorStats['successful_txns'] }} completed</p>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 text-center border border-slate-200 dark:border-slate-700">
+                                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">All Donations</p>
+                                <p class="text-lg font-extrabold text-slate-700 dark:text-slate-200 leading-tight">{{ $donorStats['total_donations'] }}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">all time</p>
+                            </div>
+                            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 text-center border border-amber-100 dark:border-amber-800/40">
+                                <p class="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1">Success Rate</p>
+                                @php
+                                    $rate = $donorStats['total_donations'] > 0
+                                        ? round(($donorStats['successful_donations'] / $donorStats['total_donations']) * 100)
+                                        : 0;
+                                @endphp
+                                <p class="text-lg font-extrabold text-amber-700 dark:text-amber-300 leading-tight">{{ $rate }}%</p>
+                                <p class="text-xs text-slate-400 mt-0.5">donations</p>
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 @endif
 
@@ -305,18 +362,11 @@
                 </div>
 
                 @if($selectedTransaction->message)
-                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4">
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4 pb-2">
                         <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-semibold mb-2">Message</p>
                         <p class="text-sm text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded p-3">{{ $selectedTransaction->message }}</p>
                     </div>
                 @endif
-
-                <div class="border-t border-slate-200 dark:border-slate-700 pt-4 pb-6">
-                    <p class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 font-semibold mb-2">Raw Payload</p>
-                    <div class="bg-slate-900 rounded-lg overflow-x-auto">
-                        <pre class="text-xs text-slate-300 p-3">{{ json_encode(json_decode($selectedTransaction->response_payload ?? '{}'), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
-                    </div>
-                </div>
             </div>
 
             <div class="border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-6 py-4">
