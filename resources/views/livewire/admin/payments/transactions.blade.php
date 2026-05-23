@@ -52,7 +52,7 @@
             {{-- Export buttons --}}
             <div class="flex items-center gap-2">
                 <button wire:click="openExcelExporter"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 text-sm font-medium rounded-lg shadow-sm transition whitespace-nowrap">
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-sm font-semibold rounded-lg shadow-sm hover:shadow-md hover:shadow-emerald-100 dark:hover:shadow-emerald-900/30 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
                     <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
