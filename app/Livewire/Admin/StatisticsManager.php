@@ -234,6 +234,13 @@ class StatisticsManager extends Component
         );
     }
 
+    public function openExcelExporter(): void
+    {
+        $this->dispatch('openExcelExporter',
+            context: 'statistics',
+        );
+    }
+
     private function initials(string $name): string
     {
         $parts = array_filter(explode(' ', trim($name)));

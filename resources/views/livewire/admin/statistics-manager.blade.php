@@ -1,5 +1,7 @@
 @section('title', 'Analytics')
 <div class="space-y-6">
+    {{-- Reusable Excel exporter modal --}}
+    @livewire('admin.excel-exporter')
 
     {{-- ── PAGE HEADER ─────────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -22,6 +24,12 @@
             </div>
             <button wire:click="loadAll" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 shadow-sm transition">
                 <i class="fas fa-sync-alt text-emerald-500" wire:loading.class="animate-spin"></i> Refresh
+            </button>
+            <button wire:click="openExcelExporter" class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 shadow-sm transition">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Excel Report
             </button>
             <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-sm font-medium text-white shadow-sm transition">
                 <i class="fas fa-print"></i> Print Report

@@ -1,4 +1,7 @@
 <div>
+    {{-- Reusable Excel exporter modal --}}
+    @livewire('admin.excel-exporter')
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     {{-- Summary Stats --}}
@@ -51,11 +54,20 @@
                 <h2 class="text-2xl font-semibold text-slate-800 dark:text-white">Payment Transactions</h2>
                 <p class="text-sm text-slate-500 dark:text-slate-400">Track all gateway events for donations and payments.</p>
             </div>
-            {{-- Export button --}}
-            <a href="{{ route('admin.transactions.export', array_filter(['gateway' => $gateway, 'status' => $status, 'category' => $category, 'period' => $period, 'search' => $search])) }}"
-               class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow transition whitespace-nowrap">
-                <i class="fas fa-file-excel"></i> Export Excel / CSV
-            </a>
+            {{-- Export buttons --}}
+            <div class="flex items-center gap-2">
+                <button wire:click="openExcelExporter"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 text-sm font-medium rounded-lg shadow-sm transition whitespace-nowrap">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Excel Report
+                </button>
+                <a href="{{ route('admin.transactions.export', array_filter(['gateway' => $gateway, 'status' => $status, 'category' => $category, 'period' => $period, 'search' => $search])) }}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow transition whitespace-nowrap">
+                    <i class="fas fa-download"></i> CSV
+                </a>
+            </div>
         </div>
 
         {{-- Filter bar --}}

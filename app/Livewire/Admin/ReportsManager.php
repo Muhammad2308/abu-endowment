@@ -114,6 +114,17 @@ class ReportsManager extends Component
         ];
     }
 
+    public function openExcelExporter(): void
+    {
+        $this->dispatch('openExcelExporter',
+            context:   'reports',
+            dateFrom:  $this->dateFrom,
+            dateTo:    $this->dateTo,
+            search:    $this->search,
+            projectId: $this->selectedProject,
+        );
+    }
+
     public function render()
     {
         $donations = $this->applyFilters(Donation::query())

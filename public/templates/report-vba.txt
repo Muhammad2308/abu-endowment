@@ -1,0 +1,464 @@
+'' ============================================================
+'' GIVE ABU ENDOWMENT FUND — Excel VBA Report Template
+'' ============================================================
+'' Instructions:
+''  1. Open the downloaded .xlsx report in Excel
+''  2. Press Alt+F11 to open the VBA editor
+''  3. Insert > Module for each module below
+''  4. Paste the corresponding code into each module
+''  5. Save the file as .xlsm (macro-enabled workbook)
+''  6. Run from the Developer tab or assign buttons to macros
+'' ============================================================
+
+
+'' ────────────────────────────────────────────────────────────
+'' MODULE 1: modImport
+'' Purpose: Import a fresh data file exported from GIVE ABU admin
+'' ────────────────────────────────────────────────────────────
+Option Explicit
+
+Sub ImportFreshData()
+    Dim fd As FileDialog
+    Dim srcPath As String
+    Dim srcWb As Workbook
+    Dim srcWs As Worksheet
+    Dim dstWs As Worksheet
+    Dim sheetNames As Variant
+    Dim sName As Variant
+
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    fd.Title = "Select GIVE ABU Export File (.xlsx)"
+    fd.Filters.Clear
+    fd.Filters.Add "Excel Files", "*.xlsx;*.xls"
+    fd.AllowMultiSelect = False
+
+    If fd.Show <> True Then Exit Sub
+    srcPath = fd.SelectedItems(1)
+
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+
+    Set srcWb = Workbooks.Open(srcPath, ReadOnly:=True)
+
+    sheetNames = Array("DONATIONS", "TRANSACTIONS", "TOP DONORS", "TRENDS", "DASHBOARD")
+
+    For Each sName In sheetNames
+        On Error Resume Next
+        Set srcWs = srcWb.Sheets(sName)
+        On Error GoTo 0
+        If Not srcWs Is Nothing Then
+            On Error Resume Next
+            Set dstWs = ThisWorkbook.Sheets(sName)
+            On Error GoTo 0
+            If dstWs Is Nothing Then
+                ThisWorkbook.Sheets.Add After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
+                Set dstWs = ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
+                dstWs.Name = sName
+            End If
+            dstWs.UsedRange.Clear
+            srcWs.UsedRange.Copy dstWs.Range("A1")
+        End If
+        Set srcWs = Nothing
+        Set dstWs = Nothing
+    Next sName
+
+    srcWb.Close False
+
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+
+    Call FormatAllSheets
+    MsgBox "Data imported and formatted successfully!", vbInformation, "GIVE ABU Report"
+End Sub
+
+
+'' ────────────────────────────────────────────────────────────
+'' MODULE 2: modFormat
+'' Purpose: Apply GIVE ABU branding to all sheets
+'' ────────────────────────────────────────────────────────────
+
+Sub FormatAllSheets()
+    Dim ws As Worksheet
+    Application.ScreenUpdating = False
+
+    For Each ws In ThisWorkbook.Sheets
+        Select Case ws.Name
+            Case "DASHBOARD"
+                Call FormatDashboard(ws)
+            Case "DONATIONS"
+                Call FormatDataSheet(ws, RGB(6, 78, 59))     ' dark green
+            Case "TRANSACTIONS"
+                Call FormatDataSheet(ws, RGB(30, 58, 95))    ' dark blue
+            Case "TOP DONORS"
+                Call FormatDataSheet(ws, RGB(6, 78, 59))
+            Case "TRENDS"
+                Call FormatDataSheet(ws, RGB(6, 78, 59))
+        End Select
+    Next ws
+
+    Application.ScreenUpdating = True
+End Sub
+
+Sub FormatDashboard(ws As Worksheet)
+    With ws
+        ' Freeze top rows
+        .Activate
+        ActiveWindow.FreezePanes = False
+        .Range("A4").Select
+        ActiveWindow.FreezePanes = True
+
+        ' Page setup
+        .PageSetup.Orientation = xlLandscape
+        .PageSetup.PaperSize = xlPaperA4
+        .PageSetup.FitToPagesWide = 1
+        .PageSetup.FitToPagesTall = False
+        .PageSetup.LeftHeader = "&B&14GIVE ABU ENDOWMENT FUND"
+        .PageSetup.RightHeader = "&""Calibri""&9Generated: &D &T"
+        .PageSetup.CenterFooter = "Page &P of &N  —  Confidential Management Report"
+        .PageSetup.PrintGridlines = False
+    End With
+End Sub
+
+Sub FormatDataSheet(ws As Worksheet, headerColor As Long)
+    Dim lastRow As Long
+    Dim lastCol As Long
+
+    With ws
+        lastRow = .Cells(.Rows.Count, 1).End(xlUp).Row
+        lastCol = .Cells(2, .Columns.Count).End(xlToLeft).Column
+
+        ' Re-apply header row color
+        If lastRow >= 2 Then
+            With .Rows(2).Interior
+                .Color = headerColor
+            End With
+            With .Rows(2).Font
+                .Color = RGB(255, 255, 255)
+                .Bold = True
+                .Size = 10
+            End With
+        End If
+
+        ' Auto-fit columns
+        .Columns(1).ColumnWidth = 6
+        .UsedRange.Columns.AutoFit
+
+        ' Page setup
+        .PageSetup.Orientation = xlLandscape
+        .PageSetup.PaperSize = xlPaperA4
+        .PageSetup.FitToPagesWide = 1
+        .PageSetup.FitToPagesTall = False
+        .PageSetup.PrintTitleRows = "$1:$2"
+        .PageSetup.LeftHeader = "&B&12GIVE ABU — " & .Name & " Report"
+        .PageSetup.RightHeader = "&9Generated: &D"
+        .PageSetup.CenterFooter = "Page &P of &N"
+    End With
+End Sub
+
+
+'' ────────────────────────────────────────────────────────────
+'' MODULE 3: modCharts
+'' Purpose: Build/refresh charts from data in the workbook
+'' ────────────────────────────────────────────────────────────
+
+Sub RefreshAllCharts()
+    Dim ws As Worksheet
+    Dim co As ChartObject
+    Application.ScreenUpdating = False
+
+    For Each ws In ThisWorkbook.Sheets
+        For Each co In ws.ChartObjects
+            co.Chart.Refresh
+        Next co
+    Next ws
+
+    Application.ScreenUpdating = True
+    MsgBox "All charts refreshed.", vbInformation, "GIVE ABU"
+End Sub
+
+Sub BuildStatusPieChart()
+    '' Builds a pie chart from DONATIONS status totals
+    '' Assumes: col I = Status in DONATIONS sheet (rows 3+)
+    Dim ws As Worksheet
+    Dim chObj As ChartObject
+    Dim ch As Chart
+    Dim lastRow As Long
+    Dim rngComp As Range, rngPend As Range, rngFail As Range
+
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("DASHBOARD")
+    On Error GoTo 0
+    If ws Is Nothing Then Exit Sub
+
+    ' Calculate totals from DONATIONS sheet
+    Dim donWs As Worksheet
+    On Error Resume Next
+    Set donWs = ThisWorkbook.Sheets("DONATIONS")
+    On Error GoTo 0
+    If donWs Is Nothing Then Exit Sub
+
+    lastRow = donWs.Cells(donWs.Rows.Count, 1).End(xlUp).Row
+
+    Dim compTotal As Double, pendTotal As Double, failTotal As Double
+    Dim i As Long
+    For i = 3 To lastRow
+        Dim status As String
+        status = LCase(donWs.Cells(i, 9).Value) ' Column I = Status
+        Dim amt As Double
+        amt = donWs.Cells(i, 8).Value ' Column H = Amount
+        Select Case status
+            Case "completed", "success", "paid": compTotal = compTotal + amt
+            Case "pending":                      pendTotal = pendTotal + amt
+            Case "failed":                       failTotal = failTotal + amt
+        End Select
+    Next i
+
+    ' Write summary to a temp range on DASHBOARD (col M)
+    ws.Range("M2").Value = "Status"
+    ws.Range("N2").Value = "Amount"
+    ws.Range("M3").Value = "Completed"
+    ws.Range("N3").Value = compTotal
+    ws.Range("M4").Value = "Pending"
+    ws.Range("N4").Value = pendTotal
+    ws.Range("M5").Value = "Failed"
+    ws.Range("N5").Value = failTotal
+    ws.Columns("M:N").Hidden = True
+
+    ' Delete existing pie chart if present
+    Dim co As ChartObject
+    For Each co In ws.ChartObjects
+        If InStr(co.Name, "StatusPie") > 0 Then co.Delete
+    Next co
+
+    ' Create new chart
+    Set chObj = ws.ChartObjects.Add(Left:=480, Top:=60, Width:=320, Height:=240)
+    chObj.Name = "StatusPie"
+    Set ch = chObj.Chart
+    ch.ChartType = xlPie
+    ch.SetSourceData ws.Range("M2:N5")
+    ch.HasTitle = True
+    ch.ChartTitle.Text = "Donation Status Breakdown"
+    ch.ChartTitle.Font.Size = 11
+    ch.ChartTitle.Font.Bold = True
+
+    ' Apply brand colors to slices
+    ch.SeriesCollection(1).Points(1).Interior.Color = RGB(16, 185, 129)   ' Completed - green
+    ch.SeriesCollection(1).Points(2).Interior.Color = RGB(245, 158, 11)   ' Pending   - amber
+    ch.SeriesCollection(1).Points(3).Interior.Color = RGB(239, 68, 68)    ' Failed    - red
+
+    ch.HasLegend = True
+    ch.Legend.Position = xlLegendPositionRight
+
+    MsgBox "Status pie chart created on DASHBOARD.", vbInformation, "GIVE ABU"
+End Sub
+
+Sub BuildMonthlyBarChart()
+    '' Builds a clustered bar chart from TRENDS sheet
+    Dim ws As Worksheet
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("TRENDS")
+    On Error GoTo 0
+    If ws Is Nothing Then Exit Sub
+
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    If lastRow < 3 Then Exit Sub
+
+    ' Delete existing chart
+    Dim co As ChartObject
+    For Each co In ws.ChartObjects
+        If InStr(co.Name, "MonthlyBar") > 0 Then co.Delete
+    Next co
+
+    Dim dataRange As Range
+    ' A = Month, C = Completed, D = Pending, E = Failed (rows 3 to lastRow-1 to exclude totals)
+    Set dataRange = ws.Range("A2:A" & (lastRow - 1))
+
+    Set co = ws.ChartObjects.Add(Left:=550, Top:=30, Width:=500, Height:=300)
+    co.Name = "MonthlyBar"
+    Dim ch As Chart
+    Set ch = co.Chart
+    ch.ChartType = xlColumnClustered
+
+    ' Clear and set series manually
+    Do While ch.SeriesCollection.Count > 0
+        ch.SeriesCollection(1).Delete
+    Loop
+
+    Dim sComp As Series, sPend As Series, sFail As Series
+    Set sComp = ch.SeriesCollection.NewSeries
+    sComp.Name = "Completed"
+    sComp.XValues = ws.Range("A3:A" & (lastRow - 1))
+    sComp.Values  = ws.Range("C3:C" & (lastRow - 1))
+    sComp.Interior.Color = RGB(16, 185, 129)
+
+    Set sPend = ch.SeriesCollection.NewSeries
+    sPend.Name = "Pending"
+    sPend.XValues = ws.Range("A3:A" & (lastRow - 1))
+    sPend.Values  = ws.Range("D3:D" & (lastRow - 1))
+    sPend.Interior.Color = RGB(245, 158, 11)
+
+    Set sFail = ch.SeriesCollection.NewSeries
+    sFail.Name = "Failed"
+    sFail.XValues = ws.Range("A3:A" & (lastRow - 1))
+    sFail.Values  = ws.Range("E3:E" & (lastRow - 1))
+    sFail.Interior.Color = RGB(239, 68, 68)
+
+    ch.HasTitle = True
+    ch.ChartTitle.Text = "Monthly Donation Trends (₦)"
+    ch.ChartTitle.Font.Size = 12
+    ch.HasLegend = True
+    ch.Legend.Position = xlLegendPositionBottom
+
+    MsgBox "Monthly bar chart created on TRENDS.", vbInformation, "GIVE ABU"
+End Sub
+
+
+'' ────────────────────────────────────────────────────────────
+'' MODULE 4: modExport
+'' Purpose: Print and PDF export
+'' ────────────────────────────────────────────────────────────
+
+Sub PrintManagementReport()
+    '' Prints DASHBOARD + TOP DONORS (the management cut)
+    Dim arrSheets(1) As String
+    arrSheets(0) = "DASHBOARD"
+    arrSheets(1) = "TOP DONORS"
+
+    Dim printSheets() As String
+    Dim count As Integer
+    Dim s As Variant
+    count = 0
+    ReDim printSheets(1)
+
+    For Each s In arrSheets
+        On Error Resume Next
+        Dim ws As Worksheet
+        Set ws = ThisWorkbook.Sheets(s)
+        On Error GoTo 0
+        If Not ws Is Nothing Then
+            printSheets(count) = s
+            count = count + 1
+        End If
+        Set ws = Nothing
+    Next s
+
+    If count = 0 Then
+        MsgBox "No sheets found to print.", vbExclamation
+        Exit Sub
+    End If
+
+    ReDim Preserve printSheets(count - 1)
+    ThisWorkbook.Sheets(printSheets).PrintOut
+End Sub
+
+Sub ExportToPDF()
+    Dim savePath As String
+    Dim fd As FileDialog
+
+    Set fd = Application.FileDialog(msoFileDialogSaveAs)
+    fd.Title = "Save Management Report PDF"
+    fd.InitialFileName = "GIVEABU_Report_" & Format(Now, "YYYY-MM-DD") & ".pdf"
+    fd.FilterIndex = 2
+
+    If fd.Show <> True Then Exit Sub
+    savePath = fd.SelectedItems(1)
+
+    ' Ensure .pdf extension
+    If LCase(Right(savePath, 4)) <> ".pdf" Then savePath = savePath & ".pdf"
+
+    ' Export all visible sheets as one PDF
+    ThisWorkbook.ExportAsFixedFormat _
+        Type:=xlTypePDF, _
+        Filename:=savePath, _
+        Quality:=xlQualityStandard, _
+        IncludeDocProperties:=True, _
+        IgnorePrintAreas:=False, _
+        OpenAfterPublish:=True
+
+    MsgBox "Report saved as PDF:" & vbCrLf & savePath, vbInformation, "GIVE ABU"
+End Sub
+
+Sub ExportDashboardOnlyPDF()
+    Dim savePath As String
+    savePath = Environ("USERPROFILE") & "\Desktop\GIVEABU_Dashboard_" & Format(Now, "YYYY-MM-DD") & ".pdf"
+
+    On Error Resume Next
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("DASHBOARD")
+    On Error GoTo 0
+
+    If ws Is Nothing Then
+        MsgBox "DASHBOARD sheet not found.", vbExclamation
+        Exit Sub
+    End If
+
+    ws.ExportAsFixedFormat _
+        Type:=xlTypePDF, _
+        Filename:=savePath, _
+        Quality:=xlQualityStandard, _
+        OpenAfterPublish:=True
+
+    MsgBox "Dashboard PDF saved to Desktop.", vbInformation, "GIVE ABU"
+End Sub
+
+
+'' ────────────────────────────────────────────────────────────
+'' MODULE 5: modQuickActions  (assign these to Ribbon buttons)
+'' ────────────────────────────────────────────────────────────
+
+Sub RunFullRefresh()
+    '' One-click: import data → format → refresh charts
+    Call ImportFreshData
+End Sub
+
+Sub AddQuickAccessButtons()
+    '' Adds buttons directly to DASHBOARD sheet
+    Dim ws As Worksheet
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets("DASHBOARD")
+    On Error GoTo 0
+    If ws Is Nothing Then Exit Sub
+
+    ' Clear existing buttons
+    Dim shp As Shape
+    For Each shp In ws.Shapes
+        If InStr(shp.Name, "QABtn") > 0 Then shp.Delete
+    Next shp
+
+    Dim btnData(3, 2) As Variant ' [Name, Macro, Color]
+    btnData(0, 0) = "QABtn_Import"  : btnData(0, 1) = "ImportFreshData"       : btnData(0, 2) = RGB(6, 78, 59)
+    btnData(1, 0) = "QABtn_Pie"     : btnData(1, 1) = "BuildStatusPieChart"    : btnData(1, 2) = RGB(16, 185, 129)
+    btnData(2, 0) = "QABtn_Bar"     : btnData(2, 1) = "BuildMonthlyBarChart"   : btnData(2, 2) = RGB(30, 58, 95)
+    btnData(3, 0) = "QABtn_PDF"     : btnData(3, 1) = "ExportToPDF"            : btnData(3, 2) = RGB(180, 83, 9)
+
+    Dim labels(3) As String
+    labels(0) = "📥 Import Data"
+    labels(1) = "🥧 Pie Chart"
+    labels(2) = "📊 Bar Chart"
+    labels(3) = "📄 Export PDF"
+
+    Dim i As Integer
+    For i = 0 To 3
+        Dim btn As Shape
+        Set btn = ws.Shapes.AddShape(msoShapeRoundedRectangle, 10 + i * 140, 5, 130, 28)
+        btn.Name = btnData(i, 0)
+        btn.TextFrame.Characters.Text = labels(i)
+        btn.TextFrame.Characters.Font.Size = 9
+        btn.TextFrame.Characters.Font.Bold = True
+        btn.TextFrame.Characters.Font.Color = RGB(255, 255, 255)
+        btn.Fill.ForeColor.RGB = btnData(i, 2)
+        btn.Line.Visible = msoFalse
+        btn.TextFrame.HorizontalAlignment = xlHAlignCenter
+        btn.OnAction = btnData(i, 1)
+        Set btn = Nothing
+    Next i
+
+    MsgBox "Quick-access buttons added to DASHBOARD.", vbInformation, "GIVE ABU"
+End Sub
+'' ============================================================
+'' END OF VBA TEMPLATE
+'' ============================================================
+'' Run AddQuickAccessButtons once after pasting this code
+'' to get clickable buttons at the top of your DASHBOARD sheet.
+'' ============================================================

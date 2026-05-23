@@ -136,6 +136,19 @@ class PaymentTransactions extends Component
         $this->showDetailsModal = true;
     }
 
+    public function openExcelExporter(): void
+    {
+        $this->dispatch('openExcelExporter',
+            context:  'transactions',
+            dateFrom: '',
+            dateTo:   '',
+            search:   $this->search,
+            gateway:  $this->gateway,
+            status:   $this->status,
+            period:   $this->period,
+        );
+    }
+
     public function closeModal()
     {
         $this->showDetailsModal = false;
