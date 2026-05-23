@@ -32,7 +32,7 @@ class ExcelExportController extends Controller
 
         return response()->streamDownload(function () use ($workbook) {
             $writer = new Xlsx($workbook);
-            $writer->setIncludeCharts(true);
+
             $writer->save('php://output');
         }, $filename, [
             'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
