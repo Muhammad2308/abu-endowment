@@ -100,7 +100,7 @@
             <!-- Logo -->
             <div class="flex items-center justify-center h-20 border-b border-slate-700/50">
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-white font-bold text-xl tracking-wide">
-                    <img src="{{ asset('icon/Header.png') }}" alt="GIVE ABU" class="h-8 w-auto">
+                    <img src="{{ asset('icon/Header.png') }}" alt="GIVE ABU" class="h-12 w-auto">
                     <span>GIVE ABU</span>
                 </a>
             </div>
