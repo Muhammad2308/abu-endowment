@@ -1,6 +1,4 @@
 <div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
     {{-- Summary Stats --}}
     <div wire:ignore class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -330,6 +328,7 @@
     </div>
 
     {{-- Chart initialisation --}}
+    <div wire:ignore>
     <script>
     (function () {
         var data = @json($chartData);
@@ -415,4 +414,5 @@
         document.addEventListener('livewire:update', function () { setTimeout(initChart, 50); });
     })();
     </script>
+    </div>
 </div>
