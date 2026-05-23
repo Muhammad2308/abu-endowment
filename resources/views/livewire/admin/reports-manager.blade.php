@@ -287,9 +287,7 @@
                     <tr class="bg-gray-50 dark:bg-gray-800">
                         <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                         <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Donor</th>
-                        <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
                         <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Project</th>
-                        <th scope="col" class="px-5 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reference</th>
                         <th scope="col" class="px-5 py-3.5 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
                         <th scope="col" class="px-5 py-3.5 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                     </tr>
@@ -321,17 +319,6 @@
                             @endif
                         </td>
 
-                        {{-- Donor type --}}
-                        <td class="px-5 py-4 whitespace-nowrap">
-                            @php $dt = strtolower($donation->donor->donor_type ?? ''); @endphp
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
-                                {{ $dt === 'alumni'    ? 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-300' :
-                                  ($dt === 'corporate' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
-                                   'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300') }}">
-                                {{ ucfirst($donation->donor->donor_type ?? 'N/A') }}
-                            </span>
-                        </td>
-
                         {{-- Project --}}
                         <td class="px-5 py-4 whitespace-nowrap">
                             @if($donation->project)
@@ -339,13 +326,6 @@
                             @else
                                 <span class="text-xs text-gray-400 italic">General Donation</span>
                             @endif
-                        </td>
-
-                        {{-- Reference --}}
-                        <td class="px-5 py-4 whitespace-nowrap">
-                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                                {{ \Illuminate\Support\Str::limit($donation->payment_reference ?? '—', 22) }}
-                            </span>
                         </td>
 
                         {{-- Amount --}}
@@ -371,7 +351,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-5 py-16 text-center">
+                        <td colspan="5" class="px-5 py-16 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <div class="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                                     <svg class="w-7 h-7 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
