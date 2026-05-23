@@ -177,6 +177,12 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
+                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</span>
+                <span class="text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
+                    ₦{{ number_format($filteredTotals['donations']['completed'] + $filteredTotals['donations']['pending'] + $filteredTotals['donations']['failed'], 0) }}
+                </span>
+            </div>
         </div>
 
         {{-- Transactions Totals --}}
@@ -219,6 +225,12 @@
                         ₦{{ number_format($filteredTotals['transactions']['failed'], 0) }}
                     </div>
                 </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-blue-200 dark:border-blue-800/60 flex items-center justify-between">
+                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</span>
+                <span class="text-2xl font-extrabold text-blue-800 dark:text-blue-300">
+                    ₦{{ number_format($filteredTotals['transactions']['completed'] + $filteredTotals['transactions']['pending'] + $filteredTotals['transactions']['failed'], 0) }}
+                </span>
             </div>
         </div>
     </div>
