@@ -2,7 +2,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     {{-- Summary Stats --}}
-    <div wire:ignore class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div wire:ignore class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Total Collected</p>
             <p class="text-2xl font-bold text-slate-800 dark:text-white mt-1">₦{{ $chartData['totals']['all'] }}</p>
@@ -16,6 +16,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Squad</p>
             <p class="text-2xl font-bold text-blue-600 mt-1">₦{{ $chartData['totals']['squad'] }}</p>
+            <p class="text-xs text-slate-400 mt-1">last 30 days</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Interswitch</p>
+            <p class="text-2xl font-bold text-cyan-600 mt-1">₦{{ $chartData['totals']['interswitch'] }}</p>
             <p class="text-xs text-slate-400 mt-1">last 30 days</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -35,6 +40,7 @@
             <div class="flex items-center gap-4 text-xs text-slate-500">
                 <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-emerald-500 rounded"></span> Paystack</span>
                 <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-blue-500 rounded"></span> Squad</span>
+                <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-cyan-500 rounded"></span> Interswitch</span>
             </div>
         </div>
         <div class="relative" style="height: 260px;">
@@ -55,6 +61,7 @@
                     <option value="">All gateways</option>
                     <option value="paystack">Paystack</option>
                     <option value="squad">Squad</option>
+                    <option value="interswitch">Interswitch</option>
                     <option value="manual">Manual</option>
                 </select>
                 <select wire:model="status" class="px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500">
@@ -98,6 +105,10 @@
                                 @elseif($transaction->payment_gateway === 'squad')
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                         <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Squad
+                                    </span>
+                                @elseif($transaction->payment_gateway === 'interswitch')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Interswitch
                                     </span>
                                 @else
                                     <span class="text-slate-600 dark:text-slate-300 text-xs">{{ ucfirst($transaction->payment_gateway) }}</span>
@@ -305,6 +316,17 @@
                             data: data.squad,
                             borderColor: '#3b82f6',
                             backgroundColor: 'rgba(59,130,246,0.08)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                            tension: 0.4,
+                            fill: true,
+                        },
+                        {
+                            label: 'Interswitch (₦)',
+                            data: data.interswitch,
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6,182,212,0.08)',
                             borderWidth: 2,
                             pointRadius: 3,
                             pointHoverRadius: 5,

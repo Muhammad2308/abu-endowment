@@ -301,6 +301,29 @@
                         </span>
                     </button>
 
+                    {{-- Interswitch --}}
+                    <button id="interswitchBtn" onclick="payWithInterswitch()" style="
+                        flex:1;padding:0.85rem 0.5rem;
+                        background:linear-gradient(135deg,#0f172a,#2563eb);
+                        color:#fff;font-size:0.88rem;font-weight:700;
+                        border:none;border-radius:14px;cursor:pointer;
+                        box-shadow:0 5px 18px rgba(37,99,235,0.3);
+                        transition:transform 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 24px rgba(37,99,235,0.4)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow='0 5px 18px rgba(37,99,235,0.3)'">
+                        <span id="interswitchBtnText" style="display:flex;align-items:center;gap:0.4rem;">
+                            <svg style="width:15px;height:15px;fill:#fff;" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>
+                            Pay via Interswitch
+                        </span>
+                        <span id="interswitchSpinner" style="display:none;align-items:center;gap:0.4rem;">
+                            <svg style="animation:spin 1s linear infinite;width:16px;height:16px;" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                                <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                            Processing...
+                        </span>
+                    </button>
+
                     {{-- Squad --}}
                     <button id="squadBtn" onclick="payWithSquad()" style="
                         flex:1;padding:0.85rem 0.5rem;
@@ -327,7 +350,7 @@
 
                 {{-- Trust badge --}}
                 <p style="text-align:center;font-size:0.75rem;color:#9ca3af;margin-top:0.25rem;">
-                    🔒 256-bit SSL &middot; Paystack &middot; Squad
+                    🔒 256-bit SSL &middot; Paystack &middot; Squad &middot; Interswitch
                 </p>
             </div>
         </div>
@@ -482,6 +505,89 @@
             } catch (err) {
                 showDonationError(err.message || 'Failed to initiate payment. Please try again.');
                 _setLoading('squadBtn', 'squadSpinner', 'squadBtnText', false);
+            }
+        }
+
+        function submitInterswitchForm(checkoutUrl, payload) {
+            console.log('[Interswitch] Redirecting to checkout URL:', checkoutUrl);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = checkoutUrl;
+            form.enctype = 'application/x-www-form-urlencoded';
+            form.target = '_self';
+            form.style.display = 'none';
+
+            const allowedFields = [
+                'merchant_code',
+                'pay_item_id',
+                'txn_ref',
+                'amount',
+                'currency',
+                'site_redirect_url',
+                'cust_name',
+                'cust_email',
+                'cust_id',
+                'pay_item_name',
+                'mode',
+            ];
+
+            Object.entries(payload).forEach(([key, value]) => {
+                if (allowedFields.includes(key) && value !== undefined && value !== null) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        async function payWithInterswitch() {
+            hideDonationError();
+            const inputs = _validateInputs();
+            if (!inputs) return;
+
+            const { amount, fullName, email } = inputs;
+            _setLoading('interswitchBtn', 'interswitchSpinner', 'interswitchBtnText', true);
+
+            try {
+                console.log('[Interswitch] Initializing payment for:', { amount, email, customer: fullName });
+
+                const callbackUrl = @json(url('/api/interswitch/redirect'));
+                const res = await fetch(@json(route('api.interswitch.pay')), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '',
+                    },
+                    body: JSON.stringify({ amount, email, customer_name: fullName, callback_url: callbackUrl }),
+                });
+
+                const result = await res.json();
+                if (!res.ok) {
+                    throw new Error(result.message || 'Unable to initialize Interswitch payment.');
+                }
+                
+                if (!result.payload || !result.checkout_url) {
+                    throw new Error('Interswitch did not return valid checkout information.');
+                }
+
+                console.log('[Interswitch] Payment initialized successfully');
+                console.log('[Interswitch] Checkout URL:', result.checkout_url);
+                console.log('[Interswitch] Redirecting user to payment gateway...');
+
+                // Use simple form redirect - bypasses inline checkout issues
+                submitInterswitchForm(result.checkout_url, result.payload);
+                // Don't clear the loading state - we're redirecting
+                
+            } catch (err) {
+                console.error('[Interswitch] Payment initialization failed:', err.message);
+                showDonationError(err.message || 'Failed to initiate payment. Please try again.');
+                _setLoading('interswitchBtn', 'interswitchSpinner', 'interswitchBtnText', false);
             }
         }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DonorController;
+use App\Http\Controllers\InterswitchPaymentController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SquadPaymentController;
 use App\Http\Controllers\SessionController;
@@ -300,6 +301,9 @@ Route::post('/payments/initialize', [PaymentController::class, 'initialize']);
 Route::get('/payments/verify/{reference}', [PaymentController::class, 'verify']);
 Route::get('/payments/test', [PaymentController::class, 'test']); // Test configuration
 Route::post('/squad/pay', [SquadPaymentController::class, 'initiate'])->name('api.squad.pay');
+Route::post('/interswitch/pay', [InterswitchPaymentController::class, 'initiate'])->name('api.interswitch.pay');
+Route::post('/interswitch/redirect', [InterswitchPaymentController::class, 'handleRedirect'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+Route::post('/interswitch/webhook', [InterswitchPaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 // Webhook (no CSRF protection needed)
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
