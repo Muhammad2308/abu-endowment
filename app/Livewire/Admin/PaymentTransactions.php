@@ -206,19 +206,22 @@ class PaymentTransactions extends Component
             return $data;
         };
 
-        $totalPaystack = array_sum($fill('paystack'));
-        $totalSquad    = array_sum($fill('squad'));
-        $totalAll      = $totalPaystack + $totalSquad;
+        $totalPaystack   = array_sum($fill('paystack'));
+        $totalSquad      = array_sum($fill('squad'));
+        $totalInterswitch = array_sum($fill('interswitch'));
+        $totalAll        = $totalPaystack + $totalSquad + $totalInterswitch;
 
         return [
-            'labels'   => $labels,
-            'paystack' => $fill('paystack'),
-            'squad'    => $fill('squad'),
-            'totals'   => [
-                'all'      => number_format($totalAll, 2),
-                'paystack' => number_format($totalPaystack, 2),
-                'squad'    => number_format($totalSquad, 2),
-                'count'    => PaymentTransaction::whereIn('status', ['completed', 'success'])->count(),
+            'labels'      => $labels,
+            'paystack'    => $fill('paystack'),
+            'squad'       => $fill('squad'),
+            'interswitch' => $fill('interswitch'),
+            'totals'      => [
+                'all'         => number_format($totalAll, 2),
+                'paystack'    => number_format($totalPaystack, 2),
+                'squad'       => number_format($totalSquad, 2),
+                'interswitch' => number_format($totalInterswitch, 2),
+                'count'       => PaymentTransaction::whereIn('status', ['completed', 'success'])->count(),
             ],
         ];
     }

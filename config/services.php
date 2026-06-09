@@ -61,6 +61,16 @@ return [
         'base_url'   => env('SQUAD_API_URL', env('SQUAD_BASE_URL', 'https://api-d.squadco.com')),
     ],
 
+    // Interswitch Payment Configuration
+    'interswitch' => [
+        'merchant_code' => env('INTERSWITCH_MERCHANT_CODE', ''),
+        'pay_item_id' => env('INTERSWITCH_PAY_ITEM_ID', ''),
+        'secret_key' => env('INTERSWITCH_SECRET_KEY', ''),
+        'base_url' => env('INTERSWITCH_API_URL', 'https://qa.interswitchng.com'),
+        'checkout_url' => env('INTERSWITCH_CHECKOUT_URL', 'https://qa.interswitchng.com/collections/w/pay'),
+        'currency_code' => env('INTERSWITCH_CURRENCY_CODE', '566'),
+    ],
+
     // Paystack Configuration
     'paystack' => [
         'public_key' => env('PAYSTACK_PUBLIC_KEY'),

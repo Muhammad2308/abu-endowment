@@ -1,6 +1,6 @@
 <div>
     {{-- Summary Stats --}}
-    <div wire:ignore class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div wire:ignore class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Total Collected</p>
             <p class="text-2xl font-bold text-slate-800 dark:text-white mt-1">₦{{ $chartData['totals']['all'] }}</p>
@@ -14,6 +14,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
             <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Squad</p>
             <p class="text-2xl font-bold text-blue-600 mt-1">₦{{ $chartData['totals']['squad'] }}</p>
+            <p class="text-xs text-slate-400 mt-1">last 30 days</p>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide font-semibold">Interswitch</p>
+            <p class="text-2xl font-bold text-cyan-600 mt-1">₦{{ $chartData['totals']['interswitch'] ?? '0.00' }}</p>
             <p class="text-xs text-slate-400 mt-1">last 30 days</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
@@ -33,6 +38,7 @@
             <div class="flex items-center gap-4 text-xs text-slate-500">
                 <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-emerald-500 rounded"></span> Paystack</span>
                 <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-blue-500 rounded"></span> Squad</span>
+                <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-cyan-500 rounded"></span> Interswitch</span>
             </div>
         </div>
         <div class="relative" style="height: 260px;">
@@ -85,6 +91,7 @@
                 <option value="">All gateways</option>
                 <option value="paystack">Paystack</option>
                 <option value="squad">Squad</option>
+                <option value="interswitch">Interswitch</option>
                 <option value="manual">Manual</option>
             </select>
 
