@@ -345,6 +345,9 @@ Route::post('/donor-sessions/login', [DonorSessionController::class, 'login']);
 Route::post('/donor-sessions/google-login', [DonorSessionController::class, 'googleLogin']);
 Route::post('/donor-sessions/google-register', [DonorSessionController::class, 'googleRegister']);
 
+// Email Verification
+Route::post('/donor-sessions/send-verification', [DonorSessionController::class, 'sendVerificationEmail']);
+
 // Password Reset Routes (link flow)
 Route::post('/donor-sessions/forgot-password', [DonorSessionController::class, 'forgotPassword']);
 Route::get('/donor-sessions/reset/{token}', [DonorSessionController::class, 'getResetToken']);

@@ -171,6 +171,12 @@
             });
         @endif
         
+        @if(session('success'))
+            document.addEventListener('DOMContentLoaded', () => {
+                showToast("{{ session('success') }}", 'success');
+            });
+        @endif
+
         @if(session('error'))
             document.addEventListener('DOMContentLoaded', () => {
                 showToast("{{ session('error') }}", 'error');

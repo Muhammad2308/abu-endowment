@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Project;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -17,6 +18,7 @@ class ProjectsManager extends Component
     public $showAddProjectModal = false;
     public $selectedProject = null;
     public $selectedDonations = [];
+    public $confirmingDeleteId = null;
     
     protected $listeners = ['project-added' => 'refreshProjects'];
     
@@ -62,6 +64,33 @@ class ProjectsManager extends Component
     public function closeAddProjectModal()
     {
         $this->showAddProjectModal = false;
+    }
+
+    public function confirmDelete($projectId): void
+    {
+        $this->confirmingDeleteId = $projectId;
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->confirmingDeleteId = null;
+    }
+
+    public function deleteProject($projectId): void
+    {
+        $project = Project::find($projectId);
+        if (!$project) {
+            $this->confirmingDeleteId = null;
+            return;
+        }
+
+        if ($project->icon_image) {
+            Storage::disk('public')->delete($project->icon_image);
+        }
+
+        $project->delete();
+        $this->confirmingDeleteId = null;
+        session()->flash('message', 'Project deleted successfully.');
     }
 
     public function loadMore()

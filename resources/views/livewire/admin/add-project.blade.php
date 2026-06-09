@@ -62,10 +62,30 @@
 
                     <div class="mb-5">
                         <label for="iconImage" class="block text-slate-700 text-sm font-bold mb-2">Icon Image <span class="text-slate-400 font-normal">(Optional)</span></label>
-                        <input type="file" wire:model="icon_image" id="iconImage" 
-                               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200" 
+                        <input type="file" wire:model="icon_image" id="iconImage"
+                               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200"
                                accept="image/*">
+                        <div wire:loading wire:target="icon_image" class="flex items-center gap-2 mt-2 text-blue-600 text-xs">
+                            <svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                            Uploading image, please wait...
+                        </div>
                         @error('icon_image') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+
+                        {{-- Image preview --}}
+                        @if ($icon_image)
+                            <div class="mt-3 flex items-center gap-3">
+                                <img src="{{ $icon_image->temporaryUrl() }}" alt="Preview" class="h-20 w-20 object-cover rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-xs text-slate-500">New image selected</span>
+                            </div>
+                        @elseif ($existing_icon_image)
+                            <div class="mt-3 flex items-center gap-3">
+                                <img src="{{ asset('storage/' . $existing_icon_image) }}" alt="Current Icon" class="h-20 w-20 object-cover rounded-lg border border-slate-200 shadow-sm">
+                                <span class="text-xs text-slate-500">Current icon (upload a new one to replace)</span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mb-6">
@@ -83,9 +103,21 @@
                                 class="w-full sm:w-auto px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-semibold rounded-xl shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200 transition-all duration-200">
                             Cancel
                         </button>
-                        <button type="submit" id="save-project-btn" 
+                        <button type="submit" id="save-project-btn"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="opacity-60 cursor-not-allowed"
+                                wire:target="icon_image,saveProject"
                                 class="w-full sm:w-auto flex-1 px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
-                            {{ $editingProjectId ? 'Update Project' : 'Create Project' }}
+                            <span wire:loading.remove wire:target="icon_image,saveProject">
+                                {{ $editingProjectId ? 'Update Project' : 'Create Project' }}
+                            </span>
+                            <span wire:loading wire:target="icon_image,saveProject" class="flex items-center justify-center gap-2">
+                                <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                </svg>
+                                {{ $editingProjectId ? 'Saving...' : 'Creating...' }}
+                            </span>
                         </button>
                     </div>
                 </form>

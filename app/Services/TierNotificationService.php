@@ -81,8 +81,8 @@ class TierNotificationService
             'amount'            => '₦' . number_format((float) $donation->amount, 2),
             'reference'         => $donation->payment_reference ?? '',
             'donation_date'     => now()->format('d M Y'),
-            'project_name'      => $donation->project?->project_title ?? 'ABU Giving',
-            'organization_name' => $donor->organization_name ?? 'ABU Giving',
+            'project_name'      => $donation->project?->project_title ?? 'GIVE ABU',
+            'organization_name' => $donor->organization_name ?? 'GIVE ABU',
             'logo_url'          => $logoUrl,
         ];
 
@@ -112,7 +112,7 @@ class TierNotificationService
                         ->subject($subject)
                         ->from(
                             config('mail.from.address', 'abuendowment@gmail.com'),
-                            config('mail.from.name', 'ABU Giving')
+                            config('mail.from.name', 'GIVE ABU')
                         );
             });
 

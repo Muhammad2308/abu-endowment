@@ -1,4 +1,10 @@
 <div>
+    @if(session('message'))
+        <div class="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium">
+            {{ session('message') }}
+        </div>
+    @endif
+
     <!-- Header Actions -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
@@ -51,7 +57,7 @@
                 <!-- Card Image/Icon -->
                 <div class="relative h-48 bg-slate-100 overflow-hidden">
                     @if($project->icon_image)
-                        <img src="{{ $project->icon_image_url ?? asset('storage/' . $project->icon_image) }}" 
+                        <img src="{{ $project->icon_image_url }}"
                              alt="{{ $project->project_title }}" 
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -133,11 +139,31 @@
                                  <i class="fas fa-file-alt mr-1"></i> Details
                              </button>
                         </div>
-                        <button wire:click="editProject({{ $project->id }})" 
-                                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all duration-200 ml-auto"
+                        <button wire:click="editProject({{ $project->id }})"
+                                class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all duration-200"
                                 title="Edit Project">
                             <i class="fas fa-edit"></i>
                         </button>
+
+                        @if($confirmingDeleteId === $project->id)
+                            <div class="flex items-center gap-1 ml-auto">
+                                <span class="text-xs text-rose-600 font-semibold">Delete?</span>
+                                <button wire:click="deleteProject({{ $project->id }})"
+                                        class="px-2 py-1 text-xs font-bold bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors">
+                                    Yes
+                                </button>
+                                <button wire:click="cancelDelete"
+                                        class="px-2 py-1 text-xs font-bold bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors">
+                                    No
+                                </button>
+                            </div>
+                        @else
+                            <button wire:click="confirmDelete({{ $project->id }})"
+                                    class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all duration-200 ml-auto"
+                                    title="Delete Project">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>

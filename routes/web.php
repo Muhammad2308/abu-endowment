@@ -30,20 +30,21 @@ Route::match(['GET', 'OPTIONS', 'HEAD'], '/storage/{path}', function ($path) {
         abort(403, 'Invalid path');
     }
     
-    // Build the full file path
-    $filePath = storage_path('app/public/' . $decodedPath);
-    
-    // Normalize path separators for Windows
-    $filePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $filePath);
-    
-    // Check if file exists using direct file system check
-    if (!file_exists($filePath) || !is_file($filePath)) {
+    // Check public/storage/ first (new files — public disk root = public/storage),
+    // then fall back to storage/app/public/ for files uploaded before the disk change.
+    $publicPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, public_path('storage/' . $decodedPath));
+    $legacyPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, storage_path('app/public/' . $decodedPath));
+
+    if (file_exists($publicPath) && is_file($publicPath)) {
+        $filePath = $publicPath;
+    } elseif (file_exists($legacyPath) && is_file($legacyPath)) {
+        $filePath = $legacyPath;
+    } else {
         \Log::warning('Storage file not found', [
             'requested_path' => $path,
             'decoded_path' => $decodedPath,
-            'full_path' => $filePath,
-            'exists' => file_exists($filePath),
-            'is_file' => is_file($filePath),
+            'public_path' => $publicPath,
+            'legacy_path' => $legacyPath,
         ]);
         abort(404, 'File not found');
     }
@@ -108,6 +109,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/transactions', function () {
             return view('admin.transactions');
         })->name('admin.transactions');
+
+        // Transactions CSV export
+        Route::get('/transactions/export', [\App\Http\Controllers\Admin\TransactionExportController::class, 'export'])->name('admin.transactions.export');
         
         // The alumni upload is now a Livewire component on the dashboard
         
@@ -126,7 +130,11 @@ Route::prefix('admin')->group(function () {
         // Project Categories
         Route::get('/project-categories', [\App\Http\Controllers\Admin\ProjectCategoryController::class, 'index'])->name('admin.project-categories.index');
         
+        // Excel report export (multi-sheet, with charts)
+        Route::get('/excel-export', [\App\Http\Controllers\Admin\ExcelExportController::class, 'export'])->name('admin.excel.export');
+
         // Reports
+        Route::get('/reports/export', [\App\Http\Controllers\Admin\ReportExportController::class, 'export'])->name('admin.reports.export');
         Route::view('/reports', 'admin.reports.index')->name('admin.reports.index');
         
         // Donor statistics
@@ -167,8 +175,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/donations/summary', [DonorController::class, 'donationSummary']);
 });
 
-// Squad payment confirmation page
+// Email verification (link from verification email)
+Route::get('/verify-email/{token}', [\App\Http\Controllers\Api\DonorSessionController::class, 'verifyEmail'])->name('email.verify');
+
+// Squad payment confirmation page (Squad redirects here after checkout)
 Route::get('/donation/thank-you', [SquadPaymentController::class, 'confirm'])->name('donation.thankyou');
+
+// Paystack thank-you page (Livewire verifies inline, then redirects here)
+Route::get('/donation/thank-you/paystack', [\App\Http\Controllers\PaymentController::class, 'thankYou'])->name('donation.thankyou.paystack');
 
 // Redirect /login to /admin/login for session expiry or direct access
 Route::get('/login', function () {

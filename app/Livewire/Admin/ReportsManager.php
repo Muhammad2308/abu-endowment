@@ -5,8 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Donation;
-use App\Models\Faculty;
-use App\Models\Department;
+use App\Models\PaymentTransaction;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,145 +13,129 @@ class ReportsManager extends Component
 {
     use WithPagination;
 
-    // Filters
-    public $search = '';
-    public $selectedFaculty = '';
-    public $selectedDepartment = '';
-    // public $selectedProgramme = ''; // Not implemented in DB yet
-    public $selectedProject = '';
-    public $dateFrom = '';
-    public $dateTo = '';
-    public $minAmount = '';
-    public $maxAmount = '';
-    public $donorPhone = '';
-    public $donorName = '';
-    public $selectedStatus = ''; // New status filter
-    
-    public $perPage = 10;
+    public string $search           = '';
+    public string $selectedProgramme = '';
+    public string $selectedProject  = '';
+    public string $dateFrom         = '';
+    public string $dateTo           = '';
+    public int    $perPage          = 15;
 
-    public function updated($propertyName)
+    protected $queryString = [
+        'search'            => ['except' => ''],
+        'selectedProgramme' => ['except' => ''],
+        'selectedProject'   => ['except' => ''],
+        'dateFrom'          => ['except' => ''],
+        'dateTo'            => ['except' => ''],
+        'perPage'           => ['except' => 15],
+    ];
+
+    public function updated(): void
     {
         $this->resetPage();
     }
 
-    public function resetFilters()
+    public function resetFilters(): void
     {
-        $this->reset([
-            'search', 'selectedFaculty', 'selectedDepartment', 
-            'selectedProject', 'dateFrom', 'dateTo', 
-            'minAmount', 'maxAmount', 'donorPhone', 'donorName',
-            'selectedStatus'
-        ]);
+        $this->search            = '';
+        $this->selectedProgramme = '';
+        $this->selectedProject   = '';
+        $this->dateFrom          = '';
+        $this->dateTo            = '';
+        $this->perPage           = 15;
         $this->resetPage();
     }
 
-    public function getFilteredQuery()
+    private function applyFilters(Builder $query): Builder
     {
-        $query = Donation::query()
-            ->with(['donor', 'project', 'donor.faculty', 'donor.department']);
-
-        // Filter by Faculty (Donor's)
-        if ($this->selectedFaculty) {
-            $query->whereHas('donor', function (Builder $q) {
-                $q->where('faculty_id', $this->selectedFaculty);
-            });
-        }
-
-        // Filter by Department (Donor's)
-        if ($this->selectedDepartment) {
-            $query->whereHas('donor', function (Builder $q) {
-                $q->where('department_id', $this->selectedDepartment);
-            });
-        }
-
-        // Filter by Project
-        if ($this->selectedProject) {
-            $query->where('project_id', $this->selectedProject);
-        }
-
-        // Filter by Date Range
-        if ($this->dateFrom) {
-            $query->whereDate('created_at', '>=', $this->dateFrom);
-        }
-        if ($this->dateTo) {
-            $query->whereDate('created_at', '<=', $this->dateTo);
-        }
-
-        // Filter by Amount
-        if ($this->minAmount) {
-            $query->where('amount', '>=', $this->minAmount);
-        }
-        if ($this->maxAmount) {
-            $query->where('amount', '<=', $this->maxAmount);
-        }
-
-        // Filter by Donor Phone
-        if ($this->donorPhone) {
-            $query->whereHas('donor', function (Builder $q) {
-                $q->where('phone', 'like', '%' . $this->donorPhone . '%');
-            });
-        }
-
-        // Filter by Donor Name (or global search)
-        if ($this->donorName) {
-            $query->whereHas('donor', function (Builder $q) {
-                // SQLite specific concatenation for full name search
-                $q->whereRaw(
-                    "(surname || ' ' || name || ' ' || COALESCE(other_name, '') LIKE ? 
-                    OR name || ' ' || surname || ' ' || COALESCE(other_name, '') LIKE ?)", 
-                    ['%' . $this->donorName . '%', '%' . $this->donorName . '%']
+        return $query
+            ->when($this->selectedProject, fn($q) => $q->where('project_id', $this->selectedProject))
+            ->when($this->dateFrom, fn($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
+            ->when($this->dateTo,   fn($q) => $q->whereDate('created_at', '<=', $this->dateTo))
+            ->when($this->search, function ($q) {
+                $s = '%' . $this->search . '%';
+                $q->where(fn($sub) => $sub
+                    ->whereHas('donor', fn($d) => $d
+                        ->where('name', 'like', $s)
+                        ->orWhere('surname', 'like', $s)
+                        ->orWhere('email', 'like', $s)
+                        ->orWhere('phone', 'like', $s)
+                        ->orWhere('organization_name', 'like', $s)
+                    )
+                    ->orWhereHas('project', fn($p) => $p->where('project_title', 'like', $s))
+                    ->orWhere('payment_reference', 'like', $s)
+                    ->orWhere('status', 'like', $s)
+                    ->orWhere('type', 'like', $s)
                 );
             });
-        }
-        
-        // Filter by Status
-        if ($this->selectedStatus) {
-            $query->where('status', $this->selectedStatus);
-        }
-        
-        // Global Search fallback
-        if ($this->search) {
-             $query->where(function($q) {
-                $q->whereHas('donor', function ($d) {
-                    $d->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('surname', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
-                })
-                ->orWhere('payment_reference', 'like', '%' . $this->search . '%');
+    }
+
+    private function applyTxnFilters(Builder $query): Builder
+    {
+        return $query
+            ->when($this->selectedProject, fn($q) => $q->where('project_id', $this->selectedProject))
+            ->when($this->dateFrom, fn($q) => $q->whereDate('created_at', '>=', $this->dateFrom))
+            ->when($this->dateTo,   fn($q) => $q->whereDate('created_at', '<=', $this->dateTo))
+            ->when($this->search, function ($q) {
+                $s = '%' . $this->search . '%';
+                $q->where(fn($sub) => $sub
+                    ->whereHas('donor', fn($d) => $d
+                        ->where('name', 'like', $s)
+                        ->orWhere('surname', 'like', $s)
+                        ->orWhere('email', 'like', $s)
+                        ->orWhere('phone', 'like', $s)
+                    )
+                    ->orWhereHas('project', fn($p) => $p->where('project_title', 'like', $s))
+                    ->orWhere('payment_reference', 'like', $s)
+                    ->orWhere('gateway_reference', 'like', $s)
+                    ->orWhere('payment_gateway', 'like', $s)
+                    ->orWhere('status', 'like', $s)
+                );
             });
-        }
-
-        return $query;
     }
 
-    public function export()
+    public function getFilteredTotals(): array
     {
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\DonationsExport($this->getFilteredQuery()), 
-            'donations_report_' . date('Y-m-d_H-i') . '.xlsx'
+        $d = $this->applyFilters(Donation::query());
+        $t = $this->applyTxnFilters(PaymentTransaction::query());
+
+        return [
+            'donations' => [
+                'completed' => (float)(clone $d)->whereIn('status', ['completed', 'success', 'paid'])->sum('amount'),
+                'pending'   => (float)(clone $d)->where('status', 'pending')->sum('amount'),
+                'failed'    => (float)(clone $d)->where('status', 'failed')->sum('amount'),
+                'count'     => (int)(clone $d)->count(),
+            ],
+            'transactions' => [
+                'completed' => (float)(clone $t)->whereIn('status', ['completed', 'success'])->sum('amount'),
+                'pending'   => (float)(clone $t)->where('status', 'pending')->sum('amount'),
+                'failed'    => (float)(clone $t)->where('status', 'failed')->sum('amount'),
+                'count'     => (int)(clone $t)->count(),
+            ],
+        ];
+    }
+
+    public function openExcelExporter(): void
+    {
+        $this->dispatch('openExcelExporter',
+            context:   'reports',
+            dateFrom:  $this->dateFrom,
+            dateTo:    $this->dateTo,
+            search:    $this->search,
+            projectId: $this->selectedProject,
         );
-    }
-
-    public function updatedSelectedFaculty()
-    {
-        $this->selectedDepartment = '';
     }
 
     public function render()
     {
-        $donations = $this->getFilteredQuery()->latest()->paginate($this->perPage);
-
-        $departmentsRequest = Department::query()->orderBy('current_name');
-        
-        if ($this->selectedFaculty) {
-            $departmentsRequest->where('faculty_id', $this->selectedFaculty);
-        }
+        $donations = $this->applyFilters(Donation::query())
+            ->with(['donor', 'project'])
+            ->latest()
+            ->paginate($this->perPage);
 
         return view('livewire.admin.reports-manager', [
-            'donations' => $donations,
-            'faculties' => Faculty::orderBy('current_name')->get(),
-            'departments' => $departmentsRequest->get(),
-            'projects' => Project::orderBy('project_title')->get(),
+            'donations'      => $donations,
+            'projects'       => Project::withoutTrashed()->orderBy('project_title')->get(),
+            'filteredTotals' => $this->getFilteredTotals(),
         ]);
     }
 }

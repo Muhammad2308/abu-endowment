@@ -26,13 +26,8 @@ class ProjectPhoto extends Model
     /**
      * Get the image URL
      */
-    public function getImageUrlAttribute()
+    public function getImageUrlAttribute(): ?string
     {
-        if ($this->body_image) {
-            // Use asset() helper which works better with symlinks and avoids CORS issues
-            // This generates a URL like: /storage/projects/photos/filename.jpg
-            return asset('storage/' . $this->body_image);
-        }
-        return null;
+        return $this->body_image ? Storage::disk('public')->url($this->body_image) : null;
     }
 }

@@ -1,9 +1,27 @@
+<IfModule mod_headers.c>
+    # CORS: match specific allowed origins so credentials can be used
+    SetEnvIf Origin "^https://abu-endowment-mobile\.vercel\.app$" CORS_ORIGIN=$0
+    SetEnvIf Origin "^http://localhost:3000$"                      CORS_ORIGIN=$0
+    SetEnvIf Origin "^http://127\.0\.0\.1:3000$"                   CORS_ORIGIN=$0
+
+    # Apply headers only when origin matched (env=CORS_ORIGIN)
+    Header always set Access-Control-Allow-Origin     "%{CORS_ORIGIN}e"                                                                                       env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Credentials "true"                                                                                                  env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Methods    "GET, POST, PUT, DELETE, OPTIONS, PATCH"                                                                 env=CORS_ORIGIN
+    Header always set Access-Control-Allow-Headers    "Content-Type, Authorization, Accept, X-Requested-With, X-Device-Fingerprint, X-Session-ID, X-Device-Session" env=CORS_ORIGIN
+    Header always set Vary                            "Origin"                                                                                                 env=CORS_ORIGIN
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    # Answer OPTIONS preflight immediately (before PHP runs)
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^ - [R=204,L]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
@@ -22,16 +40,16 @@
     RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot|map)$ [NC]
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
-    
+
     # Allow direct access to storage files
     RewriteCond %{REQUEST_URI} ^/storage/
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
-    
+
     # Allow direct access to existing files and directories
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
-    
+
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
 

@@ -476,58 +476,76 @@ class DonorController extends Controller
                 // Format phone number before validation
                 $phone = $this->formatPhoneNumber($request->phone);
                 
-                // Validate the request
+                // Validate the request — no unique constraints here, handled manually below
                 $validator = Validator::make(array_merge($request->all(), ['phone' => $phone]), [
-                    'name' => 'required|string|max:255',
-                    'surname' => 'required|string|max:255',
-                    'other_name' => 'nullable|string|max:255',
-                    'gender' => 'required|in:male,female',
-                    'country' => 'required|string|max:100',
-                    'state' => 'nullable|string|max:100',
-                    'city' => 'nullable|string|max:100',
-                    'address' => 'nullable|string|max:500',
-                    'email' => 'required|email|max:255|unique:donors,email',
-                    'phone' => 'required|string|max:20|regex:/^\+[0-9]{10,15}$/|unique:donors,phone',
-                    'donor_type' => 'required|string',
-                ], [
-                    'phone.regex' => 'Phone number must be in international format (e.g., +2348012345678)',
-                    'email.unique' => 'This email is already registered',
-                    'phone.unique' => 'This phone number is already registered',
+                    'name'            => 'required|string|max:255',
+                    'surname'         => 'required|string|max:255',
+                    'other_name'      => 'nullable|string|max:255',
+                    'gender'          => 'nullable|in:male,female',
+                    'country'         => 'nullable|string|max:100',
+                    'nationality'     => 'nullable|string|max:100',
+                    'state'           => 'nullable|string|max:100',
+                    'lga'             => 'nullable|string|max:100',
+                    'city'            => 'nullable|string|max:100',
+                    'address'         => 'nullable|string|max:500',
+                    'email'           => 'required|email|max:255',
+                    'phone'           => 'required|string|max:30',
+                    'donor_type'      => 'required|string',
                 ]);
 
                 if ($validator->fails()) {
+                    $firstError = collect($validator->errors()->toArray())->flatten()->first();
                     Log::warning('Donor creation validation failed', [
                         'errors' => $validator->errors()->toArray()
                     ]);
-                    
                     return response()->json([
                         'success' => false,
-                        'message' => 'Validation failed',
-                        'errors' => $validator->errors()
+                        'message' => $firstError ?? 'Validation failed',
+                        'errors'  => $validator->errors()
                     ], 422);
+                }
+
+                // If the email is already registered, handle gracefully
+                $existingDonor = \App\Models\Donor::where('email', $request->email)->first();
+                if ($existingDonor) {
+                    $existingSession = \App\Models\DonorSession::where('donor_id', $existingDonor->id)->first();
+                    if ($existingSession) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'This email is already registered. Please login instead.',
+                        ], 409);
+                    }
+                    // Donor exists but has no session — allow registration flow to continue
+                    Log::info('Donor creation: email exists, no session, returning existing donor', [
+                        'donor_id' => $existingDonor->id,
+                    ]);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Donor registered successfully',
+                        'data'    => ['donor' => $existingDonor],
+                    ], 201);
                 }
 
                 // Create the donor
                 $donor = Donor::create([
-                    'name' => $request->name,
-                    'surname' => $request->surname,
-                    'other_name' => $request->other_name,
-                    'gender' => $request->gender,
-                    'country' => $request->country,
-                    'email' => $request->email,
-                    'phone' => $phone,
-                    'address' => $request->address,
-                    'state' => $request->state,
-                    'lga' => $request->city, // Map frontend 'city' to database 'lga'
-                    'donor_type' => $request->donor_type,
-                    'nationality' => $request->country,
-                    // Set other fields to null
-                    'graduation_year' => null,
-                    'entry_year' => null,
-                    'reg_number' => null,
-                    'faculty_id' => null,
-                    'department_id' => null,
-                    'ranking' => null,
+                    'name'            => $request->name,
+                    'surname'         => $request->surname,
+                    'other_name'      => $request->other_name,
+                    'gender'          => $request->gender,
+                    'country'         => $request->country ?? $request->nationality,
+                    'email'           => $request->email,
+                    'phone'           => $phone,
+                    'address'         => $request->address,
+                    'state'           => $request->state,
+                    'lga'             => $request->lga ?? $request->city,
+                    'donor_type'      => $request->donor_type,
+                    'nationality'     => $request->nationality ?? $request->country,
+                    'reg_number'      => $request->reg_number,
+                    'entry_year'      => $request->entry_year,
+                    'graduation_year' => $request->graduation_year,
+                    'faculty_id'      => null,
+                    'department_id'   => null,
+                    'ranking'         => null,
                 ]);
 
                 Log::info('Donor created successfully', [
@@ -536,35 +554,11 @@ class DonorController extends Controller
                     'email' => $donor->email
                 ]);
 
-                // 1. Determine the username (email) and password (phone)
-                $username = $donor->email;
-                $password = $donor->phone;
-
-                // 2. CRITICAL FIX: Use updateOrCreate to handle existing sessions gracefully
-                $session = \App\Models\DonorSession::updateOrCreate(
-                    ['username' => $username],
-                    [
-                        'donor_id' => $donor->id,
-                        'password' => $password,
-                    ]
-                );
-
-                // Send welcome email with login details
-                try {
-                    \Illuminate\Support\Facades\Mail::to($donor->email)->send(new \App\Mail\WelcomeDonorMail($donor, $session->username, $donor->phone));
-                } catch (\Exception $e) {
-                    Log::error('Failed to send welcome email', ['error' => $e->getMessage()]);
-                    // Continue execution
-                }
-
-                // 3. Return the SUCCESS response with session details
                 return response()->json([
                     'success' => true,
                     'message' => 'Donor registered successfully',
                     'data' => [
                         'donor' => $donor,
-                        'session_id' => $session->id,
-                        'username' => $session->username,
                     ]
                 ], 201);
 
@@ -580,42 +574,24 @@ class DonorController extends Controller
     }
 
     /**
-     * Return donation history for a recognized device (by fingerprint).
-     * Always uses X-Device-Fingerprint header. Returns all donations for the donor_id.
-     */
-    /**
-     * Return donation history for a recognized device (by fingerprint or session token).
+     * Return donation history for the currently authenticated donor.
+     * Resolves via DonorSession (session_id param) first, then device-based fallback.
      */
     public function donationHistory(Request $request)
     {
-        $fingerprint = $request->header('X-Device-Fingerprint');
-        $sessionToken = $request->header('X-Device-Session'); // Support session token
-        $donations = [];
-        $donorId = null;
+        // resolveDonor checks: session_id (DonorSession) → X-Device-Session → fingerprint
+        $donor = $this->resolveDonor($request);
 
-        if ($sessionToken) {
-            $deviceSession = \App\Models\DeviceSession::where('session_token', $sessionToken)->first();
-            if ($deviceSession) {
-                $donorId = $deviceSession->donor_id;
-            }
+        if (!$donor) {
+            return response()->json(['donations' => []], 200);
         }
 
-        if (!$donorId && $fingerprint) {
-            $deviceSession = \App\Models\DeviceSession::where('device_fingerprint', $fingerprint)->first();
-            if ($deviceSession) {
-                $donorId = $deviceSession->donor_id;
-            }
-        }
+        $donations = \App\Models\Donation::where('donor_id', $donor->id)
+            ->with('project:id,project_title')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        if ($donorId) {
-            $donations = \App\Models\Donation::where('donor_id', $donorId)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
-
-        return response()->json([
-            'donations' => $donations
-        ], 200);
+        return response()->json(['donations' => $donations], 200);
     }
 
     /**

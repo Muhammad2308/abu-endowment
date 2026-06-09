@@ -45,14 +45,9 @@ class Project extends Model
     /**
      * Get the icon image URL
      */
-    public function getIconImageUrlAttribute()
+    public function getIconImageUrlAttribute(): ?string
     {
-        if ($this->icon_image) {
-            // Use asset() helper which works better with symlinks and avoids CORS issues
-            // This generates a URL like: /storage/projects/icons/filename.jpg
-            return asset('storage/' . $this->icon_image);
-        }
-        return null;
+        return $this->icon_image ? Storage::disk('public')->url($this->icon_image) : null;
     }
 
     public function donations()

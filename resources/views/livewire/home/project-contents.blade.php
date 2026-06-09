@@ -17,7 +17,7 @@
         <div class="row mb-5">
             <div class="col-12">
                 <div class="project-banner position-relative rounded-lg overflow-hidden" style="height: 400px; background-color: #f0f0f0;">
-                    <img src="{{ $project->icon_image ? asset('storage/' . $project->icon_image) : asset('img/causes/1.png') }}" 
+                    <img src="{{ $project->icon_image ? $project->icon_image_url : asset('img/causes/1.png') }}" 
                          alt="{{ $project->project_title }}" 
                          class="w-100 h-100" 
                          style="object-fit: cover;">
@@ -190,7 +190,7 @@
                     <div class="row align-items-center position-relative" style="z-index: 2;">
                         <div class="col-md-3 mb-3 mb-md-0 text-center">
                             <div class="rounded-circle overflow-hidden mx-auto" style="width: 100px; height: 100px; border: 3px solid rgba(255,255,255,0.2);">
-                                <img src="{{ $project->icon_image ? asset('storage/' . $project->icon_image) : asset('img/causes/1.png') }}" 
+                                <img src="{{ $project->icon_image ? $project->icon_image_url : asset('img/causes/1.png') }}" 
                                      alt="Icon" class="w-100 h-100" style="object-fit: cover;">
                             </div>
                         </div>
@@ -218,7 +218,7 @@
                         @foreach($project->photos as $photo)
                         <div class="col-md-6 mb-4">
                             <div class="gallery-item rounded overflow-hidden shadow-sm position-relative group" style="height: 200px;">
-                                <img src="{{ asset('storage/' . $photo->body_image) }}" 
+                                <img src="{{ $photo->image_url }}" 
                                      alt="{{ $photo->title ?? 'Gallery Image' }}" 
                                      class="w-100 h-100" 
                                      style="object-fit: cover; transition: transform 0.5s ease;">
@@ -315,7 +315,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm overflow-hidden">
                         <div class="position-relative" style="height: 180px;">
-                            <img src="{{ $other->icon_image ? asset('storage/' . $other->icon_image) : asset('img/causes/1.png') }}" 
+                            <img src="{{ $other->icon_image_url ?? asset('img/causes/1.png') }}" 
                                  class="card-img-top w-100 h-100" 
                                  style="object-fit: cover;" 
                                  alt="{{ $other->project_title }}">

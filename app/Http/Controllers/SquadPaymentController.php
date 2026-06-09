@@ -33,6 +33,7 @@ class SquadPaymentController extends Controller
             'email'         => 'required|email',
             'customer_name' => 'nullable|string|max:255',
             'callback_url'  => 'nullable|url',
+            'project_id'    => 'nullable|integer|exists:projects,id',
         ]);
 
         if (empty($this->secretKey)) {
@@ -46,6 +47,7 @@ class SquadPaymentController extends Controller
         $amountKobo   = (int) round($amountNaira * 100);
         $email        = $request->input('email');
         $customerName = $request->input('customer_name', '');
+        $projectId    = $request->input('project_id');
 
         // Find or create donor by email
         $donor = Donor::firstOrCreate(
@@ -60,11 +62,11 @@ class SquadPaymentController extends Controller
         // Create donation record before calling Squad
         $donation = Donation::create([
             'donor_id'          => $donor->id,
-            'project_id'        => null,
+            'project_id'        => $projectId,
             'amount'            => $amountNaira,
-            'type'              => 'endowment',
+            'type'              => $projectId ? 'project' : 'endowment',
             'frequency'         => 'onetime',
-            'endowment'         => 'yes',
+            'endowment'         => $projectId ? 'no' : 'yes',
             'status'            => 'pending',
             'payment_reference' => 'ABU_SQUAD_' . time() . '_' . uniqid(),
         ]);
@@ -73,9 +75,9 @@ class SquadPaymentController extends Controller
         $initTransaction = PaymentTransaction::create([
             'donation_id'       => $donation->id,
             'donor_id'          => $donor->id,
-            'project_id'        => null,
+            'project_id'        => $projectId,
             'payment_gateway'   => 'squad',
-            'category'          => 'general',
+            'category'          => $projectId ? 'project' : 'general',
             'event_type'        => 'payment.initialized',
             'payment_reference' => $donation->payment_reference,
             'gateway_reference' => null,
@@ -101,6 +103,7 @@ class SquadPaymentController extends Controller
                 'customer_name' => $customerName,
                 'donor_id'      => $donor->id,
                 'donation_id'   => $donation->id,
+                'project_id'    => $projectId,
             ],
         ];
 
@@ -436,8 +439,8 @@ class SquadPaymentController extends Controller
                 'reference'        => $ref,
                 'payment_reference'=> $ref,
                 'donation_date'    => now()->format('d M Y'),
-                'project_name'     => 'ABU Giving',
-                'organization_name'=> 'ABU Giving',
+                'project_name'     => 'GIVE ABU',
+                'organization_name'=> 'GIVE ABU',
                 'tier_name'        => '',
                 'total_amount'     => '₦' . number_format($amount, 2),
                 'donation_type'    => 'General Donation',
@@ -451,7 +454,7 @@ class SquadPaymentController extends Controller
                     ->subject($subject)
                     ->from(
                         config('mail.from.address', 'noreply@abu-endowment.edu.ng'),
-                        config('mail.from.name', 'ABU Giving')
+                        config('mail.from.name', 'GIVE ABU')
                     );
             });
 

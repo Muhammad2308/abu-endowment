@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Welcome to ABU Giving</title>
+    <title>Welcome to GIVE ABU</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
         .container { max-width: 600px; margin: 0 auto; background-color: #f9f9f9; }
@@ -18,7 +18,7 @@
     <div class="container">
         <div class="header">
             <img src="https://abu-endowment.cloud/abu_logo_white_for_email.png" alt="ABU Logo" width="80" style="display:block;margin:0 auto 12px auto;">
-            <h1>Welcome to ABU Giving</h1>
+            <h1>Welcome to GIVE ABU</h1>
         </div>
         <div class="content">
             <p>Dear {{ $donor->name }},</p>
@@ -40,10 +40,10 @@
 
             <p>If you have any questions or need assistance, please do not hesitate to contact our support team.</p>
 
-            <p>Best regards,<br>The ABU Giving Team</p>
+            <p>Best regards,<br>The GIVE ABU Team</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} ABU Giving. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} GIVE ABU. All rights reserved.</p>
         </div>
     </div>
 </body>

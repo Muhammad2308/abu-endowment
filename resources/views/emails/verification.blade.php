@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>ABU Giving - Email Verification</title>
+    <title>GIVE ABU - Email Verification</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -10,7 +10,7 @@
         <!-- Header -->
         <div style="background-color: #006B3F; padding: 30px; text-align: center;">
             <img src="https://abu-endowment.cloud/abu_logo_white_for_email.png" alt="ABU Logo" width="80" style="display:block;margin:0 auto 12px auto;">
-            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">ABU Giving</h1>
+            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold;">GIVE ABU</h1>
             <p style="color: #d4f0df; margin: 10px 0 0 0; font-size: 14px;">Email Verification</p>
         </div>
 
@@ -19,7 +19,7 @@
             <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 20px;">Verify Your Email Address</h2>
 
             <p style="color: #4b5563; margin: 0 0 20px 0; line-height: 1.6;">
-                Thank you for registering with ABU Giving. To complete your registration, please use the verification code below:
+                Thank you for registering with GIVE ABU. To complete your registration, please use the verification code below:
             </p>
 
             <!-- Verification Code -->
@@ -40,14 +40,14 @@
             </div>
 
             <p style="color: #4b5563; margin: 30px 0 0 0; line-height: 1.6;">
-                Thank you for supporting ABU Giving. Together, we can make a difference in education and community development.
+                Thank you for supporting GIVE ABU. Together, we can make a difference in education and community development.
             </p>
         </div>
 
         <!-- Footer -->
         <div style="background-color: #f8fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
             <p style="color: #6b7280; margin: 0; font-size: 12px;">
-                &copy; {{ date('Y') }} ABU Giving. All rights reserved.
+                &copy; {{ date('Y') }} GIVE ABU. All rights reserved.
             </p>
         </div>
     </div>

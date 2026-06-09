@@ -64,6 +64,7 @@
                                 <p class="text-muted" style="font-size: 1.1rem; font-family: 'Inter', sans-serif;">Please enter your details to sign in.</p>
                             </div>
 
+                            @if(config('services.google.client_id'))
                             <!-- Google Login at Top -->
                             <div id="googleBtnLogin-login" class="mb-4 d-flex justify-content-start" wire:ignore.self></div>
 
@@ -71,6 +72,7 @@
                                 <hr class="my-0">
                                 <span class="position-absolute bg-white px-3 text-muted" style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.9rem;">OR</span>
                             </div>
+                            @endif
 
                             <form wire:submit.prevent="login">
                                 <div class="form-group mb-4">
@@ -109,7 +111,7 @@
                                 </div>
                                 @endif
 
-                                <button type="submit" 
+                                <button type="submit"
                                         class="btn btn-primary btn-lg btn-block font-weight-bold shadow-sm mb-4"
                                         style="background-color: #064e3b; color: #ffffff; border: none; border-radius: 0.75rem; padding: 14px; height: auto; font-family: 'Inter', sans-serif; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(6, 78, 59, 0.3);"
                                         @if($loading) disabled @endif>
@@ -121,24 +123,24 @@
                                     @endif
                                 </button>
 
-                                <p class="text-center mt-4 mb-0 text-muted">
-                                    <a href="#" 
+                                <p class="text-center mt-2 mb-0 text-muted">
+                                    <a href="#"
                                        class="font-weight-bold text-decoration-none text-muted"
                                        wire:click.prevent="close">
                                         <i class="fas fa-arrow-left mr-2"></i> Back to Website
                                     </a>
                                 </p>
-                                
-                                <p class="text-center mt-3 mb-0 text-muted small">
-                                    Don't have an account? 
-                                    <a href="#" 
-                                       class="font-weight-bold text-decoration-none"
-                                       style="color: #064e3b;"
+
+                                <div class="d-flex align-items-center justify-content-center mt-3" style="gap: 10px;">
+                                    <span class="text-muted small">Don't have an account?</span>
+                                    <a href="#"
                                        wire:click.prevent="close"
-                                       onclick="setTimeout(() => Livewire.dispatch('openRegistrationModal'), 100);">
+                                       onclick="setTimeout(() => Livewire.dispatch('openRegistrationModal'), 100);"
+                                       class="btn btn-sm font-weight-bold"
+                                       style="background-color: #064e3b; color: #fff; border-radius: 20px; padding: 6px 18px; font-size: 0.85rem; font-family: 'Inter', sans-serif;">
                                         Register here
                                     </a>
-                                </p>
+                                </div>
                             </form>
                             
                             <div class="mt-auto text-center">
@@ -177,8 +179,13 @@
                     const parentWidth = buttonElement.parentElement.offsetWidth || 400;
                     
                     // Initialize Google Sign-In
+                    var _googleClientId = "{{ config('services.google.client_id') }}";
+                    if (!_googleClientId) {
+                        buttonElement.innerHTML = '<p class="text-xs text-slate-400 text-center">Google Sign-In not configured.</p>';
+                        return;
+                    }
                     window.google.accounts.id.initialize({
-                        client_id: "{{ config('services.google.client_id') }}",
+                        client_id: _googleClientId,
                         callback: window.handleGoogleCredentialResponse
                     });
                     

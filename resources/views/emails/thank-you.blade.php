@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -81,14 +81,14 @@
     <div class="container">
         <div class="header">
             <img src="{{ $logoUrl ?? 'https://abu-endowment.cloud/abu_logo_white_for_email.png' }}" alt="ABU Logo" width="80" style="display:block;margin:0 auto 12px auto;">
-            <h1>ABU Giving</h1>
+            <h1>GIVE ABU</h1>
             <p>Ahmadu Bello University, Zaria</p>
         </div>
 
         <div class="content">
             <h2>Dear {{ $donorName }},</h2>
 
-            <p>On behalf of the entire Ahmadu Bello University community, we extend our heartfelt gratitude for your generous donation to ABU Giving.</p>
+            <p>On behalf of the entire Ahmadu Bello University community, we extend our heartfelt gratitude for your generous donation to GIVE ABU.</p>
 
             <p>Your contribution of <strong>₦{{ $amount }}</strong> to the <strong>{{ $donationType }}</strong> will make a significant impact on the lives of students, researchers, and the broader ABU community.</p>
 
@@ -96,7 +96,7 @@
                 <h3 style="margin-top: 0; color: #006B3F;">Donation Details</h3>
                 <p><strong>Amount:</strong> <span class="amount">₦{{ $amount }}</span></p>
                 <p><strong>Donation Type:</strong> {{ $donationType }}</p>
-                @if($projectName !== 'ABU Giving')
+                @if($projectName !== 'GIVE ABU')
                 <p><strong>Project:</strong> {{ $projectName }}</p>
                 @endif
                 <p><strong>Payment Reference:</strong> {{ $reference }}</p>
@@ -117,7 +117,7 @@
 
             <div class="signature">
                 <p>With sincere appreciation,</p>
-                <p><strong>The ABU Giving Team</strong><br>
+                <p><strong>The GIVE ABU Team</strong><br>
                 Ahmadu Bello University, Zaria<br>
                 Kaduna State, Nigeria</p>
             </div>
@@ -126,7 +126,7 @@
         <div class="footer">
             <p>This is an automated email. Please do not reply to this message.</p>
             <p>For inquiries, please contact us at: endowment@abu.edu.ng</p>
-            <p>&copy; {{ date('Y') }} ABU Giving. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} GIVE ABU. All rights reserved.</p>
         </div>
     </div>
 </body>

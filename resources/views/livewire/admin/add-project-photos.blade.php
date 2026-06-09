@@ -35,8 +35,15 @@
                 <form wire:submit.prevent="savePhotos" class="mb-8 p-5 bg-slate-50 rounded-xl border border-slate-100">
                     <div class="mb-4">
                         <label for="photos{{ $project->id}}" class="block text-sm font-bold text-slate-700 mb-2">Select Photos to Upload</label>
-                        <input type="file" wire:model="photos" id="photos{{ $project->id}}" multiple 
+                        <input type="file" wire:model="photos" id="photos{{ $project->id}}" multiple
                                class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all duration-200 bg-white border border-slate-200 rounded-lg cursor-pointer">
+                        <div wire:loading wire:target="photos" class="flex items-center gap-2 mt-2 text-blue-600 text-xs">
+                            <svg class="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                            Uploading photos, please wait...
+                        </div>
                         @error('photos.*') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
@@ -68,11 +75,19 @@
                             </div>
                         </div>
                         <div class="flex justify-end">
-                            <button type="submit" 
-                            class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center" 
-                            wire:loading.attr="disabled">
-                                <span wire:loading wire:target="savePhotos" class="inline-block animate-spin mr-2"><i class="fas fa-spinner"></i></span>
-                                Save Photos
+                            <button type="submit"
+                                    wire:loading.attr="disabled"
+                                    wire:loading.class="opacity-60 cursor-not-allowed"
+                                    wire:target="photos,savePhotos"
+                                    class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-2">
+                                <span wire:loading.remove wire:target="photos,savePhotos">Save Photos</span>
+                                <span wire:loading wire:target="photos,savePhotos" class="flex items-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                    </svg>
+                                    Saving...
+                                </span>
                             </button>
                         </div>
                     @endif

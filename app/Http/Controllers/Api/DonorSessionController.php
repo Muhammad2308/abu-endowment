@@ -1159,6 +1159,65 @@ class DonorSessionController extends Controller
     }
 
     /**
+     * POST /api/donor-sessions/send-verification
+     * Generates (or regenerates) an email verification token and sends the verification email.
+     * Body: { session_id: int }
+     */
+    public function sendVerificationEmail(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|integer|exists:donor_sessions,id',
+        ]);
+
+        $donorSession = DonorSession::with('donor')->find($request->session_id);
+
+        if (!$donorSession) {
+            return response()->json(['success' => false, 'message' => 'Session not found'], 404);
+        }
+
+        if ($donorSession->email_verified_at) {
+            return response()->json(['success' => true, 'message' => 'Email already verified']);
+        }
+
+        $token = Str::random(64);
+        $donorSession->update(['email_verification_token' => $token]);
+
+        $verificationUrl = url('/verify-email/' . $token);
+        $recipientName   = $donorSession->donor->name ?? $donorSession->username;
+
+        try {
+            Mail::to($donorSession->username)->send(new \App\Mail\EmailVerificationMail($verificationUrl, $recipientName));
+        } catch (\Exception $e) {
+            Log::error('Failed to send verification email', [
+                'error'      => $e->getMessage(),
+                'session_id' => $donorSession->id,
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Verification email sent']);
+    }
+
+    /**
+     * GET /verify-email/{token}  (web route)
+     * Marks the donor session as verified and clears the token.
+     */
+    public function verifyEmail(string $token)
+    {
+        $donorSession = DonorSession::where('email_verification_token', $token)->first();
+
+        if (!$donorSession) {
+            return redirect('/')->with('error', 'This verification link is invalid or has already been used.');
+        }
+
+        $donorSession->update([
+            'email_verified_at'         => now(),
+            'email_verification_token'  => null,
+        ]);
+
+        return redirect('/')->with('message', 'Your email has been verified! Thank you.');
+    }
+
+    /**
      * Helper method to extract first name from full name
      */
     private function extractFirstName($fullName)

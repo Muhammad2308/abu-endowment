@@ -26,7 +26,7 @@
                 <div class="project-card-home" style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: none; height: 100%; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
                     <!-- Image Area -->
                     <div class="project-thumb" style="position: relative; height: 240px; overflow: hidden;">
-                        <img src="{{ $project->icon_image ? asset('storage/' . $project->icon_image) : asset('img/causes/1.png') }}" 
+                        <img src="{{ $project->icon_image ? $project->icon_image_url : asset('img/causes/1.png') }}" 
                              alt="{{ $project->project_title }}" 
                              style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease;">
                         
@@ -196,12 +196,12 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
                                 </div>
-                                <input type="number" min="100" step="500" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="Enter amount" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
+                                <input type="number" min="100" step="1" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="Enter amount" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
                             </div>
                             @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
                         
-                        <!-- Submit Button -->
+                        <!-- Payment Method Selection -->
                         <div class="mt-5">
                             @if($paymentReference)
                                 <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
@@ -211,11 +211,52 @@
                                     Click this if the payment window closed but this modal didn't.
                                 </p>
                             @else
-                                <button type="submit" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #227722 0%, #1a5c1a 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(34, 119, 34, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                                </button>
-                                <p class="text-center mt-3 text-muted small" style="font-family: 'Inter', sans-serif;">
-                                    <i class="fa fa-lock mr-1"></i> Secure payment powered by Paystack
+                                <p style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-bottom: 12px; text-align: center;">
+                                    Select a payment method
+                                </p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+
+                                    <!-- Paystack Card -->
+                                    <button type="submit"
+                                            wire:loading.attr="disabled"
+                                            wire:loading.class="proj-pay-card-disabled"
+                                            wire:target="donate"
+                                            class="proj-pay-card proj-pay-card-paystack">
+                                        <span wire:loading.remove wire:target="donate" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
+                                            <img src="{{ asset('paystack.png') }}" alt="Paystack" style="height:28px;width:auto;max-width:120px;object-fit:contain;">
+                                        </span>
+                                        <span wire:loading wire:target="donate" class="proj-pay-card-spinner">
+                                            <svg class="proj-spin-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="#374151" stroke-width="4" opacity="0.25"/>
+                                                <path fill="#374151" d="M4 12a8 8 0 018-8v8z"/>
+                                            </svg>
+                                            Processing…
+                                        </span>
+                                    </button>
+
+                                    <!-- Squad Card -->
+                                    <button type="button"
+                                            id="proj-squad-pay-btn"
+                                            wire:click="payWithSquad"
+                                            wire:loading.attr="disabled"
+                                            wire:loading.class="proj-pay-card-disabled"
+                                            wire:target="payWithSquad"
+                                            class="proj-pay-card proj-pay-card-squad">
+                                        <span id="proj-squad-btn-text" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
+                                            <img src="{{ asset('squad.jpg') }}" alt="Squad" style="height:28px;width:auto;max-width:100px;object-fit:contain;border-radius:4px;">
+                                        </span>
+                                        <span id="proj-squad-btn-loading" class="proj-pay-card-spinner" style="display:none;">
+                                            <svg class="proj-spin-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="#374151" stroke-width="4" opacity="0.25"/>
+                                                <path fill="#374151" d="M4 12a8 8 0 018-8v8z"/>
+                                            </svg>
+                                            Redirecting…
+                                        </span>
+                                    </button>
+
+                                </div>
+                                <p class="text-center mt-3 text-muted small">
+                                    <i class="fa fa-lock mr-1"></i> Secure &amp; encrypted payment
                                 </p>
                             @endif
                         </div>
@@ -224,35 +265,28 @@
             </div>
         </div>
         <style>
-            .amount-card {
+            @keyframes proj-btn-spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+            }
+            .proj-spin-svg { animation: proj-btn-spin 0.8s linear infinite; }
+
+            .proj-pay-card {
                 background: #fff;
                 border: 2px solid #e5e7eb;
-                border-radius: 12px;
-                padding: 15px 10px;
-                text-align: center;
+                border-radius: 14px;
+                padding: 16px 12px;
+                cursor: pointer;
                 transition: all 0.2s ease;
-                height: 100%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                min-height: 68px;
             }
-            
-            .amount-card:hover {
-                border-color: #227722;
-                background: #ecfdf5;
-            }
-
-            .amount-card.active {
-                background: #ecfdf5;
-                border-color: #227722;
-                color: #227722;
-                box-shadow: 0 4px 12px rgba(34, 119, 34, 0.15);
-            }
-
-            .amount-value {
-                font-weight: 700;
-                font-size: 1.1rem;
-            }
+            .proj-pay-card-paystack:hover { border-color: #50b4e5; box-shadow: 0 0 0 3px rgba(0,106,255,0.08); }
+            .proj-pay-card-squad:hover    { border-color: #00b8a9; box-shadow: 0 0 0 3px rgba(0,184,169,0.08); }
+            .proj-pay-card-disabled { opacity: 0.6 !important; cursor: not-allowed !important; }
+            .proj-pay-card-spinner  { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #374151; }
 
             .input-group:focus-within {
                 border-color: #227722 !important;
@@ -268,7 +302,7 @@
             .donate-btn:active {
                 transform: translateY(0);
             }
-            
+
             .close:hover {
                 opacity: 1 !important;
                 color: #111827 !important;
@@ -283,21 +317,21 @@
         $galleryPhotos = [];
         // Add main project image
         $galleryPhotos[] = [
-            'url' => $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png'),
+            'url' => $galleryProject->icon_image ? $galleryProject->icon_image_url : asset('img/causes/1.png'),
             'description' => $galleryProject->project_description,
             'title' => $galleryProject->project_title
         ];
         // Add other photos
         foreach($galleryProject->photos as $photo) {
             $galleryPhotos[] = [
-                'url' => asset('storage/' . $photo->body_image),
+                'url' => $photo->image_url,
                 'description' => $photo->description ?? '',
                 'title' => $photo->title ?? ''
             ];
         }
     @endphp
-    <div class="project-details-modal" style="display: block;" 
-         x-data="{ 
+    <div class="project-details-modal" style="display: block;"
+         x-data="{
             activeIndex: 0,
             showDesc: true,
             photos: {{ json_encode($galleryPhotos) }}
@@ -310,7 +344,7 @@
             <div class="project-details-header">
                 <div class="d-flex align-items-center">
                     <div class="project-icon mr-3">
-                        <img src="{{ $galleryProject->icon_image ? asset('storage/' . $galleryProject->icon_image) : asset('img/causes/1.png') }}" alt="Icon">
+                        <img src="{{ $galleryProject->icon_image ? $galleryProject->icon_image_url : asset('img/causes/1.png') }}" alt="Icon">
                     </div>
                     <div>
                         <h3 class="mb-0" style="font-weight: 800; font-size: 1.4rem; color: #1f2937; letter-spacing: -0.5px;">{{ $galleryProject->project_title }}</h3>
@@ -730,12 +764,12 @@
     </style>
     @endif
 
-    <!-- Paystack Integration Script -->
+    <!-- Payment Integration Scripts -->
     <script>
         document.addEventListener('livewire:initialized', () => {
             Livewire.on('initiate-paystack', (data) => {
                 const paymentData = Array.isArray(data) ? data[0] : data;
-                
+
                 let handler = PaystackPop.setup({
                     key: paymentData.key,
                     email: paymentData.email,
@@ -747,21 +781,67 @@
                         console.log('Payment window closed.');
                     },
                     callback: function(response){
-                        alert('Payment successful! Verifying transaction ' + response.reference);
-                        console.log('Paystack success, calling verifyPayment with reference:', response.reference);
-                        // Try direct component call using ID
                         let component = Livewire.find('{{ $this->getId() }}');
                         if (component) {
                             component.call('verifyPayment', response.reference);
                         } else {
-                            console.error('Livewire component not found');
-                            // Fallback to dispatch
                             Livewire.dispatch('project-payment-success', { reference: response.reference });
                         }
                     }
                 });
-                
+
                 handler.openIframe();
+            });
+
+            // ── Squad redirect ─────────────────────────────────────────────
+            Livewire.on('initiate-squad', async (data) => {
+                const p       = Array.isArray(data) ? data[0] : data;
+                const btn     = document.getElementById('proj-squad-pay-btn');
+                const btnText = document.getElementById('proj-squad-btn-text');
+                const btnLoad = document.getElementById('proj-squad-btn-loading');
+
+                const showLoading = () => {
+                    if (btn)     btn.disabled = true;
+                    if (btnText) btnText.style.display = 'none';
+                    if (btnLoad) btnLoad.style.display = 'flex';
+                };
+                const hideLoading = () => {
+                    if (btn)     btn.disabled = false;
+                    if (btnText) btnText.style.display = 'flex';
+                    if (btnLoad) btnLoad.style.display = 'none';
+                };
+
+                showLoading();
+
+                try {
+                    const res = await fetch('/api/squad/pay', {
+                        method:  'POST',
+                        headers: {
+                            'Content-Type':     'application/json',
+                            'Accept':           'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({
+                            amount:        p.amount,
+                            email:         p.email,
+                            customer_name: p.customer_name || '',
+                            project_id:    p.project_id || null,
+                        }),
+                    });
+
+                    const result = await res.json();
+
+                    if (result.checkout_url) {
+                        window.location.href = result.checkout_url;
+                    } else {
+                        alert(result.message || 'Unable to initiate Squad payment. Please try again.');
+                        hideLoading();
+                    }
+                } catch (err) {
+                    console.error('Squad payment error:', err);
+                    alert('A network error occurred. Please check your connection and try again.');
+                    hideLoading();
+                }
             });
 
             Livewire.on('close-donation-modal', () => {
