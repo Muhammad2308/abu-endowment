@@ -354,94 +354,115 @@
 
     <!-- Donation Modal -->
     @if($showModal)
-    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content" style="border-radius: 24px; border: none; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative;">
-                
-                <!-- Decorative Top Border -->
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #227722, #1a5c1a);"></div>
+    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:460px;">
+            <div class="modal-content" style="border-radius:24px;border:none;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.25);">
 
-                <!-- Close Button -->
-                <button type="button" class="close" wire:click="closeModal" style="position: absolute; top: 15px; right: 20px; opacity: 0.7; z-index: 10; font-size: 2.5rem; font-weight: 900; transition: opacity 0.2s; background: none; border: none; line-height: 1; color: #333;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-
-                <!-- Modal Body -->
-                <div class="modal-body px-5 pb-5 pt-5">
-                    <div class="text-center mb-4">
-                        <h5 class="modal-title font-weight-bold" style="color: #111827; font-size: 1.5rem; font-family: 'Merriweather', serif;">Donate to {{ $project->project_title }}</h5>
-                        <p class="text-muted small mt-1" style="font-family: 'Inter', sans-serif;">Your contribution makes a difference</p>
+                <!-- Green header -->
+                <div style="background:linear-gradient(135deg,#227722 0%,#1a5c1a 100%);padding:22px 24px 32px;position:relative;text-align:center;">
+                    <button type="button" wire:click="closeModal" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.28)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+                    </button>
+                    <div style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.35)" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </div>
+                    <h5 style="color:#fff;font-size:1.15rem;font-weight:700;margin:0 0 3px;font-family:'Playfair Display',serif;">Donate to {{ $project->project_title }}</h5>
+                    <p style="color:rgba(255,255,255,0.72);font-size:0.78rem;margin:0;">Your contribution makes a difference</p>
+                    <div style="position:absolute;bottom:-1px;left:0;right:0;line-height:0;">
+                        <svg viewBox="0 0 400 16" preserveAspectRatio="none" style="display:block;width:100%;height:16px;"><path d="M0,16 C100,0 300,0 400,16 L400,16 L0,16 Z" fill="#fff"/></svg>
+                    </div>
+                </div>
 
+                <!-- Form body -->
+                <div style="padding:24px 28px 28px;background:#fff;">
                     <form wire:submit.prevent="donate">
-                        <!-- Email Input -->
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Email Address</label>
-                            <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent pl-3">
-                                        <i class="fa fa-envelope" style="color: #9ca3af;"></i>
-                                    </span>
-                                </div>
-                                <input type="email" wire:model="email" class="form-control border-0 bg-transparent" placeholder="Enter your email address" required style="height: 50px; padding-left: 10px; color: #1f2937; font-weight: 500; font-family: 'Inter', sans-serif;">
+
+                        <!-- Email -->
+                        <div style="margin-bottom:14px;">
+                            <label style="display:block;font-size:0.71rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Email Address <span style="color:#ef4444;">*</span></label>
+                            <div class="pc-don-iw">
+                                <span class="pc-don-px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+                                <input type="email" wire:model="email" class="pc-don-in" placeholder="you@example.com" required>
                             </div>
-                            @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
+                            @error('email') <span style="color:#ef4444;font-size:0.74rem;margin-top:3px;display:block;">{{ $message }}</span> @enderror
                         </div>
 
-                        <!-- Custom Amount Input -->
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Donation Amount</label>
-                            <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
-                                </div>
-                                <input type="number" min="100" step="500" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="Enter amount" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
-                            </div>
+                        <!-- Amount -->
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block;font-size:0.71rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Donation Amount <span style="color:#ef4444;">*</span></label>
+                            <div class="pc-don-iw">
+                                <span class="pc-don-px pc-don-cur">₦</span>
+                                <input type="number" min="100" step="500" wire:model.live="customAmount" class="pc-don-in pc-don-in-lg" placeholder="Enter amount">
                             @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
                         </div>
                         
-                        <!-- Submit Button -->
-                        <div class="mt-5">
-                            @if($paymentReference)
-                                <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Verify Payment <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
+                        <!-- Payment method -->
+                        @if($paymentReference)
+                            <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" style="width:100%;padding:14px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:700;border:none;border-radius:14px;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 20px rgba(249,115,22,0.25);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;">
+                                Verify Payment
+                                <span wire:loading style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:pc-spin 0.8s linear infinite;"></span>
+                            </button>
+                            <p style="text-align:center;font-size:0.73rem;color:#9ca3af;">Click this if the payment window closed but this modal didn't.</p>
+                        @else
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                                <div style="flex:1;height:1px;background:#f3f4f6;"></div>
+                                <span style="font-size:0.62rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.3px;white-space:nowrap;">Choose payment method</span>
+                                <div style="flex:1;height:1px;background:#f3f4f6;"></div>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px;">
+                                <!-- Paystack -->
+                                {{-- <button type="submit" wire:loading.attr="disabled" wire:target="donate" class="pc-gw-card pc-gw-paystack">
+                                    <span wire:loading.remove wire:target="donate" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                                        <div style="height:34px;display:flex;align-items:center;justify-content:center;">
+                                            <img src="{{ asset('paystack.png') }}" alt="Paystack" style="height:40px;width:auto;max-width:130px;object-fit:contain;">
+                                        </div>
+                                    </span>
+                                    <span wire:loading wire:target="donate" class="pc-gw-loading">
+                                        <svg class="pc-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                                        Processing…
+                                    </span>
+                                </button> --}}
+
+                                <!-- Squad -->
+                                <button type="button" id="pc-squad-pay-btn" wire:click="payWithSquad" wire:loading.attr="disabled" wire:target="payWithSquad" class="pc-gw-card pc-gw-squad">
+                                    <span id="pc-squad-btn-text" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                                        <div style="height:34px;display:flex;align-items:center;justify-content:center;">
+                                            <img src="{{ asset('GTCO-Squad-Hackathon-Program.jpg') }}" alt="Squad" style="height:40px;width:auto;max-width:120px;object-fit:contain;border-radius:4px;">
+                                        </div>
+                                    </span>
+                                    <span id="pc-squad-btn-loading" class="pc-gw-loading" style="display:none;">
+                                        <svg class="pc-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                                        Redirecting…
+                                    </span>
                                 </button>
-                                <p class="text-center mt-2 text-muted small">
-                                    Click this if the payment window closed but this modal didn't.
-                                </p>
-                            @else
-                                <button type="submit" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #227722 0%, #1a5c1a 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(34, 119, 34, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Donate Now <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
-                                </button>
-                                <p class="text-center mt-3 text-muted small" style="font-family: 'Inter', sans-serif;">
-                                    <i class="fa fa-lock mr-1"></i> Secure payment powered by Paystack
-                                </p>
-                            @endif
-                        </div>
+                            </div>
+
+                            <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding-top:10px;border-top:1px solid #f3f4f6;">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span style="font-size:0.66rem;color:#9ca3af;font-weight:500;">256-bit SSL · Paystack · Squad</span>
+                            </div>
+                        @endif
                     </form>
                 </div>
             </div>
         </div>
         <style>
-            .input-group:focus-within {
-                border-color: #227722 !important;
-                box-shadow: 0 0 0 3px rgba(34, 119, 34, 0.1);
-                background: #fff !important;
-            }
-
-            .donate-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 15px 30px rgba(34, 119, 34, 0.35) !important;
-            }
-
-            .donate-btn:active {
-                transform: translateY(0);
-            }
-            
-            .close:hover {
-                opacity: 1 !important;
-                color: #111827 !important;
-            }
+            .pc-don-iw { display:flex;align-items:center;background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:11px;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s; }
+            .pc-don-iw:focus-within { border-color:#227722;background:#fff;box-shadow:0 0 0 3px rgba(34,119,34,0.08); }
+            .pc-don-px { padding:0 11px;display:flex;align-items:center;flex-shrink:0; }
+            .pc-don-cur { font-weight:800;color:#227722;font-size:1rem; }
+            .pc-don-in { border:none;outline:none;background:transparent;height:47px;padding:0 10px 0 2px;font-size:0.9rem;color:#1f2937;font-weight:500;flex:1;min-width:0; }
+            .pc-don-in-lg { font-weight:700;font-size:1.02rem; }
+            .pc-gw-card { background:#fff;border:2px solid #e5e7eb;border-radius:13px;padding:12px 8px;cursor:pointer;transition:all 0.22s ease;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:74px; }
+            .pc-gw-card:hover:not([disabled]) { transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.07); }
+            .pc-gw-card:active:not([disabled]) { transform:translateY(0); }
+            .pc-gw-card[disabled] { opacity:0.5;cursor:not-allowed; }
+            .pc-gw-paystack:hover:not([disabled]) { border-color:#00b8d9;box-shadow:0 0 0 3px rgba(0,184,217,0.1),0 6px 18px rgba(0,0,0,0.06); }
+            .pc-gw-squad:hover:not([disabled]) { border-color:#00b8a9;box-shadow:0 0 0 3px rgba(0,184,169,0.1),0 6px 18px rgba(0,0,0,0.06); }
+            .pc-gw-loading { display:flex;align-items:center;gap:5px;font-size:0.7rem;color:#6b7280;font-weight:600; }
+            @keyframes pc-spin { to { transform:rotate(360deg); } }
+            .pc-gw-spin { animation:pc-spin 0.8s linear infinite; }
         </style>
     </div>
     @endif
@@ -487,6 +508,30 @@
                 });
                 
                 handler.openIframe();
+            });
+
+            // ── Squad redirect ──────────────────────────────────────────
+            Livewire.on('initiate-squad', async (data) => {
+                const p       = Array.isArray(data) ? data[0] : data;
+                const btn     = document.getElementById('pc-squad-pay-btn');
+                const btnText = document.getElementById('pc-squad-btn-text');
+                const btnLoad = document.getElementById('pc-squad-btn-loading');
+                const showLoading = () => { if(btn) btn.disabled=true; if(btnText) btnText.style.display='none'; if(btnLoad) btnLoad.style.display='flex'; };
+                const hideLoading = () => { if(btn) btn.disabled=false; if(btnText) btnText.style.display='flex'; if(btnLoad) btnLoad.style.display='none'; };
+                showLoading();
+                try {
+                    const res = await fetch('/api/squad/pay', {
+                        method:'POST',
+                        headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},
+                        body: JSON.stringify({ amount:p.amount, email:p.email, customer_name:p.customer_name||'', project_id:p.project_id||null }),
+                    });
+                    const result = await res.json();
+                    if (result.checkout_url) { window.location.href = result.checkout_url; }
+                    else { alert(result.message || 'Unable to initiate Squad payment. Please try again.'); hideLoading(); }
+                } catch (err) {
+                    alert('A network error occurred. Please try again.');
+                    hideLoading();
+                }
             });
 
             Livewire.on('close-donation-modal', () => {

@@ -89,6 +89,21 @@ class ProjectContents extends Component
         $this->amount = $value;
     }
 
+    public function payWithSquad()
+    {
+        $this->validate([
+            'amount' => 'required|numeric|min:100',
+            'email'  => 'required|email',
+        ]);
+
+        $this->dispatch('initiate-squad', [
+            'email'         => $this->email,
+            'amount'        => $this->amount,
+            'customer_name' => '',
+            'project_id'    => $this->project->id,
+        ]);
+    }
+
     public function donate()
     {
         $this->validate([

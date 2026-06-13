@@ -1,312 +1,622 @@
-<div class="popular_causes_area section_padding" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 50%, #e8f5f1 100%);">
-    <div class="container">
-        <!-- Header Section -->
-        <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10">
-                <div class="section_title text-center mb-5">
-                    <h3 style="color: #227722; font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem;">
-                        Popular Projects
-                    </h3>
-                    <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">
-                        Support meaningful initiatives and help make a difference in communities around the world
-                    </p>
-                </div>
-            </div>
-        </div>
+<div class="hps-section">
 
-        <!-- Projects Grid -->
-        <div class="row">
-            @forelse($projects as $project)
-            <div class="col-lg-3 col-md-6 mb-4">
-                @php
-                    $raised = floatval($project->raised ?? 0);
-                    $target = floatval($project->target ?? 0);
-                    $percentage = ($target > 0) ? round(($raised / $target) * 100, 1) : 0;
-                @endphp
-                <div class="project-card-home" style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: none; height: 100%; display: flex; flex-direction: column; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-                    <!-- Image Area -->
-                    <div class="project-thumb" style="position: relative; height: 240px; overflow: hidden;">
-                        <img src="{{ $project->icon_image ? $project->icon_image_url : asset('img/causes/1.png') }}" 
-                             alt="{{ $project->project_title }}" 
-                             style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease;">
-                        
-                        <!-- Overlay Gradient -->
-                        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);"></div>
+    {{-- ── Section Label ── --}}
+    <div class="hps-label-row">
+        <span class="hps-eyebrow">Our Initiatives</span>
+        <h2 class="hps-heading">Featured Projects</h2>
+        <p class="hps-subheading">Discover meaningful causes and be part of something greater</p>
+    </div>
 
-                        <!-- Category Badge -->
-                        <span style="position: absolute; top: 15px; left: 15px; background: rgba(255,255,255,0.95); padding: 5px 14px; border-radius: 30px; font-size: 0.7rem; font-weight: 700; color: #227722; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    {{-- ── Slider ── --}}
+    @if($projects && $projects->count())
+    <div class="hps-wrapper" id="hpsWrapper">
+
+        {{-- Track (clip wrapper keeps border-radius; outer wrapper exposes nav btns) --}}
+        <div class="hps-track-clip">
+        <div class="hps-track" id="hpsTrack">
+            @foreach($projects as $project)
+            <div class="hps-slide" data-index="{{ $loop->index }}">
+                {{-- Image half --}}
+                <div class="hps-img-col">
+                    <div class="hps-img-frame">
+                        <img
+                            src="{{ $project->icon_image ? $project->icon_image_url : asset('img/causes/1.png') }}"
+                            alt="{{ $project->project_title }}"
+                            class="hps-img"
+                            loading="lazy"
+                        >
+                        {{-- Floating category pill --}}
+                        <span class="hps-cat-pill">
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="5" fill="#227722"/></svg>
                             {{ $project->category->name ?? 'General' }}
                         </span>
-                        
-                        <!-- Percentage Badge (Circular) -->
-                        <div style="position: absolute; top: 15px; right: 15px; width: 45px; height: 45px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 3px solid #227722;">
-                            <span style="font-size: 0.75rem; font-weight: 800; color: #227722;">{{ intval($percentage) }}%</span>
-                        </div>
-
-                        <!-- Bottom Actions Overlay -->
-                        <div class="card-actions-overlay" style="position: absolute; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 15px; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;">
-                            <button wire:click.prevent="openImageGallery({{ $project->id }})" style="background: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #227722; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: transform 0.2s;">
-                                <i class="fa fa-eye"></i>
-                            </button>
-                            <button style="background: #227722; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; box-shadow: 0 5px 15px rgba(34, 119, 34, 0.4); transition: transform 0.2s;">
-                                <i class="fa fa-heart"></i>
-                            </button>
-                        </div>
                     </div>
+                </div>
 
-                    <!-- Content Area -->
-                    <div class="project-content" style="padding: 25px; flex: 1; display: flex; flex-direction: column; position: relative;">
-                        <h4 style="font-size: 1.2rem; font-weight: 800; color: #1f2937; margin-bottom: 12px; line-height: 1.4; font-family: 'Playfair Display', serif;">
-                            <a href="{{ route('project.single', $project->id) }}" style="color: inherit; text-decoration: none; transition: color 0.3s;">
-                                {{ $project->project_title }}
-                            </a>
-                        </h4>
-                        
-                        <p style="color: #6b7280; font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            {{ $project->project_description }}
-                        </p>
-                        
-                        <div style="margin-top: auto;">
-                            <!-- Progress Bar (Thicker, Rounded) -->
-                            <div class="progress mb-3" style="height: 10px; border-radius: 10px; background-color: #f3f4f6; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: {{ min($percentage, 100) }}%; background: linear-gradient(90deg, #227722, #1a5c1a); border-radius: 10px;" 
-                                     aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100">
-                                </div>
-                            </div>
-                            
-                            <!-- Stats -->
-                            <div class="d-flex justify-content-between align-items-center mb-4" style="font-size: 0.85rem;">
-                                <div>
-                                    <span class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;">Raised</span>
-                                    <span style="color: #227722; font-weight: 800; font-size: 1rem;">₦{{ number_format($project->raised ?? 0, 2) }}</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;">Goal</span>
-                                    <span style="color: #4b5563; font-weight: 700;">₦{{ number_format($project->target ?? 0, 2) }}</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Buttons -->
-                            <div class="d-flex justify-content-between align-items-center">
-                                <button wire:click="openDonationModal({{ $project->id }})" 
-                                        class="btn btn-donate-home" 
-                                        style="background-color: #227722; color: white; font-weight: 600; padding: 12px 24px; border-radius: 12px; border: none; transition: all 0.3s ease; font-size: 0.9rem; display: flex; align-items: center; box-shadow: 0 4px 12px rgba(34, 119, 34, 0.25);">
-                                    Donate Now
-                                </button>
-                                
-                                <a href="{{ route('project.single', $project->id) }}" style="width: 45px; height: 45px; border-radius: 12px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #4b5563; transition: all 0.3s ease; text-decoration: none;">
-                                    <i class="fa fa-arrow-right"></i>
-                                </a>
-                            </div>
+                {{-- Content half --}}
+                <div class="hps-content-col">
+                    <div class="hps-content-inner">
+
+                        <div class="hps-index-pill">
+                            <span class="hps-idx-cur">{{ str_pad($loop->index + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="hps-idx-sep">/</span>
+                            <span class="hps-idx-tot">{{ str_pad($projects->count(), 2, '0', STR_PAD_LEFT) }}</span>
                         </div>
+
+                        <h3 class="hps-title">{{ $project->project_title }}</h3>
+
+                        <div class="hps-divider"></div>
+
+                        <p class="hps-desc">{{ \Illuminate\Support\Str::limit($project->project_description, 260) }}</p>
+
+                        <a href="{{ route('project.single', $project->id) }}" class="hps-learn-btn" aria-label="Learn more about {{ $project->project_title }}">
+                            <span>Learn More</span>
+                            <svg class="hps-arrow-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                                <path d="M3.75 9H14.25M9 3.75L14.25 9L9 14.25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             </div>
-            @empty
-            <div class="col-12 text-center py-5">
-                <div class="p-5 bg-white rounded shadow-sm" style="max-width: 500px; margin: 0 auto;">
-                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                    <p class="text-muted mb-0" style="font-size: 1.1rem;">No active projects at the moment. Check back soon!</p>
-                </div>
-            </div>
-            @endforelse
+            @endforeach
+        </div>
+        </div>{{-- /.hps-track-clip --}}
+
+        {{-- Nav buttons --}}
+        <button class="hps-nav hps-nav-prev" id="hpsPrev" aria-label="Previous project">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <button class="hps-nav hps-nav-next" id="hpsNext" aria-label="Next project">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        {{-- Dot indicators --}}
+        <div class="hps-dots" id="hpsDots" aria-label="Slide indicators">
+            @foreach($projects as $project)
+            <button class="hps-dot{{ $loop->first ? ' active' : '' }}" data-dot="{{ $loop->index }}" aria-label="Go to project {{ $loop->index + 1 }}"></button>
+            @endforeach
         </div>
 
-        <!-- See All Projects Link -->
-        <div class="row mt-5">
-            <div class="col-12 text-center">
-                <a href="{{ route('projects') }}" class="btn-see-all" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 35px; background: transparent; border: 2px solid #227722; color: #227722; font-weight: 700; border-radius: 50px; transition: all 0.3s ease; text-decoration: none;">
-                    See All Projects <i class="fas fa-long-arrow-alt-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <style>
-            .project-card-home:hover {
-                transform: translateY(-10px) !important;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
-            }
-            .project-card-home:hover .project-thumb img {
-                transform: scale(1.1);
-            }
-            .project-card-home:hover .card-actions-overlay {
-                opacity: 1 !important;
-                transform: translateY(0) !important;
-            }
-            .project-card-home:hover h4 a {
-                color: #227722 !important;
-            }
-            .btn-donate-home:hover {
-                background-color: #227722 !important;
-                transform: translateY(-2px);
-                box-shadow: 0 8px 15px rgba(34, 119, 34, 0.3) !important;
-            }
-            .btn-see-all:hover {
-                background: #227722 !important;
-                color: #fff !important;
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(34, 119, 34, 0.2);
-            }
-        </style>
     </div>
+    @else
+    <div class="hps-empty">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#f3f4f6"/><path d="M16 32l6-8 5 6 4-5 7 7" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19" cy="20" r="3" stroke="#9ca3af" stroke-width="2"/></svg>
+        <p>No active projects at the moment. Check back soon!</p>
+    </div>
+    @endif
+
+    {{-- See all CTA --}}
+    <div class="hps-footer">
+        <a href="{{ route('projects') }}" class="hps-see-all">
+            Explore All Projects
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+    </div>
+
+    {{-- ═══════════════════════════ STYLES ═══════════════════════════ --}}
+    <style>
+        /* ── Section wrapper ── */
+        .hps-section {
+            background: #f0f4f0;
+            padding: 80px 0 64px;
+        }
+
+        /* ── Label row ── */
+        .hps-label-row {
+            text-align: center;
+            margin-bottom: 52px;
+            padding: 0 16px;
+        }
+        .hps-eyebrow {
+            display: inline-block;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            padding: 6px 20px;
+            border-radius: 100px;
+            margin-bottom: 16px;
+        }
+        .hps-heading {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 14px;
+            letter-spacing: -0.6px;
+            line-height: 1.15;
+        }
+        .hps-subheading {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* ── Slider overflow container ── */
+        .hps-wrapper {
+            position: relative;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 80px;
+        }
+        /* clip only the slide track, not the nav buttons */
+        .hps-track-clip {
+            overflow: hidden;
+            border-radius: 28px;
+        }
+
+        /* ── Track ── */
+        .hps-track {
+            display: flex;
+            transition: transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        /* ─────────────────────────────────────────
+           SLIDE — fixed height, two equal halves
+        ───────────────────────────────────────── */
+        .hps-slide {
+            flex: 0 0 100%;
+            /* Fixed height so image column has a concrete parent to fill */
+            height: 560px;
+            display: grid;
+            grid-template-columns: 55% 45%;
+            align-items: stretch;
+            background: #fff;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+        }
+
+        /* ── Image column ── */
+        .hps-img-col {
+            position: relative;
+            /* must be a block-level box with explicit height = parent */
+            overflow: hidden;
+            height: 100%;
+        }
+        .hps-img-frame {
+            position: absolute;
+            inset: 0;            /* fills parent absolutely */
+        }
+        .hps-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 9s ease;
+        }
+        .hps-slide:hover .hps-img {
+            transform: scale(1.06);
+        }
+        /* subtle dark gradient over image for pill contrast */
+        .hps-img-frame::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.28) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hps-cat-pill {
+            position: absolute;
+            top: 28px;
+            left: 28px;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(10px);
+            color: #111827;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border-radius: 100px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+        }
+
+        /* ── Content column ── */
+        .hps-content-col {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            height: 100%;
+            overflow: hidden;
+        }
+        .hps-content-inner {
+            padding: 52px 56px;
+            width: 100%;
+        }
+        .hps-index-pill {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 5px;
+            margin-bottom: 28px;
+        }
+        .hps-idx-cur {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: #227722;
+            line-height: 1;
+        }
+        .hps-idx-sep {
+            font-size: 1.1rem;
+            color: #d1d5db;
+        }
+        .hps-idx-tot {
+            font-size: 1rem;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+        .hps-title {
+            font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 20px;
+            line-height: 1.2;
+            letter-spacing: -0.4px;
+        }
+        .hps-divider {
+            width: 56px;
+            height: 4px;
+            background: linear-gradient(90deg, #227722, #4ade80);
+            border-radius: 3px;
+            margin-bottom: 22px;
+        }
+        .hps-desc {
+            font-size: 1.05rem;
+            color: #4b5563;
+            line-height: 1.8;
+            margin: 0 0 40px;
+        }
+
+        /* ── Learn More button ── */
+        .hps-learn-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #227722;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 15px 32px;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+            box-shadow: 0 6px 18px rgba(34,119,34,0.3);
+        }
+        .hps-learn-btn:hover {
+            background: #1a5c1a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(34,119,34,0.35);
+            color: #fff;
+            text-decoration: none;
+        }
+        .hps-learn-btn:active { transform: translateY(0); }
+        .hps-arrow-icon {
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+        .hps-learn-btn:hover .hps-arrow-icon { transform: translateX(4px); }
+
+        /* ── Nav buttons ── */
+        .hps-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            z-index: 10;
+        }
+        .hps-nav:hover {
+            background: #227722;
+            border-color: #227722;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(34,119,34,0.25);
+            transform: translateY(-50%) scale(1.08);
+        }
+        .hps-nav-prev { left: 0; }
+        .hps-nav-next { right: 0; }
+
+        /* ── Dots ── */
+        .hps-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 28px;
+        }
+        .hps-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 100px;
+            background: #d1d5db;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+        .hps-dot.active {
+            width: 28px;
+            background: #227722;
+        }
+
+        /* ── Empty state ── */
+        .hps-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .hps-empty p { font-size: 1rem; margin: 0; }
+
+        /* ── Footer ── */
+        .hps-footer {
+            text-align: center;
+            margin-top: 40px;
+        }
+        .hps-see-all {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #227722;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            border: 2px solid #227722;
+            padding: 12px 32px;
+            border-radius: 100px;
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+        }
+        .hps-see-all:hover {
+            background: #227722;
+            color: #fff;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(34,119,34,0.2);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 991px) {
+            .hps-wrapper { padding: 0 20px; }
+            /* Stack: image on top, content below */
+            .hps-slide {
+                grid-template-columns: 1fr;
+                grid-template-rows: 300px auto;
+                height: auto;
+            }
+            .hps-img-col { height: 300px; }
+            .hps-img-frame { position: absolute; inset: 0; }
+            .hps-content-inner { padding: 36px 32px; }
+            .hps-nav-prev { left: -4px; }
+            .hps-nav-next { right: -4px; }
+            .hps-title { font-size: 1.55rem; }
+        }
+        @media (max-width: 575px) {
+            .hps-section { padding: 52px 0 44px; }
+            .hps-slide { grid-template-rows: 240px auto; }
+            .hps-img-col { height: 240px; }
+            .hps-content-inner { padding: 28px 22px 32px; }
+            .hps-nav { width: 44px; height: 44px; }
+            .hps-title { font-size: 1.35rem; }
+            .hps-desc { font-size: 0.97rem; }
+        }
+
+        /* ── Reduced motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            .hps-track { transition: none; }
+            .hps-img { transition: none; }
+        }
+    </style>
+
+    {{-- ═══════════════════════════ SCRIPT ═══════════════════════════ --}}
+    <script>
+    (function () {
+        const track    = document.getElementById('hpsTrack');
+        const btnPrev  = document.getElementById('hpsPrev');
+        const btnNext  = document.getElementById('hpsNext');
+        const dotsWrap = document.getElementById('hpsDots');
+        if (!track) return;
+
+        const slides = track.querySelectorAll('.hps-slide');
+        const dots   = dotsWrap ? dotsWrap.querySelectorAll('.hps-dot') : [];
+        const total  = slides.length;
+        let   idx    = 0;
+        let   timer  = null;
+        const AUTO_INTERVAL = 5500;
+
+        function goTo(i) {
+            idx = ((i % total) + total) % total;
+            track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+            dots.forEach((d, n) => d.classList.toggle('active', n === idx));
+        }
+
+        function next() { goTo(idx + 1); }
+        function prev() { goTo(idx - 1); }
+
+        function startAuto() {
+            stopAuto();
+            timer = setInterval(next, AUTO_INTERVAL);
+        }
+        function stopAuto() {
+            if (timer) { clearInterval(timer); timer = null; }
+        }
+        function restartAuto() { stopAuto(); startAuto(); }
+
+        if (btnNext) btnNext.addEventListener('click', function () { next(); restartAuto(); });
+        if (btnPrev) btnPrev.addEventListener('click', function () { prev(); restartAuto(); });
+
+        dots.forEach(function (dot) {
+            dot.addEventListener('click', function () {
+                goTo(parseInt(dot.dataset.dot));
+                restartAuto();
+            });
+        });
+
+        var wrapper = document.getElementById('hpsWrapper');
+        if (wrapper) {
+            wrapper.addEventListener('mouseenter', stopAuto);
+            wrapper.addEventListener('mouseleave', startAuto);
+        }
+
+        goTo(0);
+        if (total > 1) startAuto();
+    })();
+    </script>
+
+</div>{{-- /.hps-section --}}
 
     <!-- Donation Modal -->
     @if($showModal && $selectedProject)
-    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content" style="border-radius: 24px; border: none; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative;">
-                
-                <!-- Decorative Top Border -->
-                <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #227722, #1a5c1a);"></div>
+    <div class="modal fade show d-block" id="donationModal" tabindex="-1" role="dialog" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width:460px;">
+            <div class="modal-content" style="border-radius:24px;border:none;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.25);">
 
-                <!-- Close Button -->
-                <button type="button" class="close" wire:click="closeModal" style="position: absolute; top: 15px; right: 20px; opacity: 0.7; z-index: 10; font-size: 2.5rem; font-weight: 900; transition: opacity 0.2s; background: none; border: none; line-height: 1; color: #333;">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-
-                <!-- Modal Body -->
-                <div class="modal-body px-5 pb-5 pt-5">
-                    <div class="text-center mb-4">
-                        <h5 class="modal-title font-weight-bold" style="color: #111827; font-size: 1.5rem; font-family: 'Merriweather', serif;">Donate to {{ $selectedProject->project_title }}</h5>
-                        <p class="text-muted small mt-1" style="font-family: 'Inter', sans-serif;">Your contribution makes a difference</p>
+                <!-- Green header band -->
+                <div style="background:linear-gradient(135deg,#227722 0%,#1a5c1a 100%);padding:22px 24px 32px;position:relative;text-align:center;">
+                    <button type="button" wire:click="closeModal" style="position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.28)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+                    </button>
+                    <div style="width:44px;height:44px;background:rgba(255,255,255,0.18);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.35)" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                     </div>
+                    <h5 style="color:#fff;font-size:1.15rem;font-weight:700;margin:0 0 3px;font-family:'Playfair Display',serif;">Donate to {{ $selectedProject->project_title }}</h5>
+                    <p style="color:rgba(255,255,255,0.72);font-size:0.78rem;margin:0;">Your contribution makes a difference</p>
+                    <div style="position:absolute;bottom:-1px;left:0;right:0;line-height:0;">
+                        <svg viewBox="0 0 400 16" preserveAspectRatio="none" style="display:block;width:100%;height:16px;"><path d="M0,16 C100,0 300,0 400,16 L400,16 L0,16 Z" fill="#fff"/></svg>
+                    </div>
+                </div>
 
+                <!-- Form body -->
+                <div style="padding:24px 28px 28px;background:#fff;">
                     <form wire:submit.prevent="donate">
-                        <!-- Email Input -->
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Email Address</label>
-                            <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent pl-3">
-                                        <i class="fa fa-envelope" style="color: #9ca3af;"></i>
+
+                        <!-- Email -->
+                        <div style="margin-bottom:14px;">
+                            <label style="display:block;font-size:0.71rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Email Address <span style="color:#ef4444;">*</span></label>
+                            <div class="hps-don-iw">
+                                <span class="hps-don-px">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                </span>
+                                <input type="email" wire:model="email" class="hps-don-in" placeholder="you@example.com" required>
+                            </div>
+                            @error('email') <span style="color:#ef4444;font-size:0.74rem;margin-top:3px;display:block;">{{ $message }}</span> @enderror
+                        </div>
+
+                        <!-- Amount -->
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block;font-size:0.71rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Donation Amount <span style="color:#ef4444;">*</span></label>
+                            <div class="hps-don-iw">
+                                <span class="hps-don-px hps-don-px-cur">₦</span>
+                                <input type="number" min="100" step="1" wire:model.live="customAmount" class="hps-don-in hps-don-in-lg" placeholder="Enter amount">
+                            </div>
+                            @error('amount') <span style="color:#ef4444;font-size:0.74rem;margin-top:3px;display:block;">{{ $message }}</span> @enderror
+                        </div>
+
+                        <!-- Payment method -->
+                        @if($paymentReference)
+                            <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" style="width:100%;padding:14px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:700;border:none;border-radius:14px;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 20px rgba(249,115,22,0.25);display:flex;align-items:center;justify-content:center;gap:8px;">
+                                Verify Payment
+                                <span wire:loading style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:hps-don-spin 0.8s linear infinite;"></span>
+                            </button>
+                            <p style="text-align:center;margin-top:8px;font-size:0.73rem;color:#9ca3af;">Click this if the payment window closed but this modal didn't.</p>
+                        @else
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                                <div style="flex:1;height:1px;background:#f3f4f6;"></div>
+                                <span style="font-size:0.62rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.3px;white-space:nowrap;">Choose payment method</span>
+                                <div style="flex:1;height:1px;background:#f3f4f6;"></div>
+                            </div>
+
+                            <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px;">
+                                <!-- Paystack -->
+                                {{-- <button type="submit" wire:loading.attr="disabled" wire:target="donate" class="hps-gw-card hps-gw-paystack">
+                                    <span wire:loading.remove wire:target="donate" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                                        <div style="height:34px;display:flex;align-items:center;justify-content:center;">
+                                            <img src="{{ asset('paystack.png') }}" alt="Paystack" style="height:40px;width:auto;max-width:130px;object-fit:contain;">
+                                        </div>
                                     </span>
-                                </div>
-                                <input type="email" wire:model="email" class="form-control border-0 bg-transparent" placeholder="Enter your email address" required style="height: 50px; padding-left: 10px; color: #1f2937; font-weight: 500; font-family: 'Inter', sans-serif;">
-                            </div>
-                            @error('email') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                        </div>
+                                    <span wire:loading wire:target="donate" class="hps-gw-loading">
+                                        <svg class="hps-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                                        Processing…
+                                    </span>
+                                </button> --}}
 
-
-
-                        <!-- Custom Amount Input -->
-                        <div class="form-group mb-4">
-                            <label class="font-weight-bold mb-2" style="color: #374151; font-size: 0.95rem; font-family: 'Merriweather', serif;">Donation Amount</label>
-                            <div class="input-group" style="background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; transition: all 0.3s ease;">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text border-0 bg-transparent pl-3 font-weight-bold" style="color: #227722;">₦</span>
-                                </div>
-                                <input type="number" min="100" step="1" wire:model.live="customAmount" class="form-control border-0 bg-transparent" placeholder="Enter amount" style="height: 50px; padding-left: 5px; color: #1f2937; font-weight: 600; font-size: 1.1rem; font-family: 'IBM Plex Mono', monospace;">
-                            </div>
-                            @error('amount') <span class="text-danger small mt-1 d-block">{{ $message }}</span> @enderror
-                        </div>
-                        
-                        <!-- Payment Method Selection -->
-                        <div class="mt-5">
-                            @if($paymentReference)
-                                <button type="button" wire:click="verifyPayment('{{ $paymentReference }}')" class="btn btn-block donate-btn" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; font-weight: 700; padding: 16px; border-radius: 14px; border: none; font-size: 1.1rem; letter-spacing: 0.5px; box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25); transition: all 0.3s ease; width: 100%; font-family: 'Merriweather', serif;">
-                                    Verify Payment <span wire:loading class="spinner-border spinner-border-sm ml-2"></span>
+                                <!-- Squad -->
+                                <button type="button" id="proj-squad-pay-btn" wire:click="payWithSquad" wire:loading.attr="disabled" wire:target="payWithSquad" class="hps-gw-card hps-gw-squad">
+                                    <span id="proj-squad-btn-text" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                                        <div style="height:34px;display:flex;align-items:center;justify-content:center;">
+                                            <img src="{{ asset('GTCO-Squad-Hackathon-Program.jpg') }}" alt="Squad" style="height:40px;width:auto;max-width:120px;object-fit:contain;border-radius:4px;">
+                                        </div>
+                                    </span>
+                                    <span id="proj-squad-btn-loading" class="hps-gw-loading" style="display:none;">
+                                        <svg class="hps-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                                        Redirecting…
+                                    </span>
                                 </button>
-                                <p class="text-center mt-2 text-muted small">
-                                    Click this if the payment window closed but this modal didn't.
-                                </p>
-                            @else
-                                <p style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-bottom: 12px; text-align: center;">
-                                    Select a payment method
-                                </p>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            </div>
 
-                                    <!-- Paystack Card -->
-                                    <button type="submit"
-                                            wire:loading.attr="disabled"
-                                            wire:loading.class="proj-pay-card-disabled"
-                                            wire:target="donate"
-                                            class="proj-pay-card proj-pay-card-paystack">
-                                        <span wire:loading.remove wire:target="donate" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
-                                            <img src="{{ asset('paystack.png') }}" alt="Paystack" style="height:28px;width:auto;max-width:120px;object-fit:contain;">
-                                        </span>
-                                        <span wire:loading wire:target="donate" class="proj-pay-card-spinner">
-                                            <svg class="proj-spin-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <circle cx="12" cy="12" r="10" stroke="#374151" stroke-width="4" opacity="0.25"/>
-                                                <path fill="#374151" d="M4 12a8 8 0 018-8v8z"/>
-                                            </svg>
-                                            Processing…
-                                        </span>
-                                    </button>
-
-                                    <!-- Squad Card -->
-                                    <button type="button"
-                                            id="proj-squad-pay-btn"
-                                            wire:click="payWithSquad"
-                                            wire:loading.attr="disabled"
-                                            wire:loading.class="proj-pay-card-disabled"
-                                            wire:target="payWithSquad"
-                                            class="proj-pay-card proj-pay-card-squad">
-                                        <span id="proj-squad-btn-text" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
-                                            <img src="{{ asset('squad.jpg') }}" alt="Squad" style="height:28px;width:auto;max-width:100px;object-fit:contain;border-radius:4px;">
-                                        </span>
-                                        <span id="proj-squad-btn-loading" class="proj-pay-card-spinner" style="display:none;">
-                                            <svg class="proj-spin-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <circle cx="12" cy="12" r="10" stroke="#374151" stroke-width="4" opacity="0.25"/>
-                                                <path fill="#374151" d="M4 12a8 8 0 018-8v8z"/>
-                                            </svg>
-                                            Redirecting…
-                                        </span>
-                                    </button>
-
-                                </div>
-                                <p class="text-center mt-3 text-muted small">
-                                    <i class="fa fa-lock mr-1"></i> Secure &amp; encrypted payment
-                                </p>
-                            @endif
-                        </div>
+                            <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding-top:10px;border-top:1px solid #f3f4f6;">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span style="font-size:0.66rem;color:#9ca3af;font-weight:500;">256-bit SSL · Secure &amp; encrypted payment</span>
+                            </div>
+                        @endif
                     </form>
                 </div>
             </div>
         </div>
+
         <style>
-            @keyframes proj-btn-spin {
-                from { transform: rotate(0deg); }
-                to   { transform: rotate(360deg); }
+            .hps-don-iw {
+                display:flex;align-items:center;
+                background:#f9fafb;border:1.5px solid #e5e7eb;
+                border-radius:11px;overflow:hidden;
+                transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;
             }
-            .proj-spin-svg { animation: proj-btn-spin 0.8s linear infinite; }
+            .hps-don-iw:focus-within { border-color:#227722;background:#fff;box-shadow:0 0 0 3px rgba(34,119,34,0.08); }
+            .hps-don-px { padding:0 11px;display:flex;align-items:center;flex-shrink:0; }
+            .hps-don-px-cur { font-weight:800;color:#227722;font-size:1rem; }
+            .hps-don-in {
+                border:none;outline:none;background:transparent;
+                height:47px;padding:0 10px 0 2px;
+                font-size:0.9rem;color:#1f2937;font-weight:500;flex:1;min-width:0;
+            }
+            .hps-don-in-lg { font-weight:700;font-size:1.02rem; }
 
-            .proj-pay-card {
-                background: #fff;
-                border: 2px solid #e5e7eb;
-                border-radius: 14px;
-                padding: 16px 12px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 68px;
+            .hps-gw-card {
+                background:#fff;border:2px solid #e5e7eb;border-radius:13px;
+                padding:12px 8px;cursor:pointer;
+                transition:all 0.22s ease;
+                display:flex;flex-direction:column;align-items:center;justify-content:center;
+                min-height:74px;
             }
-            .proj-pay-card-paystack:hover { border-color: #50b4e5; box-shadow: 0 0 0 3px rgba(0,106,255,0.08); }
-            .proj-pay-card-squad:hover    { border-color: #00b8a9; box-shadow: 0 0 0 3px rgba(0,184,169,0.08); }
-            .proj-pay-card-disabled { opacity: 0.6 !important; cursor: not-allowed !important; }
-            .proj-pay-card-spinner  { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #374151; }
+            .hps-gw-card:hover:not([disabled]) { transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.07); }
+            .hps-gw-card:active:not([disabled]) { transform:translateY(0); }
+            .hps-gw-card[disabled] { opacity:0.5;cursor:not-allowed; }
+            .hps-gw-paystack:hover:not([disabled]) { border-color:#00b8d9;box-shadow:0 0 0 3px rgba(0,184,217,0.1),0 6px 18px rgba(0,0,0,0.06); }
+            .hps-gw-squad:hover:not([disabled])    { border-color:#00b8a9;box-shadow:0 0 0 3px rgba(0,184,169,0.1),0 6px 18px rgba(0,0,0,0.06); }
 
-            .input-group:focus-within {
-                border-color: #227722 !important;
-                box-shadow: 0 0 0 3px rgba(34, 119, 34, 0.1);
-                background: #fff !important;
-            }
-
-            .donate-btn:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 15px 30px rgba(34, 119, 34, 0.35) !important;
-            }
-
-            .donate-btn:active {
-                transform: translateY(0);
-            }
-
-            .close:hover {
-                opacity: 1 !important;
-                color: #111827 !important;
-            }
+            .hps-gw-loading { display:flex;align-items:center;gap:5px;font-size:0.7rem;color:#6b7280;font-weight:600; }
+            @keyframes hps-don-spin { to { transform:rotate(360deg); } }
+            .hps-gw-spin { animation:hps-don-spin 0.8s linear infinite; }
         </style>
     </div>
     @endif

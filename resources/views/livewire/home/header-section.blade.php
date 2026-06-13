@@ -276,88 +276,87 @@
                 </div>
                 @endif
 
-                {{-- Two payment buttons --}}
-                <div style="display:flex;gap:0.75rem;margin-bottom:0.85rem;">
+                {{-- Payment method label --}}
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <div style="flex:1;height:1px;background:#f3f4f6;"></div>
+                    <span style="font-size:0.63rem;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:1.5px;white-space:nowrap;">Choose payment method</span>
+                    <div style="flex:1;height:1px;background:#f3f4f6;"></div>
+                </div>
+
+                {{-- 3 Gateway cards --}}
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+
                     {{-- Paystack --}}
-                    <button id="paystackBtn" onclick="payWithPaystack()" style="
-                        flex:1;padding:0.85rem 0.5rem;
-                        background:linear-gradient(135deg,#064e3b,#059669);
-                        color:#fff;font-size:0.88rem;font-weight:700;
-                        border:none;border-radius:14px;cursor:pointer;
-                        box-shadow:0 5px 18px rgba(6,78,59,0.3);
-                        transition:transform 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;"
-                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 24px rgba(6,78,59,0.4)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow='0 5px 18px rgba(6,78,59,0.3)'">
-                        <span id="paystackBtnText" style="display:flex;align-items:center;gap:0.4rem;">
-                            <svg style="width:15px;height:15px;fill:#fff;" viewBox="0 0 24 24"><path d="M2 7h20v3H2zm0 4h20v3H2zm0 4h12v3H2z"/></svg>
-                            Pay via Paystack
+                    {{-- <button id="paystackBtn" onclick="payWithPaystack()" class="hdr-gw-card hdr-gw-paystack">
+                        <span id="paystackBtnText" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                            <div style="height:32px;display:flex;align-items:center;justify-content:center;">
+                                <img src="{{ asset('paystack.png') }}" alt="Paystack" style="height:38px;width:auto;max-width:110px;object-fit:contain;">
+                            </div>
                         </span>
-                        <span id="paystackSpinner" style="display:none;align-items:center;gap:0.4rem;">
-                            <svg style="animation:spin 1s linear infinite;width:16px;height:16px;" viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-                                <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                            </svg>
-                            Processing...
+                        <span id="paystackSpinner" class="hdr-gw-loading" style="display:none;">
+                            <svg class="hdr-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                            Processing…
                         </span>
-                    </button>
+                    </button> --}}
 
                     {{-- Interswitch --}}
-                    <button id="interswitchBtn" onclick="payWithInterswitch()" style="
-                        flex:1;padding:0.85rem 0.5rem;
-                        background:linear-gradient(135deg,#0f172a,#2563eb);
-                        color:#fff;font-size:0.88rem;font-weight:700;
-                        border:none;border-radius:14px;cursor:pointer;
-                        box-shadow:0 5px 18px rgba(37,99,235,0.3);
-                        transition:transform 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;"
-                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 24px rgba(37,99,235,0.4)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow='0 5px 18px rgba(37,99,235,0.3)'">
-                        <span id="interswitchBtnText" style="display:flex;align-items:center;gap:0.4rem;">
-                            <svg style="width:15px;height:15px;fill:#fff;" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>
-                            Pay via Interswitch
+                    <button id="interswitchBtn" onclick="payWithInterswitch()" class="hdr-gw-card hdr-gw-interswitch">
+                        <span id="interswitchBtnText" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                            <div style="height:32px;display:flex;align-items:center;justify-content:center;">
+                                <img src="{{ asset('Interswitch_logo.jpg') }}" alt="Interswitch" style="height:38px;width:auto;max-width:110px;object-fit:contain;border-radius:3px;">
+                            </div>
                         </span>
-                        <span id="interswitchSpinner" style="display:none;align-items:center;gap:0.4rem;">
-                            <svg style="animation:spin 1s linear infinite;width:16px;height:16px;" viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-                                <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                            </svg>
-                            Processing...
+                        <span id="interswitchSpinner" class="hdr-gw-loading" style="display:none;">
+                            <svg class="hdr-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                            Processing…
                         </span>
                     </button>
 
                     {{-- Squad --}}
-                    <button id="squadBtn" onclick="payWithSquad()" style="
-                        flex:1;padding:0.85rem 0.5rem;
-                        background:linear-gradient(135deg,#7f1d1d,#dc2626);
-                        color:#fff;font-size:0.88rem;font-weight:700;
-                        border:none;border-radius:14px;cursor:pointer;
-                        box-shadow:0 5px 18px rgba(185,28,28,0.3);
-                        transition:transform 0.2s,box-shadow 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;"
-                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 24px rgba(185,28,28,0.4)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow='0 5px 18px rgba(185,28,28,0.3)'">
-                        <span id="squadBtnText" style="display:flex;align-items:center;gap:0.4rem;">
-                            <svg style="width:15px;height:15px;fill:#fff;" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                            Pay via Squad
+                    <button id="squadBtn" onclick="payWithSquad()" class="hdr-gw-card hdr-gw-squad">
+                        <span id="squadBtnText" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;">
+                            <div style="height:32px;display:flex;align-items:center;justify-content:center;">
+                                <img src="{{ asset('GTCO-Squad-Hackathon-Program.jpg') }}" alt="Squad" style="height:38px;width:auto;max-width:100px;object-fit:contain;border-radius:4px;">
+                            </div>
                         </span>
-                        <span id="squadSpinner" style="display:none;align-items:center;gap:0.4rem;">
-                            <svg style="animation:spin 1s linear infinite;width:16px;height:16px;" viewBox="0 0 24 24" fill="none">
-                                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
-                                <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                            </svg>
-                            Processing...
+                        <span id="squadSpinner" class="hdr-gw-loading" style="display:none;">
+                            <svg class="hdr-gw-spin" width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#d1d5db" stroke-width="3"/><path d="M12 2a10 10 0 0 1 10 10" stroke="#374151" stroke-width="3" stroke-linecap="round"/></svg>
+                            Processing…
                         </span>
                     </button>
                 </div>
 
                 {{-- Trust badge --}}
-                <p style="text-align:center;font-size:0.75rem;color:#9ca3af;margin-top:0.25rem;">
-                    🔒 256-bit SSL &middot; Paystack &middot; Squad &middot; Interswitch
-                </p>
+                <div style="display:flex;align-items:center;justify-content:center;gap:5px;padding-top:10px;border-top:1px solid #f3f4f6;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span style="font-size:0.66rem;color:#9ca3af;font-weight:500;">256-bit SSL &middot; Paystack &middot; Squad &middot; Interswitch</span>
+                </div>
             </div>
         </div>
     </div>
 
     <style>
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Header donation gateway cards ── */
+        .hdr-gw-card {
+            background:#fff;border:2px solid #e5e7eb;border-radius:13px;
+            padding:11px 6px;cursor:pointer;
+            transition:all 0.22s ease;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            min-height:70px;
+        }
+        .hdr-gw-card:hover:not(:disabled) {
+            transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.07);
+        }
+        .hdr-gw-card:active:not(:disabled) { transform:translateY(0); }
+        .hdr-gw-card:disabled { opacity:0.5;cursor:not-allowed; }
+        .hdr-gw-paystack:hover:not(:disabled)    { border-color:#00b8d9;box-shadow:0 0 0 3px rgba(0,184,217,0.1),0 6px 18px rgba(0,0,0,0.06); }
+        .hdr-gw-interswitch:hover:not(:disabled) { border-color:#1e3a8a;box-shadow:0 0 0 3px rgba(30,58,138,0.1),0 6px 18px rgba(0,0,0,0.06); }
+        .hdr-gw-squad:hover:not(:disabled)       { border-color:#00b8a9;box-shadow:0 0 0 3px rgba(0,184,169,0.1),0 6px 18px rgba(0,0,0,0.06); }
+        .hdr-gw-loading { display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#6b7280;font-weight:600; }
+        @keyframes hdr-gw-spin-kf { to { transform:rotate(360deg); } }
+        .hdr-gw-spin { animation:hdr-gw-spin-kf 0.8s linear infinite; }
     </style>
 
     <script>
