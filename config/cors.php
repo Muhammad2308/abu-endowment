@@ -26,9 +26,13 @@ return [
         'http://127.0.0.1:3000',
         'https://abu-endowment.cloud',
         'https://abu-endowment-mobile.vercel.app',
+        'https://giveabu.com',
+        'https://www.giveabu.com',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://[a-zA-Z0-9\-]+\.vercel\.app$#',
+    ],
 
     'allowed_headers' => ['*'],
 

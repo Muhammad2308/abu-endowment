@@ -1,6 +1,15 @@
+# Allow the OPTIONS method before any auth module can deny it
+<Limit OPTIONS>
+    Require all granted
+</Limit>
+
 <IfModule mod_headers.c>
     # CORS: match specific allowed origins so credentials can be used
     SetEnvIf Origin "^https://abu-endowment-mobile\.vercel\.app$" CORS_ORIGIN=$0
+    SetEnvIf Origin "^https://[a-zA-Z0-9-]+\.vercel\.app$"        CORS_ORIGIN=$0
+    SetEnvIf Origin "^https://giveabu\.com$"                       CORS_ORIGIN=$0
+    SetEnvIf Origin "^https://www\.giveabu\.com$"                  CORS_ORIGIN=$0
+    SetEnvIf Origin "^https://abu-endowment\.cloud$"               CORS_ORIGIN=$0
     SetEnvIf Origin "^http://localhost:3000$"                      CORS_ORIGIN=$0
     SetEnvIf Origin "^http://127\.0\.0\.1:3000$"                   CORS_ORIGIN=$0
 

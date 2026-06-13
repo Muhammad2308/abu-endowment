@@ -21,6 +21,11 @@ use App\Http\Controllers\Api\DonorsController;
 use App\Http\Controllers\Api\DonorSessionController;
 use App\Http\Controllers\Api\DonorTierController;
 
+// CORS preflight — catch all OPTIONS before auth middleware can reject them
+Route::options('{any}', function () {
+    return response()->noContent();
+})->where('any', '.*');
+
 // Donor tiers
 Route::get('/donor-tiers', [DonorTierController::class, 'index']);
 Route::post('/donor-tiers', [DonorTierController::class, 'store']);
