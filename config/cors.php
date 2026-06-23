@@ -28,6 +28,9 @@ return [
         'https://abu-endowment-mobile.vercel.app',
         'https://giveabu.com',
         'https://www.giveabu.com',
+        'https://localhost',
+        'capacitor://localhost',
+        'http://localhost',
     ],
 
     'allowed_origins_patterns' => [

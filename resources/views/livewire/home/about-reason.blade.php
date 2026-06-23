@@ -6,7 +6,7 @@
                 <div class="section_title text-center">
                     <h3 style="color: #064e3b; font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; font-family: 'Playfair Display', serif;">Driving Institutional Growth</h3>
                     <p style="color: #6b7280; font-size: 1.1rem; line-height: 1.8; margin: 0 auto; max-width: 900px;">
-                        The ABU Endowment Fund was established to bridge the funding gap in higher education. We connect alumni, partners, and friends of the university to projects that matter — from modernizing lecture halls to funding breakthrough research. Our goal is simple: to ensure ABU remains a beacon of learning in Africa.
+                        The GIVE-ABU Fund was established to bridge the funding gap in higher education. We connect alumni, partners, and friends of the university to projects that matter — from modernizing lecture halls to funding breakthrough research. Our goal is simple: to ensure ABU remains a beacon of learning in Africa.
                     </p>
                 </div>
             </div>
